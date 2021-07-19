@@ -43,10 +43,10 @@ classdef NEURON
             value = py.neuron.h(s);
         end
         function value = IClamp(obj, segment)
-            value = IClamp(segment)
+            value = IClamp(segment);
         end
         function value = Vector(obj)
-            value = Vector()
+            value = Vector();
         end
     end
 end
