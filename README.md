@@ -3,7 +3,7 @@ Interface for connecting NEURON and MATLAB.
 
 This branch uses Python as the bridge, with thin wrappers in both MATLAB and Python.
 
-Only a limited subset of NEURON is currently supported; examine and run the matlab script `neurondemo` for an example of generating and plotting an action potential. Notably absent, any ability to connect sections together, although this can in principle be done using the same strategies as in the existing code.
+Only a limited subset of NEURON is currently supported; examine and run the matlab script [`neurondemo`](https://github.com/mcdougallab/matlabneuroninterface/blob/using-python/neurondemo.m) for an example of generating and plotting an action potential. Notably absent, any ability to connect sections together, although this can in principle be done using the same strategies as in the existing code.
 
 Everything may be accessed through an instance of the NEURON class.
 
