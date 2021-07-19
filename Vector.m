@@ -18,7 +18,6 @@ classdef Vector
         end
         function value = to_matlab(obj)
             value = double(py.array.array("d", obj.vec.call("to_python")));
-%cellfun(@double, cell(obj.vec.call("to_python")));
         end
     end
 end
