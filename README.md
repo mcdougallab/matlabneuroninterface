@@ -44,14 +44,22 @@ Pointers may be obtained in a couple ways. A Pointer `ptr` has one public proper
     ptr.value  % the value pointed to; it may be read and set
 
 ## IClamp
-An IClamp `ic` is a current clamp. It has three properties, all of which can be read and written:
+An IClamp `ic` is a current clamp. Construct an IClamp by passing in a segment as in:
+
+    ic = n.IClamp(soma.seg(0.5))
+
+Every IClamp has three properties, all of which can be read and written:
 
     ic.amp     % amplitude (nA)
     ic.delay   % start time (ms)
     ic.dur     % duration (ms)
 
 ## Vector
-A Vector `vec` is used to record a time series or other data. The interface currently supports the following methods:
+A Vector `vec` is used to record a time series or other data. Construct a Vector via e.g.
+
+    vec = n.Vector()
+
+The interface currently supports the following methods:
 
     vec.record(ptr)       % record the value pointed to by ptr as the simulation advances
     vec.to_matlab()       % return a copy of the vector as a MATLAB array
