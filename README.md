@@ -41,7 +41,7 @@ Segments are obtained by using a `Section` object's `.seg` method as above. If `
 ## Pointer
 Pointers may be obtained in a couple ways. A Pointer `ptr` has one public property:
 
-    ptr.value  % the value pointed to; it may be read and set
+    ptr.val    % the value pointed to; it may be read and set
 
 ## IClamp
 An IClamp `ic` is a current clamp. Construct an IClamp by passing in a segment as in:
