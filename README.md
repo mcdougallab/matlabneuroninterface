@@ -5,8 +5,7 @@ This branch uses Python as the bridge, with thin wrappers in both MATLAB and Pyt
 
 Only a limited subset of NEURON is currently supported; examine and run the matlab script [`neurondemo`](https://github.com/mcdougallab/matlabneuroninterface/blob/using-python/neurondemo.m) for an example of generating and plotting an action potential. Notably absent, any ability to connect sections together, although this can in principle be done using the same strategies as in the existing code.
 
-![image](https://user-images.githubusercontent.com/6668090/126222850-7305cf56-d8b7-4620-9543-5a82a17cd084.png)
-
+![image](https://user-images.githubusercontent.com/6668090/126541403-4a2d4766-7050-48bd-a47a-232879569bf9.png)
 
 Everything may be accessed through an instance of the NEURON class.
 
@@ -83,3 +82,6 @@ There are also global values:
     n.dt                  % current time step (in ms); may be read and set
     n.celsius             % temperature (in celsius); may be read and set
     n.t_ptr               % a pointer to the current time; use this with Vector.record
+
+## Note
+To use this, the `NEURON` package should be in your MATLAB path and the `neuronwrapper.py` should be on MATLAB's Python path (where the latter can be obtained simply by putting it in the same folder as your model code.)
