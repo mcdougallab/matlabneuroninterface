@@ -1,4 +1,4 @@
-n = NEURON;
+n = NEURON.NEURON;
 
 soma = n.Section("soma");
 soma.L = 10;
