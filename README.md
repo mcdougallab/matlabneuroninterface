@@ -22,6 +22,7 @@ Each section (`sec` in the below) has certain properties:
     sec.L      % length in µm
     sec.diam   % diameter in µm (sets everything, but gets the value at the middle)
     sec.nseg   % number of segments (must be an integer >= 1)
+    sec.Ra     % axial resistivity in ohm cm
 
 To insert a distributed ion channel mechanism (NEURON comes with `"hh"` and `"pas"`) call `.insert` and specify the name as a string, e.g.
 
