@@ -9,7 +9,7 @@ Only a limited subset of NEURON is currently supported; examine and run the matl
 
 Everything may be accessed through an instance of the NEURON class.
 
-Suppose `n = NEURON`. Then:
+Suppose `n = NEURON.NEURON`. Then:
 
 ## Section
 To construct a Section, specify a name, e.g.
