@@ -1,4 +1,4 @@
-# MATLAB - NEURON interface
+# NEURON Toolbox
 Interface for connecting NEURON and MATLAB.
 
 This branch uses Python as the bridge, with thin wrappers in both MATLAB and Python.
@@ -85,3 +85,5 @@ There are also global values:
 
 ## Note
 To use this, the `NEURON` package should be in your MATLAB path and the `neuronwrapper.py` should be on MATLAB's Python path (where the latter can be obtained simply by putting it in the same folder as your model code.)
+
+MATLAB is a registered trademark of The MathWorks, Inc.
