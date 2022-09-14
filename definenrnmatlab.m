@@ -12,7 +12,7 @@
 function libDef = definenrnmatlab()
 libDef = clibgen.LibraryDefinition("nrnmatlabData.xml");
 %% OutputFolder and Libraries 
-libDef.OutputFolder = "C:\Users\edo.vanveen\Documents\MATLAB\neuron";
+libDef.OutputFolder = "Z:\Git\matlabneuroninterface";
 libDef.Libraries = "bin/libnrniv.a";
 
 %% C++ function |ivocmain_session| with MATLAB name |clib.nrnmatlab.ivocmain_session|
