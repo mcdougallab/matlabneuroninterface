@@ -20,8 +20,11 @@ Results are written to stdout.txt.
 
 ## Notes
 
-This version only works on Windows (for now). We use clibgen with MinGW64, 
-and give it a static library (a .a file), which is included in bin/.
+We use clibgen with MinGW64, and give it a .a static library file, 
+which is included in bin/.
+
+Hence this version only works on Windows (for now) for MATLAB versions 
+R2022a and up; at this version support for .a static libraries was added. 
 
 To convert the libnrniv.dll file to a static library we used the following
 steps:
