@@ -11,12 +11,13 @@ MATLAB is a registered trademark of The MathWorks, Inc.
 ## Usage
 
 Run the MATLAB scripts in the following order:
-- **setup** to add the appropriate directories to your path
-- **genlibdef_nrnmatlab** to generate the library definition file
-- **build_nrnmatlab** to build the library interface
-- **run_nrnmatlab** to call a function from the library
-
-Results are written to stdout.txt.
+- **setup** 
+    - to add the appropriate directories to your path
+    - to generate the library definition file
+    - to build the library interface
+- **example_run** 
+    - to call some functions from the library
+    - stdout is written to stdout.txt.
 
 ## Notes
 
