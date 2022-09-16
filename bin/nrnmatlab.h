@@ -10,18 +10,23 @@ extern "C" __declspec(dllimport) int hoc_oc(const char*);
 extern "C" __declspec(dllimport) void* hoc_lookup(const char*);
 extern "C" __declspec(dllimport) double hoc_call_func(void*, int);
 extern "C" __declspec(dllimport) void hoc_pushx(double);
+extern "C" __declspec(dllimport) int nrn_main_launch;
+extern "C" __declspec(dllimport) int nrn_nobanner_;
 
 // Define invocmain_session input.
 static const char* argv[] = {"nrn_test", "-nogui", NULL};
 
-// Initialize.
+// Initialize NEURON session.
 void initialize(){
-    // Initialize NEURON session.
-    ivocmain_session(2, argv, NULL, 0);
+    // Redirect stdout/sterr output to file, because MATLAB cannot handle 
+    // it directly. Maybe we can use GetStdHandle instead?
+    freopen("stdout.txt", "w", stdout);
+    freopen("stderr.txt", "w", stderr);
 
-    // Redirect stdout output to file, because MATLAB cannot handle it 
-    // directly.
-    freopen ("stdout.txt", "w", stdout);
+    // Initialize NEURON session.
+    nrn_main_launch = 0;
+    nrn_nobanner_ = 1; // 0 to write banner (to stderr), 1 to hide banner.
+    ivocmain_session(2, argv, NULL, 0);
 }
 
 // Call a few hoc functions.
@@ -31,11 +36,19 @@ void hoc_run(double finitialize_val){
     hoc_call_func(hoc_lookup("topology"), 0);
     hoc_pushx(finitialize_val);
     hoc_call_func(hoc_lookup("finitialize"), 1);
+    std::cout << "time and voltage:" << std::endl;
     hoc_oc("print t, v\n");
 }
 
-// Finish up
+// Run simulation.
+void fadvance(){
+    hoc_call_func(hoc_lookup("fadvance"), 0);
+    std::cout << "time and voltage:" << std::endl;
+    hoc_oc("print t, v\n");
+}
+
+// Finish up: close stdout and stderr output files.
 void close(){
-    // Close stdout output file.
     fclose(stdout);
+    fclose(stderr);
 }

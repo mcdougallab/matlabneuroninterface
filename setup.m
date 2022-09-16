@@ -3,9 +3,6 @@
 % User setting:
 NeuronInstallationDirectory = 'C:\nrn';
 
-% Path to the generated interface library.
-addpath nrnmatlab;
-
 % All dependencies of the generated interface library must be findable.
 % WINDOWS: Put them on the PATH
 dllpath = fullfile(NeuronInstallationDirectory, 'bin');
@@ -18,6 +15,9 @@ StaticLibPath = "bin/libnrniv.a";
 clibgen.generateLibraryDefinition(HeaderFilePath, ...
     Libraries=StaticLibPath, ...
     OverwriteExistingDefinitionFiles=true);
+
+% Path to the generated interface library.
+addpath nrnmatlab;
 
 % Build the library interface.
 build(definenrnmatlab);
