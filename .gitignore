@@ -1,2 +1,7 @@
 # MATLAB autosave files
 *.asv
+
+# clibgen generated files
+nrnmatlabData.xml
+definenrnmatlab.m
+definenrnmatlab.mlx
