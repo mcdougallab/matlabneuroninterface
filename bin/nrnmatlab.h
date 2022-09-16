@@ -1,9 +1,9 @@
 #include <iostream>
 #include <cstdlib>
-#include <string>
 
 // Import C++ name mangled functions.
-__declspec(dllimport) void ivocmain_session(int, const char**, const char**, int);
+__declspec(dllimport) void ivocmain_session(int, const char**, 
+                                            const char**, int);
 
 // Import non-name mangled functions.
 extern "C" __declspec(dllimport) int hoc_oc(const char*);
@@ -16,25 +16,22 @@ static const char* argv[] = {"nrn_test", "-nogui", NULL};
 
 // Initialize.
 void initialize(){
-
     // Initialize NEURON session.
     ivocmain_session(2, argv, NULL, 0);
 
-    // Redirect stdout output to file, because MATLAB cannot handle it.
+    // Redirect stdout output to file, because MATLAB cannot handle it 
+    // directly.
     freopen ("stdout.txt", "w", stdout);
-
 }
 
 // Call a few hoc functions.
 void hoc_run(double finitialize_val){
-
     // Run HOC code.
     hoc_oc("create soma\n");
     hoc_call_func(hoc_lookup("topology"), 0);
     hoc_pushx(finitialize_val);
     hoc_call_func(hoc_lookup("finitialize"), 1);
     hoc_oc("print t, v\n");
-
 }
 
 // Finish up
