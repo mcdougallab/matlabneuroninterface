@@ -5,3 +5,6 @@
 nrnmatlabData.xml
 definenrnmatlab.m
 definenrnmatlab.mlx
+
+# nrnmatlab generated files
+stdout.txt
