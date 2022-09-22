@@ -5,7 +5,7 @@
 __declspec(dllimport) void ivocmain_session(int, const char**, 
                                             const char**, int);
 
-// Import non-name mangled functions.
+// Import non-name mangled functions and parameters.
 extern "C" __declspec(dllimport) int hoc_oc(const char*);
 extern "C" __declspec(dllimport) void* hoc_lookup(const char*);
 extern "C" __declspec(dllimport) double hoc_call_func(void*, int);
