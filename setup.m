@@ -4,9 +4,12 @@
 if ispc
     NeuronInstallationDirectory = 'C:\nrn';
 else
-    % Assume neuron installed through conda
+    % Assume neuron installed through conda, and this matlab session started
+    % from within the activated conda environment
     % Note that within the conda env, the ncurses package needs to come from conda-forge
-    NeuronInstallationDirectory = 'PATH_TO_NEURON_CONDA_ENV';
+    [a, b] = system('which nrniv');
+    b = strtrim(b);
+    NeuronInstallationDirectory = fileparts(fileparts(b));
 end
 
 % Path to the generated interface library.
