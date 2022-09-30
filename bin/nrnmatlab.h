@@ -4,6 +4,7 @@
 // Import C++ name mangled functions.
 __declspec(dllimport) void ivocmain_session(int, const char**, 
                                             const char**, int);
+__declspec(dllimport) void nrnmpi_stubs();  // We need to check if this exists in case the user compiled their own code...
 
 // Import non-name mangled functions and parameters.
 extern "C" __declspec(dllimport) int hoc_oc(const char*);
@@ -42,6 +43,7 @@ void hoc_run(double finitialize_val){
 
 // Run simulation.
 void fadvance(){
+    nrnmpi_stubs();
     hoc_call_func(hoc_lookup("fadvance"), 0);
     std::cout << "time and voltage:" << std::endl;
     hoc_oc("print t, v\n");

@@ -7,7 +7,7 @@ clib.nrnmatlab.initialize();
 clib.nrnmatlab.hoc_run(3.14);
 
 % Run HOC code.
-% clib.nrnmatlab.fadvance(); % Crashes.
+clib.nrnmatlab.fadvance();
 
 % Done.
 clib.nrnmatlab.close();
