@@ -16,7 +16,8 @@ Run the MATLAB scripts in the following order:
 - **setup** 
     - to add the appropriate directories to your path (you might need to
       change the NEURON installation directory)
-    - to generate the library definition file
+    - to generate the library definition file (there is no need to adapt
+      this file after generation)
     - to build the library interface
 - **example_run** 
     - to call some functions from the library

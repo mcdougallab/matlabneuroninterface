@@ -26,7 +26,7 @@ void initialize(){
 
     // Initialize NEURON session.
     nrn_main_launch = 0;
-    nrn_nobanner_ = 1; // 0 to write banner (to stderr), 1 to hide banner.
+    nrn_nobanner_ = 0; // 0 to write banner (to stderr), 1 to hide banner.
     ivocmain_session(2, argv, NULL, 0);
 }
 

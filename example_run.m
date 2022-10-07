@@ -1,16 +1,18 @@
-% Initialize a neuron session and call some hoc functions.
+% Proof of concept for running NEURON in MATLAB:
+% Initialize a neuron session and call some functions.
 
 % Initialization.
-clib.nrnmatlab.initialize();
+clib.neuron.initialize();
 
 % Run HOC code.
-clib.nrnmatlab.hoc_run(3.14);
+clib.neuron.hoc_run(3.14);
 
 % Run HOC code.
-clib.nrnmatlab.fadvance();
+clib.neuron.fadvance();
 
 % Done.
-clib.nrnmatlab.close();
+clib.neuron.close();
 
 % Show results.
-disp(fileread('stdout.txt'));
+fprintf(1, '%s\n', fileread('stdout.txt'));
+fprintf(2, '%s\n', fileread('stderr.txt'));

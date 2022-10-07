@@ -2,9 +2,9 @@
 *.asv
 
 # clibgen generated files
-nrnmatlabData.xml
-definenrnmatlab.m
-definenrnmatlab.mlx
+neuronData.xml
+defineneuron.m
+defineneuron.mlx
 
 # nrnmatlab generated files
 stderr.txt
