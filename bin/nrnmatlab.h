@@ -25,6 +25,7 @@ void initialize(){
     freopen("stderr.txt", "w", stderr);
 
     // Initialize NEURON session.
+    nrnmpi_stubs();
     nrn_main_launch = 0;
     nrn_nobanner_ = 0; // 0 to write banner (to stderr), 1 to hide banner.
     ivocmain_session(2, argv, NULL, 0);
@@ -43,7 +44,6 @@ void hoc_run(double finitialize_val){
 
 // Run simulation.
 void fadvance(){
-    nrnmpi_stubs();
     hoc_call_func(hoc_lookup("fadvance"), 0);
     std::cout << "time and voltage:" << std::endl;
     hoc_oc("print t, v\n");
