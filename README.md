@@ -13,11 +13,18 @@ MATLAB is a registered trademark of The MathWorks, Inc.
 First, make sure NEURON for Windows is installed (see http://neuron.yale.edu/).
 
 Run the MATLAB scripts in the following order:
-- **setup** 
+- **setup0_paths** 
     - to add the appropriate directories to your path (you might need to
       change the NEURON installation directory)
-    - to generate the library definition file (there is no need to adapt
-      this file after generation)
+- **setup1_define**
+    - to generate the library definition file
+    - in this file, you will need to adapt & uncomment the functions:
+        - get_vector_capacity, vector_double_method, get_vector_vec, 
+          get_vector: <SHAPE> of clib.neuron.Object is 1
+        - get_vector_vec: <SHAPE> of clib.array.neuron.Double is "len"
+        - vector_double_method: "methodname" is a "string" given as 
+          "input" with <SHAPE> "nullTerminated"
+- **setup2_build**
     - to build the library interface
 - **example_run** 
     - to call some functions from the library
