@@ -28,7 +28,9 @@ Run the MATLAB scripts in the following order:
     - to build the library interface
 - **example_run** 
     - to call some functions from the library
-    - stdout is written to stdout.txt.
+    - stdout is written to stdout.txt
+- **example_vector** 
+    - to create a Vector object and calculate some properties
 
 ## Notes
 
