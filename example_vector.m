@@ -10,20 +10,25 @@ n.topology();
 v = Vector();
 disp("Before recording:");
 disp(v.vec);
-disp(v.size());
+disp("Size: " + v.size());
 disp(v.data());
 disp("----------");
 
 % Track time in vector.
-v.record(n.ref("t"));
+t = n.ref("t");
+v.record(t);
 n.finitialize(-65);
 disp("Tracking 10 time steps with Vector.record()...");
-for i = 1:10
+for i = 1:4
     n.fadvance();
 end
-disp("After 10 x fadvance():")
+t.set(3.14);
+for i = 5:9
+    n.fadvance();
+end
+disp("After 9 x fadvance():")
 disp(v.vec);
-disp(v.size());
+disp("Size: " + v.size());
 disp(v.data());
 disp("----------");
 
