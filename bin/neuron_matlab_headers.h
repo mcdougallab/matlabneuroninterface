@@ -11,6 +11,9 @@ class NrnRef { /* Holds a pointer to a double. */
         void set(double x) {
             *ref = x;
         }
+        double get() {
+            return *ref;
+        }
 };
 
 #endif

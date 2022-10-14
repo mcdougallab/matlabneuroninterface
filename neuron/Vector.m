@@ -14,7 +14,7 @@ classdef Vector
             value = clib.neuron.vector_double_method(obj.vec, 'size');
         end
 
-        % Prob need to check for all these properties if Vector.size() > 0
+        % TODO: Prob need to check for all these properties if Vector.size() > 0
         function value = hoc_get(obj, method)
             value = clib.neuron.vector_double_method(obj.vec, method);
         end

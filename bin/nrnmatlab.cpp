@@ -83,6 +83,7 @@ NrnRef* ref(const char* tlsym){
 }
 
 // Print all Vector methods & attributes.
+// TODO: can we use this to automatically populate the MATLAB Vector class methods?
 void print_symbol_table(Symlist* table) {
     for (Symbol* sp = table->first; sp != NULL; sp = sp->next) {
         // type distinguishes methods from properties, return type
@@ -130,15 +131,9 @@ Object* get_vector(int vector_value){
     if (vector_value > 0) {
         hoc_pushx(vector_value);
         my_vec = hoc_newobj1(hoc_lookup("Vector"), 1);
-        // Set vector data to something.
-        double* vec_data = vector_vec(my_vec->u.this_pointer);
-        for (auto i = 0; i < vector_capacity(my_vec->u.this_pointer); i++) {
-            vec_data[i] = i * i;
-        }
     } else {
         my_vec = hoc_newobj1(hoc_lookup("Vector"), 0);
     }
 
-    std::cout << "my_vec address: " << my_vec << std::endl;
     return my_vec;
 }

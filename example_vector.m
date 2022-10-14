@@ -2,9 +2,9 @@
 % Initialize a neuron session, record time and call some vector methods.
 
 % Initialization.
+setup0_paths;
 n = Neuron();
 n.create_soma();
-n.topology();
 
 % Try vector.
 v = Vector();
