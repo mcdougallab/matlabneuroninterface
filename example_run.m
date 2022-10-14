@@ -5,9 +5,11 @@
 clib.neuron.initialize();
 
 % Run HOC code.
-clib.neuron.hoc_run(3.14);
+clib.neuron.create_soma();
+clib.neuron.topology();
+clib.neuron.finitialize(3.14);
 
-% Run HOC code.
+% Advance the simulation by one time step.
 clib.neuron.fadvance();
 
 % Done.

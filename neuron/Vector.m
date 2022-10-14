@@ -1,16 +1,23 @@
 classdef Vector
-    properties (Access=private)
+    properties (Access=public)
         vec
     end
     methods
         function obj = Vector(n)
-            obj.vec = clib.neuron.get_vector(n);
+            if (nargin==1)
+                obj.vec = clib.neuron.get_vector(n);
+            else
+                obj.vec = clib.neuron.get_vector(0);
+            end
         end
         function value = size(obj)
             value = clib.neuron.vector_double_method(obj.vec, 'size');
         end
 
         % Prob need to check for all these properties if Vector.size() > 0
+        function value = hoc_get(obj, method)
+            value = clib.neuron.vector_double_method(obj.vec, method);
+        end
         function value = mean(obj)
             value = clib.neuron.vector_double_method(obj.vec, 'mean');
         end
@@ -31,7 +38,8 @@ classdef Vector
                 arr(i) = vec_data(i);
             end
         end
-        % To add (important!):
-        % function value = record(obj, ptr)
+        function record(obj, ptr)
+            clib.neuron.record(obj.vec, ptr);
+        end
     end
 end
