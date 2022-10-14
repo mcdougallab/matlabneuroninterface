@@ -2,18 +2,18 @@
 % Initialize a neuron session and call some functions.
 
 % Initialization.
-clib.neuron.initialize();
+n = Neuron();
 
 % Run HOC code.
-clib.neuron.create_soma();
-clib.neuron.topology();
-clib.neuron.finitialize(3.14);
+n.create_soma();
+n.topology();
+n.finitialize(3.14);
 
 % Advance the simulation by one time step.
-clib.neuron.fadvance();
+n.fadvance();
 
 % Done.
-clib.neuron.close();
+n.close();
 
 % Show results.
 fprintf(1, '%s\n', fileread('stdout.txt'));
