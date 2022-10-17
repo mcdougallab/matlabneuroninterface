@@ -1,5 +1,5 @@
 classdef Vector
-    properties (Access=public)
+    properties (Access=private)
         vec
     end
     methods
@@ -12,6 +12,12 @@ classdef Vector
         end
         function value = size(obj)
             value = clib.neuron.vector_double_method(obj.vec, 'size');
+        end
+        function arr = data(obj)
+            arr = clib.neuron.get_vector_vec(obj.vec, obj.size());
+        end
+        function record(obj, ptr)
+            clib.neuron.record(obj.vec, ptr);
         end
 
         % TODO: Prob need to check for all these properties if Vector.size() > 0
@@ -29,17 +35,6 @@ classdef Vector
         end
         function value = sumsq(obj)
             value = clib.neuron.vector_double_method(obj.vec, 'sumsq');
-        end
-        function arr = data(obj)
-            vec_len = obj.size();
-            arr = zeros(1, vec_len);
-            vec_data = clib.neuron.get_vector_vec(obj.vec, vec_len);
-            for i=1:vec_len
-                arr(i) = vec_data(i);
-            end
-        end
-        function record(obj, ptr)
-            clib.neuron.record(obj.vec, ptr);
         end
     end
 end

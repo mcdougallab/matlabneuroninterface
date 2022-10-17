@@ -19,7 +19,7 @@ To get the toolbox working on your machine, run the MATLAB scripts in the follow
 - **setup1_define**
     - to generate the library definition file
     - in this file, you will need to adapt & uncomment the function:
-        - get_vector_vec: `<SHAPE>` of clib.array.neuron.Double is "len"
+        - get_vector_vec: `<MLTYPE>` is "double" and `<SHAPE>` is "len"
 - **setup2_build**
     - to build the library interface
 
