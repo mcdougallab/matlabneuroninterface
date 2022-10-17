@@ -17,11 +17,11 @@ v_vec = Vector();
 v = n.range_ref(axon, "v", 0.5);
 v_vec.record(v);
 
-% Insert current
+% Insert current.
 iclamp = IClamp(0.5);
-iclamp.set_pp_property("del", 1);
-iclamp.set_pp_property("dur", 1);
-iclamp.set_pp_property("amp", 100);
+iclamp.del = 1;
+iclamp.dur = 1;
+iclamp.amp = 100;
 
 % Run simulation.
 n.finitialize(-65);

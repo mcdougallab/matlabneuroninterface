@@ -127,7 +127,7 @@ const double* get_vector_vec(Object* vec, int len){
 }
 
 // Calculate a Vector property that returns a double, like mean, min, stdev, ...
-double vector_double_method(Object* vec, const char methodname[]){
+double vector_double_method(Object* vec, const char* methodname){
     auto sym = hoc_table_lookup(methodname, vec->ctemplate->symtable);
     assert(sym);
     hoc_call_ob_proc(vec, sym, 0);
@@ -177,10 +177,14 @@ void insert_mechanism(Section* sec, const char* mech_name) {
     mech_insert1(sec, sym->subtype);
 }
 
-// Set object property.
+// Set/get object property.
 void set_pp_property(Object* pp, const char* name, double value) {
     int index = hoc_table_lookup(name, pp->ctemplate->symtable)->u.rng.index;
     ob2pntproc_0(pp)->prop->param[index] = value;
+}
+double get_pp_property(Object* pp, const char* name) {
+    int index = hoc_table_lookup(name, pp->ctemplate->symtable)->u.rng.index;
+    return ob2pntproc_0(pp)->prop->param[index];
 }
 
 // Get IClamp object.
