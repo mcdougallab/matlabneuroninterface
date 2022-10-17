@@ -4,12 +4,12 @@ classdef Section
         name
     end
     methods
-        function obj = Section(name)
-            obj.name = name;
-            obj.sec = clib.neuron.new_section(name);
+        function self = Section(name)
+            self.name = name;
+            self.sec = clib.neuron.new_section(name);
         end
-        function insert_mechanism(obj, mech_name)
-            clib.neuron.insert_mechanism(obj.sec, mech_name);
+        function insert_mechanism(self, mech_name)
+            clib.neuron.insert_mechanism(self.sec, mech_name);
         end
     end
 end

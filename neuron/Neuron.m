@@ -1,6 +1,6 @@
 classdef Neuron
     methods(Static)
-        function obj = Neuron()
+        function self = Neuron()
             clib.neuron.initialize();
         end
         function create_soma()

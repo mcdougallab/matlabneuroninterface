@@ -8,36 +8,36 @@ classdef IClamp
         amp
     end
     methods
-        function obj = IClamp(loc)
-            obj.ic = clib.neuron.get_IClamp(loc);
+        function self = IClamp(loc)
+            self.ic = clib.neuron.get_IClamp(loc);
         end
 
         % Generic set/get methods
-        function set_pp_property(obj, name, val)
-            clib.neuron.set_pp_property(obj.ic, name, val);
+        function set_pp_property(self, name, val)
+            clib.neuron.set_pp_property(self.ic, name, val);
         end
-        function value = get_pp_property(obj, name)
-            value = clib.neuron.set_pp_property(obj.ic, name, val);
+        function value = get_pp_property(self, name)
+            value = clib.neuron.set_pp_property(self.ic, name, val);
         end
 
         % Individual set/get methods
-        function obj = set.del(obj, val)
-            clib.neuron.set_pp_property(obj.ic, "del", val);
+        function self = set.del(self, val)
+            clib.neuron.set_pp_property(self.ic, "del", val);
         end
-        function value = get.del(obj)
-            value = clib.neuron.get_pp_property(obj.ic, "del");
+        function value = get.del(self)
+            value = clib.neuron.get_pp_property(self.ic, "del");
         end
-        function obj = set.dur(obj, val)
-            clib.neuron.set_pp_property(obj.ic, "dur", val);
+        function self = set.dur(self, val)
+            clib.neuron.set_pp_property(self.ic, "dur", val);
         end
-        function value = get.dur(obj)
-            value = clib.neuron.get_pp_property(obj.ic, "dur");
+        function value = get.dur(self)
+            value = clib.neuron.get_pp_property(self.ic, "dur");
         end
-        function obj = set.amp(obj, val)
-            clib.neuron.set_pp_property(obj.ic, "amp", val);
+        function self = set.amp(self, val)
+            clib.neuron.set_pp_property(self.ic, "amp", val);
         end
-        function value = get.amp(obj)
-            value = clib.neuron.get_pp_property(obj.ic, "amp");
+        function value = get.amp(self)
+            value = clib.neuron.get_pp_property(self.ic, "amp");
         end
     end
 end
