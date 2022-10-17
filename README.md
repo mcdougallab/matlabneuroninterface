@@ -30,6 +30,10 @@ Run the MATLAB scripts in the following order:
 - **example_acpot** 
     - to generate an action potential
 
+**example_acpot** should result in:
+
+![Action potential](doc/acpot.jpg)
+
 ## Notes
 
 We use clibgen with MinGW64, and give it a .a static library file, 
