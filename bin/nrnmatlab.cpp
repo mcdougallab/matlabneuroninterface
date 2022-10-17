@@ -76,8 +76,8 @@ void finitialize(double finitialize_val){
 // Run simulation time step.
 void fadvance(){
     hoc_call_func(hoc_lookup("fadvance"), 0);
-    std::cout << "time and voltage:" << std::endl;
-    hoc_oc("print t, v\n");
+    // std::cout << "time and voltage:" << std::endl;
+    // hoc_oc("print t, v\n");
 }
 
 // Finish up: close stdout and stderr output files.
