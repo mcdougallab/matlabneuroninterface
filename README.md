@@ -12,7 +12,7 @@ MATLAB is a registered trademark of The MathWorks, Inc.
 
 First, make sure NEURON for Windows is installed (see http://neuron.yale.edu/).
 
-Run the MATLAB scripts in the following order:
+To get the toolbox working on your machine, run the MATLAB scripts in the following order:
 - **setup0_paths** 
     - to add the appropriate directories to your path (you might need to
       change the NEURON installation directory)
@@ -22,6 +22,8 @@ Run the MATLAB scripts in the following order:
         - get_vector_vec: `<SHAPE>` of clib.array.neuron.Double is "len"
 - **setup2_build**
     - to build the library interface
+
+Then, you can test the toolbox by running:
 - **example_run** 
     - to call some functions from the library
     - stdout/stderr are written to stdout.txt/stderr.txt respectively
