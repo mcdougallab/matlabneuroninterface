@@ -118,7 +118,7 @@ void print_class_methods(const char* class_name) {
 }
 // Return all class methods & attributes as a string with separators ";"
 // between methods, and ":" between method name and method type.
-const char* get_class_methods(const char* class_name) {
+std::string get_class_methods(const char* class_name) {
     std::string methods, new_method;
     auto sym = hoc_lookup(class_name);
     Symlist* table = sym->u.ctemplate->symtable;
@@ -126,10 +126,12 @@ const char* get_class_methods(const char* class_name) {
     for (Symbol* sp = table->first; sp != NULL; sp = sp->next) {
         new_method = std::string(sp->name) + ":" + 
                      std::to_string(sp->type) + ";";
+        std::cout << new_method.c_str() << std::endl;
         methods = methods + new_method;
     }
+    std::cout << methods.c_str() << std::endl;
 
-    return methods.c_str();
+    return methods;
 }
 
 // Get Vector size.

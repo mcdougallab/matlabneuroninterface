@@ -1,3 +1,4 @@
+#include <string>
 #include "neuron_api_headers.h"
 #include "neuron_matlab_headers.h"
 
@@ -23,7 +24,7 @@ void print_class_methods(const char* class_name);
 
 // Return all class methods & attributes as a string with separators ";"
 // between methods, and ":" between method name and method type.
-const char* get_class_methods(const char* class_name);
+std::string get_class_methods(const char* class_name);
 
 // Vector object.
 int get_vector_capacity(Object* vec);
