@@ -15,6 +15,9 @@ void fadvance();
 // Get pointer to top-level symbol.
 NrnRef* ref(const char* tlsym);
 
+// Get pointer from nrn_rangepointer.
+NrnRef* range_ref(Section* sec, const char* sym, double val);
+
 // Test vector object.
 int get_vector_capacity(Object* vec);
 const double* get_vector_vec(Object* vec, int len);
@@ -26,3 +29,15 @@ void record(Object* vec, NrnRef* nrnref);
 
 // Finish up: close stdout and stderr output files.
 void close();
+
+// Make a new section.
+Section* new_section(const char* name);
+
+// Insert mechanism into section.
+void insert_mechanism(Section* sec, const char* mech_name);
+
+// Set object property.
+void set_pp_property(Object* pp, const char* name, double value);
+
+// Get IClamp object.
+Object* get_IClamp(double loc);

@@ -2,6 +2,17 @@
 #ifndef NRNAPI_H
 #define NRNAPI_H
 
+#define DIAMLIST 1
+#define CACHEVEC 1
+#define EXTRAEQN 0
+#define DEBUGSOLVE 0
+
+// default nseg from https://github.com/neuronsimulator/nrn/blob/master/src/nrnoc/membdef.h
+#define DEF_nseg 1    /* default number of segments per section*/
+
+
+// excerpted from https://github.com/neuronsimulator/nrn/blob/master/src/oc/hocdec.h
+
 struct Symbol;
 struct Arrayinfo;
 struct Proc;
@@ -10,8 +21,22 @@ union Datum;
 struct cTemplate;
 union Objectdata;
 struct Object;
-struct hoc_Item;
+struct Section;
 
+struct hoc_Item {
+    union {
+        hoc_Item* itm;
+        hoc_Item* lst;
+        char* str;
+        Symbol* sym;
+        Section* sec;
+        Object* obj;
+        void* vd;
+    } element; /* pointer to the actual item */
+    hoc_Item* next;
+    hoc_Item* prev;
+    short itemtype;
+};
 using hoc_List = hoc_Item;
 
 typedef int (*Pfri)(void);
@@ -145,5 +170,160 @@ struct Symlist {
     Symbol* first;
     Symbol* last;
 };
+
+union Datum { /* interpreter stack type */
+    double val;
+    Symbol* sym;
+    int i;
+    double* pval; /* first used with Eion in NEURON */
+    Object** pobj;
+    Object* obj; /* sections keep this to construct a name */
+    char** pstr;
+    hoc_Item* itm;
+    hoc_List* lst;
+    void* _pvoid; /* not used on stack, see nrnoc/point.cpp */
+};
+
+/**********************************************************
+ * The below is excerpted from:
+ * https://github.com/neuronsimulator/nrn/blob/master/src/nrnoc/section.h
+ *********************************************************/
+
+struct Prop;
+struct Section;
+struct Node;
+
+#if DIAMLIST
+typedef struct Pt3d {
+    float x, y, z, d; /* 3d point, microns */
+    double arc;
+} Pt3d;
+#endif
+
+typedef struct Section {
+    int refcount;              /* may be in more than one list */
+    short nnode;               /* Number of nodes for ith section */
+    struct Section* parentsec; /* parent section of node 0 */
+    struct Section* child;     /* root of the list of children
+                       connected to this parent kept in
+                       order of increasing x */
+    struct Section* sibling;   /* used as list of sections that have same parent */
+
+
+    /* the parentnode is only valid when tree_changed = 0 */
+    struct Node* parentnode; /* parent node */
+    struct Node** pnode;     /* Pointer to  pointer vector of node structures */
+    int order;               /* index of this in secorder vector */
+    short recalc_area_;      /* NODEAREA, NODERINV, diam, L need recalculation */
+    short volatile_mark;     /* for searching */
+    void* volatile_ptr;      /* e.g. ShapeSection* */
+#if DIAMLIST
+    short npt3d;                     /* number of 3-d points */
+    short pt3d_bsize;                /* amount of allocated space for 3-d points */
+    struct Pt3d* pt3d;               /* list of 3d points with diameter */
+    struct Pt3d* logical_connection; /* nil for legacy, otherwise specifies logical connection
+                                        position (for translation) */
+#endif
+    struct Prop* prop; /* eg. length, etc. */
+} Section;
+
+typedef struct Node {
+#if CACHEVEC == 0
+    double _v;    /* membrane potential */
+    double _area; /* area in um^2 but see treesetup.cpp */
+    double _a;    /* effect of node in parent equation */
+    double _b;    /* effect of parent in node equation */
+#else             /* CACHEVEC */
+    double* _v;     /* membrane potential */
+    double _area;   /* area in um^2 but see treesetup.cpp */
+    double _rinv;   /* conductance uS from node to parent */
+    double _v_temp; /* vile necessity til actual_v allocated */
+#endif            /* CACHEVEC */
+    double* _d;   /* diagonal element in node equation */
+    double* _rhs; /* right hand side in node equation */
+    double* _a_matelm;
+    double* _b_matelm;
+    int eqn_index_;                 /* sparse13 matrix row/col index */
+                                    /* if no extnodes then = v_node_index +1*/
+                                    /* each extnode adds nlayer more equations after this */
+    struct Prop* prop;              /* Points to beginning of property list */
+    Section* child;                 /* section connected to this node */
+                                    /* 0 means no other section connected */
+    Section* sec;                   /* section this node is in */
+                                    /* #if PARANEURON */
+    struct Node* _classical_parent; /* needed for multisplit */
+    void* _nt;               // actually a struct NrnThread*
+/* #endif */
+#if EXTRACELLULAR
+    void* extnode;                  // was struct Extnode*
+#endif
+
+#if EXTRAEQN
+    void* eqnblock; /* hook to other equations which
+           need to be solved at the same time as the membrane
+           potential. eg. fast changeing ionic concentrations -- was struct Eqnblock* */
+#endif                         /*MOREEQN*/
+
+#if DEBUGSOLVE
+    double savd;
+    double savrhs;
+#endif                   /*DEBUGSOLVE*/
+    int v_node_index;    /* only used to calculate parent_node_indices*/
+    int sec_node_index_; /* to calculate segment index from *Node */
+} Node;
+
+
+typedef struct Prop {
+    struct Prop* next; /* linked list of properties */
+    short _type;       /* type of membrane, e.g. passive, HH, etc. */
+    short unused1;     /* gcc and borland need pairs of shorts to align the same.*/
+    int param_size;    /* for notifying hoc_free_val_array */
+    double* param;     /* vector of doubles for this property */
+    Datum* dparam;     /* usually vector of pointers to doubles
+                  of other properties but maybe other things as well
+                  for example one cable section property is a
+                  symbol */
+    long _alloc_seq;   /* for cache efficiency */
+    Object* ob;        /* nil if normal property, otherwise the object containing the data*/
+} Prop;
+
+typedef struct Point_process {
+    Section* sec; /* section and node location for the point mechanism*/
+    Node* node;
+    Prop* prop;    /* pointer to the actual property linked to the
+                  node property list */
+    Object* ob;    /* object that owns this process */
+    void* presyn_; /* non-threshold presynapse for NetCon */
+    void* nvi_;    /* NrnVarIntegrator (for local step method) */
+    void* _vnt;    /* NrnThread* (for NET_RECEIVE and multicore) */
+} Point_process;
+
+
+typedef void (initer_function)(int, const char**, const char**, int);
+typedef void (vd_function)(double);
+typedef void (vdptr_function)(double*);
+typedef void (vv_function)(void);
+typedef int (icptr_function)(const char*);
+typedef void* (vcptr_function)(const char*);
+typedef Symbol* (scptr_function)(const char*);
+typedef double (dvptrint_function) (void*, int);
+typedef Symbol* (scptroptr_function) (char*, Object*);
+typedef double (dsio_function) (Symbol*, int, Object*);
+typedef Symbol* (scptrslptr_function) (const char*, Symlist*);
+typedef Object* (optrsptri_function) (Symbol*, int);
+typedef Object* (optri_function) (int);
+typedef void (voptr_function) (Object*);
+typedef void (vf2icif_function)(int (*)(int, char*), int(*)());
+typedef int (ivptr_function)(void*);
+typedef double* (dptrvptr_function)(void*);
+typedef double (dv_function)(void);
+typedef void (voptrsptri_function)(Object*, Symbol*, int);
+typedef void (vcptrptr_function)(char**);
+typedef void (vsptr_function)(Symbol*);
+typedef void (voptrsptritemptrptri_function)(Object*, Symbol*, hoc_Item**, int);
+typedef char* (cptrsecptr_function)(Section*);
+typedef double* (dptrsecptrsptrd_function)(Section*, Symbol*, double);
+typedef void (vsecptri_function)(Section*, int);
+typedef Point_process* (ppoptr_function)(Object*);
 
 #endif
