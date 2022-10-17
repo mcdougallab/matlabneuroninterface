@@ -3,9 +3,6 @@ classdef Vector < dynamicprops
         vec
         method_list
     end
-    properties (Access=public)
-        S
-    end
     methods
         function self = Vector(n)
             self = self@dynamicprops;
