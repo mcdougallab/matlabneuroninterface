@@ -32,9 +32,8 @@ disp("Size: " + v.size());
 disp(v.data());
 disp("----------");
 
-% Get some properties.
-disp("mean (using .hoc_get()): " + v.hoc_get("mean"));
-disp("sumsq (using .hoc_get()): " + v.hoc_get("sumsq"));
+% Get some properties using dynamically generated methods.
+% See also: v.list_methods();
 disp("mean: " + v.mean());
 disp("stdev: " + v.stdev());
 disp("size: " + v.size());

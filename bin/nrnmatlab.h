@@ -18,8 +18,12 @@ NrnRef* ref(const char* tlsym);
 // Get pointer from nrn_rangepointer.
 NrnRef* range_ref(Section* sec, const char* sym, double val);
 
-// Print all class methods & attributes.
+// Print all class methods & attributes to stdout.
 void print_class_methods(const char* class_name);
+
+// Return all class methods & attributes as a string with separators ";"
+// between methods, and ":" between method name and method type.
+const char* get_class_methods(const char* class_name);
 
 // Vector object.
 int get_vector_capacity(Object* vec);

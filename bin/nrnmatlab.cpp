@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <cstdint>
 #include <cstring>
+#include <string>
 #include "neuron_api_headers.h"
 #include "neuron_matlab_headers.h"
 
@@ -114,6 +115,21 @@ void print_class_methods(const char* class_name) {
     assert(sym);
     std::cout << sym->name << " properties and methods:" << std::endl;
     print_symbol_table(sym->u.ctemplate->symtable);
+}
+// Return all class methods & attributes as a string with separators ";"
+// between methods, and ":" between method name and method type.
+const char* get_class_methods(const char* class_name) {
+    std::string methods, new_method;
+    auto sym = hoc_lookup(class_name);
+    Symlist* table = sym->u.ctemplate->symtable;
+
+    for (Symbol* sp = table->first; sp != NULL; sp = sp->next) {
+        new_method = std::string(sp->name) + ":" + 
+                     std::to_string(sp->type) + ";";
+        methods = methods + new_method;
+    }
+
+    return methods.c_str();
 }
 
 // Get Vector size.
