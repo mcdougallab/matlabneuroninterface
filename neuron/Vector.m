@@ -28,7 +28,7 @@ classdef Vector < dynamicprops
             arr = clib.neuron.get_vector_vec(self.vec, self.size());
         end
 
-        % Record some quantity by providing a NrnPtr to that quantity.
+        % Record some quantity by providing a NrnRef pointer to that quantity.
         function record(self, ptr)
             clib.neuron.record(self.vec, ptr);
         end
