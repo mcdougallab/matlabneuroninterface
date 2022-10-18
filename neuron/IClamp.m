@@ -1,3 +1,5 @@
+% Current clamp class.
+
 classdef IClamp
     properties (Access=private)
         ic
@@ -9,18 +11,20 @@ classdef IClamp
     end
     methods
         function self = IClamp(loc)
+        % Constructor for IClamp; create current clamp at a location
+        % between 0 and 1 on the currently accessed section.
             self.ic = clib.neuron.get_IClamp(loc);
         end
 
-        % Generic set/get methods
-        function set_pp_property(self, name, val)
-            clib.neuron.set_pp_property(self.ic, name, val);
+        function set_pp_property(self, prop, val)
+        % Generic set method, set IClamp property (prop) to value (val).
+            clib.neuron.set_pp_property(self.ic, prop, val);
         end
-        function value = get_pp_property(self, name)
-            value = clib.neuron.set_pp_property(self.ic, name, val);
+        function value = get_pp_property(self, prop)
+        % Generic get method for property (prop).
+            value = clib.neuron.set_pp_property(self.ic, prop, val);
         end
 
-        % Individual set/get methods
         function self = set.del(self, val)
             clib.neuron.set_pp_property(self.ic, "del", val);
         end

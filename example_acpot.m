@@ -14,7 +14,7 @@ t_vec.record(t);
 
 % Track voltage with Vector v_vec.
 v_vec = Vector();
-v = n.range_ref(axon, "v", 0.5);
+v = axon.ref("v", 0.5);
 v_vec.record(v);
 
 % Insert current.

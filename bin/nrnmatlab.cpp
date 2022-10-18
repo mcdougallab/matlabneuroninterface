@@ -41,19 +41,26 @@ extern "C" __declspec(dllimport) dptrvptr_function vector_vec;
 static const char* argv[] = {"nrn_test", "-nogui", "-nopython", NULL};
 
 // Initialize NEURON session.
+bool initialized = false;
 void initialize(){
-    // Redirect stdout/sterr output to file, because MATLAB cannot handle 
-    // it directly. Maybe we can use GetStdHandle instead?
-    freopen("stdout.txt", "w", stdout);
-    freopen("stderr.txt", "w", stderr);
 
-    // Initialize NEURON session.
-    if (nrnmpi_stubs) {
-        nrnmpi_stubs();
+    if (!initialized) {
+        // Redirect stdout/sterr output to file, because MATLAB cannot handle 
+        // it directly. Maybe we can use GetStdHandle instead?
+        freopen("stdout.txt", "w", stdout);
+        freopen("stderr.txt", "w", stderr);
+    
+        // Initialize NEURON session.
+        if (nrnmpi_stubs) {
+            nrnmpi_stubs();
+        }
+        nrn_main_launch = 0;
+        nrn_nobanner_ = 0; // 0 to write banner (to stderr), 1 to hide banner.
+        ivocmain_session(3, argv, NULL, 0);
+
+        initialized = true;
     }
-    nrn_main_launch = 0;
-    nrn_nobanner_ = 0; // 0 to write banner (to stderr), 1 to hide banner.
-    ivocmain_session(3, argv, NULL, 0);
+
 }
 
 // Create soma.
@@ -126,10 +133,8 @@ std::string get_class_methods(const char* class_name) {
     for (Symbol* sp = table->first; sp != NULL; sp = sp->next) {
         new_method = std::string(sp->name) + ":" + 
                      std::to_string(sp->type) + ";";
-        std::cout << new_method.c_str() << std::endl;
         methods = methods + new_method;
     }
-    std::cout << methods.c_str() << std::endl;
 
     return methods;
 }
