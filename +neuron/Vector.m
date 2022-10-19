@@ -33,16 +33,16 @@ classdef Vector < dynamicprops
             clibRelease(self.vec)
         end
 
-        function value = size(self)
-        % Get Vector data size.
-        %   value = size()
-            value = clib.neuron.vector_double_method(self.vec, 'size');
-        end
-
         function arr = data(self)
         % Access Vector data.
         %   arr = data()
             arr = clib.neuron.get_vector_vec(self.vec, self.size());
+        end
+
+        function value = size(self)
+        % Get Vector data size.
+        %   value = size()
+            value = clib.neuron.vector_double_method(self.vec, 'size');
         end
 
         function arr = double(self)
@@ -66,10 +66,17 @@ classdef Vector < dynamicprops
         % Call method returning a double by passing method name (method) to HOC lookup, along with method arguments (varargin).
         %   value = hoc_get(method, varargin)
             
-            % TODO: pass variable number of arguments (varargin) to C++
             try
-                value = clib.neuron.vector_double_method(self.vec, method);
-            catch  % TODO: if the above code fails, usually Matlab just crashes instead of catching some error.
+                sym = clib.neuron.get_method_sym(self.vec, method);
+                n = length(varargin);
+                for i=1:n
+                    % TODO: for now this only works for doubles; we need to check the type and push the right type
+                    clib.neuron.matlab_hoc_pushx(varargin{:}(i));  
+                end
+                clib.neuron.matlab_hoc_call_ob_proc(self.vec, sym, n);
+                value = clib.neuron.matlab_hoc_xpop();
+            % TODO: if the above code fails, Matlab just crashes instead of catching an error.
+            catch  
                 warning("'"+string(method)+"': number or type of arguments incorrect.")
             end
 

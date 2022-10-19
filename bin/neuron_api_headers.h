@@ -324,6 +324,7 @@ typedef void (voptrsptritemptrptri_function)(Object*, Symbol*, hoc_Item**, int);
 typedef char* (cptrsecptr_function)(Section*);
 typedef double* (dptrsecptrsptrd_function)(Section*, Symbol*, double);
 typedef void (vsecptri_function)(Section*, int);
+typedef void (vsecptr_function)(Section*);
 typedef Point_process* (ppoptr_function)(Object*);
 
 #endif

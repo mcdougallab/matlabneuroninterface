@@ -32,6 +32,11 @@ const double* get_vector_vec(Object* vec, int len);
 double vector_double_method(Object* vec, const char* methodname);
 Object* get_vector(int vector_value);
 
+Symbol* get_method_sym(Object* ob, const char* methodname);
+void matlab_hoc_call_ob_proc(Object* ob, Symbol* sym, int narg);
+void matlab_hoc_pushx(double x);
+double matlab_hoc_xpop(void);
+
 // Record.
 void record(Object* vec, NrnRef* nrnref);
 
@@ -40,8 +45,6 @@ void close();
 
 // Make a new section.
 Section* new_section(const char* name);
-extern "C" __declspec(dllimport) void nrn_popsec(void);
-extern "C" __declspec(dllimport) void nrn_pushsec(Section* sec);
 
 // Insert mechanism into section.
 void insert_mechanism(Section* sec, const char* mech_name);
@@ -52,3 +55,7 @@ double get_pp_property(Object* pp, const char* name);
 
 // Get IClamp object.
 Object* get_IClamp(double loc);
+
+// C++ Neuron functions directly accessible from MATLAB.
+extern "C" __declspec(dllimport) void nrn_popsec(void);
+extern "C" __declspec(dllimport) void nrn_pushsec(Section* sec);

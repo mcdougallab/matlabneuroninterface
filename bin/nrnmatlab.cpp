@@ -156,6 +156,18 @@ double vector_double_method(Object* vec, const char* methodname){
     hoc_call_ob_proc(vec, sym, 0);
     return hoc_xpop();
 }
+Symbol* get_method_sym(Object* ob, const char* methodname){
+    return hoc_table_lookup(methodname, ob->ctemplate->symtable);
+}
+void matlab_hoc_call_ob_proc(Object* ob, Symbol* sym, int narg) {
+    hoc_call_ob_proc(ob, sym, narg);
+}
+void matlab_hoc_pushx(double x) {
+    hoc_pushx(x);
+}
+double matlab_hoc_xpop(void) {
+    return hoc_xpop();
+}
 
 // Record.
 void record(Object* vec, NrnRef* nrnref) {
