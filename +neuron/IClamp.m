@@ -1,30 +1,40 @@
-% Current clamp class.
-
 classdef IClamp
+% IClamp Current clamp class
     properties (Access=private)
-        ic
+        ic      % C++ IClamp object
     end
     properties (Dependent)
-        del
-        dur
-        amp
+        del     % Delay.
+        dur     % Duration.
+        amp     % Amplitude.
     end
     methods
-        function self = IClamp(loc)
-        % Constructor for IClamp; create current clamp at a location
-        % between 0 and 1 on the currently accessed section.
+        function self = IClamp(sec, loc)
+        % Construct current clamp on a section (sec) at a location (loc) between 0 and 1.
+        %   IClamp(sec, loc)
+            clib.neuron.nrn_pushsec(sec.get_sec());
             self.ic = clib.neuron.get_IClamp(loc);
+            clib.neuron.nrn_popsec();
+        end
+
+        function delete(self)
+        % Destructor for IClamp.
+        %   delete()
+            clibRelease(self.ic)
         end
 
         function set_pp_property(self, prop, val)
         % Generic set method, set IClamp property (prop) to value (val).
+        %   set_pp_property(prop, val)
             clib.neuron.set_pp_property(self.ic, prop, val);
         end
         function value = get_pp_property(self, prop)
         % Generic get method for property (prop).
+        %   value = get_pp_property(prop)
             value = clib.neuron.set_pp_property(self.ic, prop, val);
         end
 
+        % Get/set dependent properties.
         function self = set.del(self, val)
             clib.neuron.set_pp_property(self.ic, "del", val);
         end

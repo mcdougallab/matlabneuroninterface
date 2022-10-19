@@ -1,10 +1,10 @@
-% The Neuron class is used to initialize a Neuron session. It also 
-% contains static methods for running generic Neuron functions.
-
 classdef Neuron
+% Neuron Class for initializing a Neuron session and running generic Neuron functions.
+
     methods
         function self = Neuron()
-        % Initialize NEURON session. 
+        % Initialize the neuron session, if it has not been initialized before.
+        %   Neuron()
 
             % Strictly speaking this constructor is static; it only 
             % initializes the NEURON session in C++ and does 
@@ -15,27 +15,33 @@ classdef Neuron
     end
     methods(Static)
         function create_soma()
-        % Pass "create soma\n" to hoc_oc.
+        % Create soma by passing "create soma\n" to hoc_oc.
+        %   create_soma()
             clib.neuron.create_soma();
         end
         function topology()
-        % Print the topology to stdout.txt
+        % Print the topology to stdout.txt.
+        %   topology()
             clib.neuron.topology();
         end
-        function value = ref(sym)
-        % Get an NrnRef containing a pointer to a top-level symbol.
-            value = clib.neuron.ref(sym);
+        function nrnref = ref(sym)
+        % Return an NrnRef containing a pointer to a top-level symbol (sym).
+        %   nrnref = ref(sym)
+            nrnref = clib.neuron.ref(sym);
         end
         function finitialize(v)
-        % Initialize a simulation, provide a voltage in mv.
+        % Initializes a simulation, by providing a voltage (v) in mv.
+        %   finitialize(v)
             clib.neuron.finitialize(v);
         end
         function fadvance()
         % Advance the simulation by one timestep.
+        %   fadvance()
             clib.neuron.fadvance();
         end
         function close()
         % Close the stderr/stdout txt files.
+        %   close()
             clib.neuron.close();
         end
     end

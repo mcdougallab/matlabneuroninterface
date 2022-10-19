@@ -2,7 +2,9 @@
 % Initialize a neuron session and call some functions.
 
 % Initialization.
-n = Neuron();
+clear all;
+setup0_paths;
+n = neuron.Neuron();
 
 % Run HOC code.
 n.create_soma();

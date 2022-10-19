@@ -2,12 +2,13 @@
 % Initialize a neuron session, record time and call some vector methods.
 
 % Initialization.
+clear all;
 setup0_paths;
-n = Neuron();
+n = neuron.Neuron();
 n.create_soma();
 
 % Try vector.
-v = Vector();
+v = neuron.Vector();
 disp("Before recording:");
 disp(v.vec);
 disp("Size: " + v.size());

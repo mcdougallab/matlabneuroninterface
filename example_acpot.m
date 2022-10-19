@@ -2,23 +2,24 @@
 % Generate activation function.
 
 % Initialization.
+clear all;
 setup0_paths;
-n = Neuron();
-axon = Section("axon");
+n = neuron.Neuron();
+axon = neuron.Section("axon");
 axon.insert_mechanism("hh");
 
 % Track time with Vector t_vec.
-t_vec = Vector();
+t_vec = neuron.Vector();
 t = n.ref("t");
 t_vec.record(t);
 
 % Track voltage with Vector v_vec.
-v_vec = Vector();
+v_vec = neuron.Vector();
 v = axon.ref("v", 0.5);
 v_vec.record(v);
 
 % Insert current.
-iclamp = IClamp(0.5);
+iclamp = neuron.IClamp(axon, 0.5);
 iclamp.del = 1;
 iclamp.dur = 1;
 iclamp.amp = 100;
@@ -30,7 +31,7 @@ while t.get() < 10
 end
 
 % Plot results.
-plot(t_vec.data(), v_vec.data());
+plot(t_vec, v_vec);
 title("Action potential");
 xlabel("t (ms)");
 ylabel("voltage (mV)")

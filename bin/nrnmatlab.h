@@ -40,6 +40,8 @@ void close();
 
 // Make a new section.
 Section* new_section(const char* name);
+extern "C" __declspec(dllimport) void nrn_popsec(void);
+extern "C" __declspec(dllimport) void nrn_pushsec(Section* sec);
 
 // Insert mechanism into section.
 void insert_mechanism(Section* sec, const char* mech_name);
