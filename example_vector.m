@@ -37,9 +37,9 @@ disp("----------");
 % See also: v.list_methods();
 disp("mean: " + v.mean());
 disp("stdev: " + v.stdev());
-disp("size: " + v.size());
-disp("sum: " + v.sum());
-disp("sumsq: " + v.sumsq());
+disp("contains 0.0: " + v.contains(0.0));
+disp("contains 1.0: " + v.contains(1.0));
+
 
 % Done.
 n.close();
