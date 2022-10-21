@@ -5,14 +5,15 @@
 clear all;
 setup0_paths;
 n = neuron.Neuron();
-n.create_soma();
+n.hoc_oc("create soma");
+n.topology();
 
 % Try vector.
 v = neuron.Vector();
 disp("Before recording:");
 disp(v.get_vec());
 disp("Size: " + length(v));
-disp(v.data());
+disp(v.double());
 disp("----------");
 
 % Track time in vector.
@@ -21,16 +22,18 @@ v.record(t);
 n.finitialize(-65);
 disp("Tracking 10 time steps with Vector.record()...");
 for i = 1:4
+    disp("t: "+n.t);
     n.fadvance();
 end
 t.set(3.14);
 for i = 5:9
+    disp("t: "+n.t);
     n.fadvance();
 end
 disp("After 9 x fadvance():")
 disp(v.get_vec());
 disp("Size: " + length(v));
-disp(v.data());
+disp(v.double());
 disp("----------");
 
 % Get some properties using dynamically generated methods.

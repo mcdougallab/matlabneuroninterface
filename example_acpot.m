@@ -7,6 +7,7 @@ setup0_paths;
 n = neuron.Neuron();
 axon = neuron.Section("axon");
 axon.insert_mechanism("hh");
+n.topology();
 
 % Track time with Vector t_vec.
 t_vec = neuron.Vector();
@@ -26,7 +27,7 @@ iclamp.amp = 100;
 
 % Run simulation.
 n.finitialize(-65);
-while t.get() < 10
+while n.t < 10
     n.fadvance();
 end
 

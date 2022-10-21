@@ -6,14 +6,14 @@
 void initialize();
 bool isinitialized();
 
-// Call a few hoc functions.
-void create_soma();
-void print_t_v();
-void topology();
-void finitialize(double finitialize_val);
+// Return all top-level functions.
+std::string get_nrn_functions();
 
-// Run simulation.
-void fadvance();
+// Call hoc_oc from MATLAB.
+void matlab_hoc_oc(std::string hoc_str);
+
+// Call function from MATLAB.
+void matlab_hoc_call_func(std::string func, int narg);
 
 // Get pointer to top-level symbol.
 NrnRef* ref(const char* tlsym);
@@ -21,11 +21,7 @@ NrnRef* ref(const char* tlsym);
 // Get pointer from nrn_rangepointer.
 NrnRef* range_ref(Section* sec, const char* sym, double val);
 
-// Print all class methods & attributes to stdout.
-void print_class_methods(const char* class_name);
-
-// Return all class methods & attributes as a string with separators ";"
-// between methods, and ":" between method name and method type.
+// Return all object methods & attributes.
 std::string get_class_methods(const char* class_name);
 
 // Vector object.
@@ -36,6 +32,8 @@ Object* get_vector(int vector_value);
 // Calling Object methods from MATLAB.
 Symbol* get_method_sym(Object* ob, const char* methodname);
 void matlab_hoc_call_ob_proc(Object* ob, Symbol* sym, int narg);
+
+// Pushing/popping objects onto/from the stack.
 void matlab_hoc_pushx(double x);
 void matlab_hoc_pushpx(NrnRef* nrnref);
 void matlab_hoc_pushstr(std::string str);
@@ -43,9 +41,6 @@ void matlab_hoc_pushobj(Object* ob);
 double matlab_hoc_xpop(void);
 std::string matlab_hoc_strpop(void);
 Object* matlab_hoc_objpop(void);
-
-// Record.
-void record(Object* vec, NrnRef* nrnref);
 
 // Make a new section.
 Section* new_section(const char* name);
@@ -63,3 +58,5 @@ Object* get_IClamp(double loc);
 // C++ Neuron functions directly accessible from MATLAB.
 extern "C" __declspec(dllimport) void nrn_popsec(void);
 extern "C" __declspec(dllimport) void nrn_pushsec(Section* sec);
+__declspec(dllimport) void section_unref(Section*);
+extern "C" __declspec(dllimport) void hoc_obj_unref(Object*);

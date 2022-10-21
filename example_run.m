@@ -7,13 +7,13 @@ setup0_paths;
 n = neuron.Neuron();
 
 % Run HOC code.
-n.create_soma();
+n.hoc_oc("create soma");
 n.topology();
 n.finitialize(3.14);
-n.print_t_v();
+n.hoc_oc("print t, v");
 
 % Advance the simulation by one time step.
 n.fadvance();
 
-% Print V, t
-n.print_t_v();
+% Print time, voltage.
+n.hoc_oc("print t, v");

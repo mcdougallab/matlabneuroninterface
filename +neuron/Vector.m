@@ -38,7 +38,8 @@ classdef Vector < dynamicprops
 
             % Release self.vec C++ object.
             if (class(self.vec) == "clib.neuron.Object")
-                clibRelease(self.vec)
+                clib.neuron.hoc_obj_unref(self.vec);
+                clibRelease(self.vec);
             end
         end
 
@@ -71,12 +72,6 @@ classdef Vector < dynamicprops
             end
         end
 
-        function record(self, nrnref)
-        % Record some quantity by providing a NrnRef to that quantity.
-        %   record(nrnref)
-            clib.neuron.record(self.vec, nrnref);
-        end
-
         function value = call_method_hoc(self, method, returntype, varargin)
         % Call method by passing method name (method) to HOC lookup, along with its return type (returntype) and method arguments (varargin).
         %   value = call_method_double(method, varargin)
@@ -90,9 +85,9 @@ classdef Vector < dynamicprops
                         clib.neuron.matlab_hoc_pushx(arg);  
                     elseif (isa(arg, "string") || isa(arg, "char"))
                         clib.neuron.matlab_hoc_pushstr(arg);  
-                    elseif (isa(arg, "Vector"))
+                    elseif (isa(arg, "clib.neuron.Vector"))
                         clib.neuron.matlab_hoc_pushobj(arg);  
-                    elseif (isa(arg, "NrnRef"))
+                    elseif (isa(arg, "clib.neuron.NrnRef"))
                         clib.neuron.matlab_hoc_pushpx(arg);  
                     else
                         error("Input of type "+class(arg)+" not allowed.");
@@ -103,7 +98,7 @@ classdef Vector < dynamicprops
                     value = clib.neuron.matlab_hoc_xpop();
                 elseif (returntype=="string")
                     value = clib.neuron.matlab_hoc_strpop();
-                elseif (returntype=="object")
+                elseif (returntype=="clib.neuron.Vector")
                     nrnvec = clib.neuron.matlab_hoc_objpop();
                     value = neuron.Vector(0, nrnvec);
                 elseif (returntype=="void")
@@ -119,7 +114,7 @@ classdef Vector < dynamicprops
         function list_methods(self)
         % List all available methods to be called using HOC lookup.
         %   list_methods()
-            disp("For now, only methods with type 270 or 329 can be called.");
+            disp("For now, only methods with type 270 (double), 329 (object) or 330 (string) can be called.");
             for i=1:length(self.method_list)
                 mth = self.method_list(i).split(":");
                 disp("Name: " + mth(1) + ", type: " + mth(2));
@@ -127,7 +122,7 @@ classdef Vector < dynamicprops
         end
 
         function varargout = subsref(self, S)
-        % If a method is called, but it is not listed above, try to run it by calling self.hoc_get().
+        % If a method is called, but it is not listed above, try to run it by calling self.call_method_hoc().
         %   Available methods are displayed using Vector.list_methods().
         %   Method documentation can be found at https://nrn.readthedocs.io/en/latest/python/programming/math/vector.html.
         %
@@ -139,7 +134,7 @@ classdef Vector < dynamicprops
             method = S(1).subs;
 
             % Are we trying to directly access Vector data elements?
-            if (length(S) == 1)
+            if (isa(method, "cell") && length(S) == 1)
                 arr = self.double();
                 [varargout{1:nargout}] = arr(S(1).subs{:});
             % Is the provided method listed above?
@@ -153,9 +148,11 @@ classdef Vector < dynamicprops
             % Is this method present in the HOC lookup table, and does it return a double?
             elseif any(strcmp(self.method_list, method+":270"))
                 [varargout{1:nargout}] = call_method_hoc(self, method, "double", S(2).subs{:});
-            % Is this method present in the HOC lookup table, and does it return a void?
+            % Is this method present in the HOC lookup table, and does it return an object?
             elseif any(strcmp(self.method_list, method+":329"))
-                [varargout{1:nargout}] = call_method_hoc(self, method, "void", S(2).subs{:});
+                % [varargout{1:nargout}] = call_method_hoc(self, method, "clib.neuron.Vector", S(2).subs{:});
+                % TODO: For now, do not take Object off the stack, until we fix unref issues.
+                [varargout{1:nargout}] = call_method_hoc(self, method, "void", S(2).subs{:});  
             % Is this method present in the HOC lookup table, and does it return a string?
             elseif any(strcmp(self.method_list, method+":330"))
                 [varargout{1:nargout}] = call_method_hoc(self, method, "string", S(2).subs{:});

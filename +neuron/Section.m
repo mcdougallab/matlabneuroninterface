@@ -22,6 +22,7 @@ classdef Section
         % Destroy the Section object.
         %   delete()
             if (class(self.sec) == "clib.neuron.Section")
+                clib.neuron.section_unref(self.sec);
                 clibRelease(self.sec)
             end
         end

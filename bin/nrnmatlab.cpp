@@ -22,6 +22,7 @@ __declspec(dllimport) vv_function nrnmpi_stubs;
 __declspec(dllimport) dptrsecptrsptrd_function nrn_rangepointer;
 
 // Import non-name mangled functions and parameters.
+extern "C" __declspec(dllimport) Symlist* hoc_built_in_symlist;
 extern "C" __declspec(dllimport) dvptrint_function hoc_call_func;
 extern "C" __declspec(dllimport) voptrsptri_function hoc_call_ob_proc;
 extern "C" __declspec(dllimport) dsio_function hoc_call_objfunc;
@@ -39,6 +40,7 @@ extern "C" __declspec(dllimport) vv_function hoc_ret;
 extern "C" __declspec(dllimport) cptrptrv_function hoc_strpop;
 extern "C" __declspec(dllimport) scptrslptr_function hoc_table_lookup;
 extern "C" __declspec(dllimport) voptrptr_function hoc_tobj_unref;
+extern "C" __declspec(dllimport) Symlist* hoc_top_level_symlist;
 extern "C" __declspec(dllimport) dv_function hoc_xpop;
 extern "C" __declspec(dllimport) int nrn_is_python_extension;
 extern "C" __declspec(dllimport) int nrn_main_launch;
@@ -90,33 +92,34 @@ bool isinitialized() {
     return initialized;
 }
 
-// Create soma.
-void create_soma(){
-    hoc_oc("create soma\n");
+// Return all functions/methods/attributes as a string with separators ";"
+// between methods, and ":" between method name and method type.
+std::string str_symbol_table(Symlist* table) {
+    std::string tabstr, new_tabstr;
+    for (Symbol* sp = table->first; sp != NULL; sp = sp->next) {
+        new_tabstr = std::string(sp->name) + ":" + 
+                     std::to_string(sp->type) + ";";
+        tabstr = tabstr + new_tabstr;
+    }
+    return tabstr;
 }
 
-// Print time and voltage.
-void print_t_v(){
-    hoc_oc("print t, v\n");
+// Return all top-level functions.
+std::string get_nrn_functions() {
+    return str_symbol_table(hoc_built_in_symlist) + 
+        str_symbol_table(hoc_top_level_symlist);
 }
 
-// Topology.
-void topology(){
-    hoc_call_func(hoc_lookup("topology"), 0);
+// Call hoc_oc from MATLAB.
+void matlab_hoc_oc(std::string hoc_str) {
+    hoc_oc((hoc_str + "\n").c_str());
 }
 
-// Finitialize.
-void finitialize(double finitialize_val){
-    hoc_pushx(finitialize_val);
-    hoc_call_func(hoc_lookup("finitialize"), 1);
+// Call function from MATLAB.
+void matlab_hoc_call_func(std::string func, int narg){
+    hoc_call_func(hoc_lookup(func.c_str()), narg);
 }
 
-// Run simulation time step.
-void fadvance(){
-    hoc_call_func(hoc_lookup("fadvance"), 0);
-    // std::cout << "time and voltage:" << std::endl;
-    // hoc_oc("print t, v\n");
-}
 // Get pointer to top-level symbol.
 NrnRef* ref(const char* tlsym){
     auto sym = hoc_lookup(tlsym);
@@ -130,35 +133,11 @@ NrnRef* range_ref(Section* sec, const char* sym, double val){
     return ref;
 }
 
-// Print all Vector methods & attributes.
-// TODO: can we use this to automatically populate the MATLAB Vector class methods?
-void print_symbol_table(Symlist* table) {
-    for (Symbol* sp = table->first; sp != NULL; sp = sp->next) {
-        // type distinguishes methods from properties, return type
-        std::cout << "-- " << sp->name << " (" << sp->type << ")\n";
-    }
-    std::cout << std::endl;
-}
-void print_class_methods(const char* class_name) {
-    auto sym = hoc_lookup(class_name);
-    assert(sym);
-    std::cout << sym->name << " properties and methods:" << std::endl;
-    print_symbol_table(sym->u.ctemplate->symtable);
-}
-// Return all class methods & attributes as a string with separators ";"
-// between methods, and ":" between method name and method type.
+// Return all object methods & attributes.
 std::string get_class_methods(const char* class_name) {
-    std::string methods, new_method;
     auto sym = hoc_lookup(class_name);
     Symlist* table = sym->u.ctemplate->symtable;
-
-    for (Symbol* sp = table->first; sp != NULL; sp = sp->next) {
-        new_method = std::string(sp->name) + ":" + 
-                     std::to_string(sp->type) + ";";
-        methods = methods + new_method;
-    }
-
-    return methods;
+    return str_symbol_table(table);
 }
 
 // Get Vector size.
@@ -178,6 +157,8 @@ Symbol* get_method_sym(Object* ob, const char* methodname){
 void matlab_hoc_call_ob_proc(Object* ob, Symbol* sym, int narg) {
     hoc_call_ob_proc(ob, sym, narg);
 }
+
+// Pushing/popping objects onto/from the stack.
 void matlab_hoc_pushx(double x) {
     hoc_pushx(x);
 }
@@ -201,15 +182,8 @@ std::string matlab_hoc_strpop(void) {
 Object* matlab_hoc_objpop(void) {
     Object** obptr = hoc_objpop();
     Object* ob = *obptr;
-    hoc_tobj_unref(obptr);
+    // hoc_tobj_unref(obptr);
     return ob;
-}
-
-// Record.
-void record(Object* vec, NrnRef* nrnref) {
-    hoc_pushpx(nrnref->ref);
-    auto sym = hoc_table_lookup("record", vec->ctemplate->symtable);
-    hoc_call_ob_proc(vec, sym, 1);
 }
 
 // Make and return Vector.
