@@ -90,11 +90,6 @@ classdef Neuron < dynamicprops
 
     end
     methods(Static)
-        function value = double(varargin)
-            disp("Huh?");
-            disp(length(varargin));
-            value = 0;
-        end
         function hoc_oc(str)
         % Pass string to hoc_oc.
         %   hoc_oc()
