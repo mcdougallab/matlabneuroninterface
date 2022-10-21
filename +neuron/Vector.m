@@ -85,14 +85,14 @@ classdef Vector < dynamicprops
                 sym = clib.neuron.get_method_sym(self.vec, method);
                 n = length(varargin);
                 for i=1:n
-                    arg = varargin{:}(i);
-                    if (class(arg) == "double")
+                    arg = varargin{i};
+                    if (isa(arg, "double"))
                         clib.neuron.matlab_hoc_pushx(arg);  
-                    elseif (class(arg) == "string" || class(arg) == "char")
+                    elseif (isa(arg, "string") || isa(arg, "char"))
                         clib.neuron.matlab_hoc_pushstr(arg);  
-                    elseif (class(arg) == "Vector")
+                    elseif (isa(arg, "Vector"))
                         clib.neuron.matlab_hoc_pushobj(arg);  
-                    elseif (class(arg) == "NrnRef")
+                    elseif (isa(arg, "NrnRef"))
                         clib.neuron.matlab_hoc_pushpx(arg);  
                     else
                         error("Input of type "+class(arg)+" not allowed.");
@@ -109,7 +109,7 @@ classdef Vector < dynamicprops
                 elseif (returntype=="void")
                     value = self;
                 end
-            % TODO: if the above code fails, Matlab just crashes instead of catching an error.
+            % TODO: if the above code fails, Matlab often just crashes instead of catching an error.
             catch  
                 warning("'"+string(method)+"': number or type of arguments incorrect.")
             end
@@ -130,6 +130,9 @@ classdef Vector < dynamicprops
         % If a method is called, but it is not listed above, try to run it by calling self.hoc_get().
         %   Available methods are displayed using Vector.list_methods().
         %   Method documentation can be found at https://nrn.readthedocs.io/en/latest/python/programming/math/vector.html.
+        %
+        %   Direct Vector data element access is possible using:
+        %   vec(1), vec(1:5), vec{1}
 
             % S(1).subs is method name;
             % S(2).subs is a cell array containing arguments.
