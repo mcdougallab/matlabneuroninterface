@@ -8,6 +8,7 @@ bool isinitialized();
 
 // Call a few hoc functions.
 void create_soma();
+void print_t_v();
 void topology();
 void finitialize(double finitialize_val);
 
@@ -45,9 +46,6 @@ Object* matlab_hoc_objpop(void);
 
 // Record.
 void record(Object* vec, NrnRef* nrnref);
-
-// Finish up: close stdout and stderr output files.
-void close();
 
 // Make a new section.
 Section* new_section(const char* name);

@@ -39,11 +39,3 @@ disp("mean: " + v.mean());
 disp("stdev: " + v.stdev());
 disp("contains 0.0: " + v.contains(0.0));
 disp("contains 1.0: " + v.contains(1.0));
-
-
-% Done.
-n.close();
-
-% Show results.
-% fprintf(1, '%s\n', fileread('stdout.txt'));
-% fprintf(2, '%s\n', fileread('stderr.txt'));

@@ -25,8 +25,7 @@ To get the toolbox working on your machine, run the MATLAB scripts in the follow
 
 Then, you can test the toolbox by running:
 - **example_run** 
-    - to call some functions from the library
-    - stdout/stderr are written to stdout.txt/stderr.txt respectively
+    - to initialize a Neuron session and call some top-level functions from the library
 - **example_vector** 
     - to create a Vector object and calculate some properties
 - **example_acpot** 

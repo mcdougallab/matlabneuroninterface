@@ -10,13 +10,10 @@ n = neuron.Neuron();
 n.create_soma();
 n.topology();
 n.finitialize(3.14);
+n.print_t_v();
 
 % Advance the simulation by one time step.
 n.fadvance();
 
-% Done.
-n.close();
-
-% Show results.
-fprintf(1, '%s\n', fileread('stdout.txt'));
-fprintf(2, '%s\n', fileread('stderr.txt'));
+% Print V, t
+n.print_t_v();

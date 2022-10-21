@@ -8,6 +8,11 @@
 #include "neuron_api_headers.h"
 #include "neuron_matlab_headers.h"
 
+// Declare mexPrintf
+// We cannot include mex.h with clib, because during build will give
+// "error Using MATLAB Data API with C Matrix API is not supported."
+extern "C" int mexPrintf(const char *message, ...);
+
 // Import C++ name mangled functions.
 __declspec(dllimport) optrsptri_function hoc_newobj1;
 __declspec(dllimport) initer_function ivocmain_session;
@@ -35,8 +40,10 @@ extern "C" __declspec(dllimport) cptrptrv_function hoc_strpop;
 extern "C" __declspec(dllimport) scptrslptr_function hoc_table_lookup;
 extern "C" __declspec(dllimport) voptrptr_function hoc_tobj_unref;
 extern "C" __declspec(dllimport) dv_function hoc_xpop;
+extern "C" __declspec(dllimport) int nrn_is_python_extension;
 extern "C" __declspec(dllimport) int nrn_main_launch;
 extern "C" __declspec(dllimport) int nrn_nobanner_;
+extern "C" __declspec(dllimport) vf2icif_function nrnpy_set_pr_etal;
 extern "C" __declspec(dllimport) ppoptr_function ob2pntproc_0;
 extern "C" __declspec(dllimport) ivptr_function vector_capacity;
 extern "C" __declspec(dllimport) dptrvptr_function vector_vec;
@@ -45,15 +52,27 @@ extern "C" __declspec(dllimport) dptrvptr_function vector_vec;
 // Define invocmain_session input.
 static const char* argv[] = {"nrn_test", "-nogui", "-nopython", NULL};
 
+// Print to MATLAB command window.
+int mlprint(int stream, char* msg) {
+    // stream = 1 for stdout; otherwise stderr
+    if (stream == 1) {
+        mexPrintf(msg);
+    } else {
+        mexPrintf("stderr: ");
+        mexPrintf(msg);
+    }
+    return 0;
+}
+
 // Initialize NEURON session.
 bool initialized = false;
 void initialize(){
 
     if (!initialized) {
-        // Redirect stdout/sterr output to file, because MATLAB cannot handle 
-        // it directly. Maybe we can use GetStdHandle instead?
-        freopen("stdout.txt", "w", stdout);
-        freopen("stderr.txt", "w", stderr);
+
+        // Redirect stdout/sterr output to MATLAB.
+        nrn_is_python_extension = 1;
+        nrnpy_set_pr_etal(mlprint, NULL);
     
         // Initialize NEURON session.
         if (nrnmpi_stubs) {
@@ -76,6 +95,11 @@ void create_soma(){
     hoc_oc("create soma\n");
 }
 
+// Print time and voltage.
+void print_t_v(){
+    hoc_oc("print t, v\n");
+}
+
 // Topology.
 void topology(){
     hoc_call_func(hoc_lookup("topology"), 0);
@@ -85,8 +109,6 @@ void topology(){
 void finitialize(double finitialize_val){
     hoc_pushx(finitialize_val);
     hoc_call_func(hoc_lookup("finitialize"), 1);
-    std::cout << "time and voltage:" << std::endl;
-    hoc_oc("print t, v\n");
 }
 
 // Run simulation time step.
@@ -95,14 +117,6 @@ void fadvance(){
     // std::cout << "time and voltage:" << std::endl;
     // hoc_oc("print t, v\n");
 }
-
-// Finish up: close stdout and stderr output files.
-// TODO: this does not properly end the session.
-void close(){
-    fclose(stdout);
-    fclose(stderr);
-}
-
 // Get pointer to top-level symbol.
 NrnRef* ref(const char* tlsym){
     auto sym = hoc_lookup(tlsym);

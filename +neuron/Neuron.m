@@ -39,10 +39,10 @@ classdef Neuron
         %   fadvance()
             clib.neuron.fadvance();
         end
-        function close()
-        % Close the stderr/stdout txt files.
-        %   close()
-            clib.neuron.close();
+        function print_t_v()
+        % Print time and voltage.
+        %   print_t_v()
+            clib.neuron.print_t_v();
         end
     end
 end
