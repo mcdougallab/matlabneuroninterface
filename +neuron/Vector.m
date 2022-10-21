@@ -106,6 +106,8 @@ classdef Vector < dynamicprops
                 elseif (returntype=="object")
                     nrnvec = clib.neuron.matlab_hoc_objpop();
                     value = neuron.Vector(0, nrnvec);
+                elseif (returntype=="void")
+                    value = self;
                 end
             % TODO: if the above code fails, Matlab just crashes instead of catching an error.
             catch  
@@ -148,9 +150,9 @@ classdef Vector < dynamicprops
             % Is this method present in the HOC lookup table, and does it return a double?
             elseif any(strcmp(self.method_list, method+":270"))
                 [varargout{1:nargout}] = call_method_hoc(self, method, "double", S(2).subs{:});
-            % Is this method present in the HOC lookup table, and does it return an object?
+            % Is this method present in the HOC lookup table, and does it return a void?
             elseif any(strcmp(self.method_list, method+":329"))
-                [varargout{1:nargout}] = call_method_hoc(self, method, "object", S(2).subs{:});
+                [varargout{1:nargout}] = call_method_hoc(self, method, "void", S(2).subs{:});
             % Is this method present in the HOC lookup table, and does it return a string?
             elseif any(strcmp(self.method_list, method+":330"))
                 [varargout{1:nargout}] = call_method_hoc(self, method, "string", S(2).subs{:});
