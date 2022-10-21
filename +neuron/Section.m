@@ -10,13 +10,20 @@ classdef Section
         function self = Section(name)
         % Initialize a new Section by providing a name.
         %   Section(name) 
-            self.name = name;
-            self.sec = clib.neuron.new_section(name);
+            if clib.neuron.isinitialized()
+                self.name = name;
+                self.sec = clib.neuron.new_section(name);
+            else
+                self.name = name;
+                warning("Initialize a Neuron session before making a Section.");
+            end
         end
         function delete(self)
         % Destroy the Section object.
         %   delete()
-            clibRelease(self.sec)
+            if (class(self.sec) == "clib.neuron.Section")
+                clibRelease(self.sec)
+            end
         end
         function insert_mechanism(self, mech_name)
         % Insert a mechanism by providing a mechanism name.

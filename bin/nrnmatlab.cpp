@@ -58,7 +58,7 @@ int mlprint(int stream, char* msg) {
     if (stream == 1) {
         mexPrintf(msg);
     } else {
-        mexPrintf("stderr: ");
+        // We could add something to error messages here.
         mexPrintf(msg);
     }
     return 0;

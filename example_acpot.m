@@ -34,4 +34,4 @@ end
 plot(t_vec, v_vec);
 title("Action potential");
 xlabel("t (ms)");
-ylabel("voltage (mV)")
+ylabel("voltage (mV)");
