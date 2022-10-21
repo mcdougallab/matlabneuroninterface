@@ -23,7 +23,7 @@ classdef Section
         %   delete()
             if (class(self.sec) == "clib.neuron.Section")
                 clib.neuron.section_unref(self.sec);
-                clibRelease(self.sec)
+                clibRelease(self.sec);
             end
         end
         function insert_mechanism(self, mech_name)
