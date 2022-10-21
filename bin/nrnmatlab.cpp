@@ -24,18 +24,23 @@ extern "C" __declspec(dllimport) vsptr_function hoc_install_object_data_index;
 extern "C" __declspec(dllimport) scptr_function hoc_lookup;
 extern "C" __declspec(dllimport) voptr_function hoc_obj_ref;
 extern "C" __declspec(dllimport) Objectdata* hoc_objectdata;
+extern "C" __declspec(dllimport) optrptrv_function hoc_objpop;
 extern "C" __declspec(dllimport) icptr_function hoc_oc;
-extern "C" __declspec(dllimport) vcptrptr_function hoc_pushstr;
+extern "C" __declspec(dllimport) voptrptr_function hoc_pushobj;
 extern "C" __declspec(dllimport) vdptr_function hoc_pushpx;
+extern "C" __declspec(dllimport) vcptrptr_function hoc_pushstr;
 extern "C" __declspec(dllimport) vd_function hoc_pushx;
 extern "C" __declspec(dllimport) vv_function hoc_ret;
+extern "C" __declspec(dllimport) cptrptrv_function hoc_strpop;
 extern "C" __declspec(dllimport) scptrslptr_function hoc_table_lookup;
+extern "C" __declspec(dllimport) voptrptr_function hoc_tobj_unref;
 extern "C" __declspec(dllimport) dv_function hoc_xpop;
 extern "C" __declspec(dllimport) int nrn_main_launch;
 extern "C" __declspec(dllimport) int nrn_nobanner_;
 extern "C" __declspec(dllimport) ppoptr_function ob2pntproc_0;
 extern "C" __declspec(dllimport) ivptr_function vector_capacity;
 extern "C" __declspec(dllimport) dptrvptr_function vector_vec;
+
 
 // Define invocmain_session input.
 static const char* argv[] = {"nrn_test", "-nogui", "-nopython", NULL};
@@ -61,6 +66,9 @@ void initialize(){
         initialized = true;
     }
 
+}
+bool isinitialized() {
+    return initialized;
 }
 
 // Create soma.
@@ -149,13 +157,7 @@ const double* get_vector_vec(Object* vec, int len){
     return vector_vec(vec->u.this_pointer);
 }
 
-// Calculate a Vector property that returns a double, like mean, min, stdev, ...
-double vector_double_method(Object* vec, const char* methodname){
-    auto sym = hoc_table_lookup(methodname, vec->ctemplate->symtable);
-    assert(sym);
-    hoc_call_ob_proc(vec, sym, 0);
-    return hoc_xpop();
-}
+// Calling Object methods from MATLAB.
 Symbol* get_method_sym(Object* ob, const char* methodname){
     return hoc_table_lookup(methodname, ob->ctemplate->symtable);
 }
@@ -165,8 +167,28 @@ void matlab_hoc_call_ob_proc(Object* ob, Symbol* sym, int narg) {
 void matlab_hoc_pushx(double x) {
     hoc_pushx(x);
 }
+void matlab_hoc_pushpx(NrnRef* nrnref) {
+    hoc_pushpx(nrnref->ref);
+}
+void matlab_hoc_pushstr(std::string str) {
+    char* strchr = const_cast<char*>(str.c_str());
+    hoc_pushstr(&strchr);
+}
+void matlab_hoc_pushobj(Object* ob) {
+    hoc_pushobj(&ob);
+}
 double matlab_hoc_xpop(void) {
     return hoc_xpop();
+}
+std::string matlab_hoc_strpop(void) {
+    std::string str_out = std::string(*hoc_strpop());
+    return str_out;
+}
+Object* matlab_hoc_objpop(void) {
+    Object** obptr = hoc_objpop();
+    Object* ob = *obptr;
+    hoc_tobj_unref(obptr);
+    return ob;
 }
 
 // Record.

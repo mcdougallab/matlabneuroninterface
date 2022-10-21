@@ -10,8 +10,8 @@ n.create_soma();
 % Try vector.
 v = neuron.Vector();
 disp("Before recording:");
-disp(v.vec);
-disp("Size: " + v.size());
+disp(v.get_vec());
+disp("Size: " + length(v));
 disp(v.data());
 disp("----------");
 
@@ -28,8 +28,8 @@ for i = 5:9
     n.fadvance();
 end
 disp("After 9 x fadvance():")
-disp(v.vec);
-disp("Size: " + v.size());
+disp(v.get_vec());
+disp("Size: " + length(v));
 disp(v.data());
 disp("----------");
 

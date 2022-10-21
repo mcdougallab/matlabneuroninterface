@@ -4,6 +4,7 @@
 
 // Initialize NEURON session.
 void initialize();
+bool isinitialized();
 
 // Call a few hoc functions.
 void create_soma();
@@ -29,13 +30,18 @@ std::string get_class_methods(const char* class_name);
 // Vector object.
 int get_vector_capacity(Object* vec);
 const double* get_vector_vec(Object* vec, int len);
-double vector_double_method(Object* vec, const char* methodname);
 Object* get_vector(int vector_value);
 
+// Calling Object methods from MATLAB.
 Symbol* get_method_sym(Object* ob, const char* methodname);
 void matlab_hoc_call_ob_proc(Object* ob, Symbol* sym, int narg);
 void matlab_hoc_pushx(double x);
+void matlab_hoc_pushpx(NrnRef* nrnref);
+void matlab_hoc_pushstr(std::string str);
+void matlab_hoc_pushobj(Object* ob);
 double matlab_hoc_xpop(void);
+std::string matlab_hoc_strpop(void);
+Object* matlab_hoc_objpop(void);
 
 // Record.
 void record(Object* vec, NrnRef* nrnref);

@@ -313,6 +313,7 @@ typedef Symbol* (scptrslptr_function) (const char*, Symlist*);
 typedef Object* (optrsptri_function) (Symbol*, int);
 typedef Object* (optri_function) (int);
 typedef void (voptr_function) (Object*);
+typedef void (voptrptr_function) (Object**);
 typedef void (vf2icif_function)(int (*)(int, char*), int(*)());
 typedef int (ivptr_function)(void*);
 typedef double* (dptrvptr_function)(void*);
@@ -326,5 +327,7 @@ typedef double* (dptrsecptrsptrd_function)(Section*, Symbol*, double);
 typedef void (vsecptri_function)(Section*, int);
 typedef void (vsecptr_function)(Section*);
 typedef Point_process* (ppoptr_function)(Object*);
+typedef char** (cptrptrv_function)(void);
+typedef Object** (optrptrv_function)(void);
 
 #endif
