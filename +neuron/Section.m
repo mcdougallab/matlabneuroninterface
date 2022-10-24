@@ -2,8 +2,6 @@ classdef Section
 % Section Class for manipulating Neuron sections.
     properties (Access=private)
         sec     % C++ Section object.
-    end
-    properties (Access=public)
         name    % Name of the section.
     end
     methods

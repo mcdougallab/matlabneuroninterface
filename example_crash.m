@@ -1,5 +1,5 @@
 % Cause a crash while running NEURON in MATLAB:
-clear all;
+clear;
 setup0_paths;
 n = neuron.Neuron();
 v = neuron.Vector(10);

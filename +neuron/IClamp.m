@@ -20,9 +20,15 @@ classdef IClamp
         function delete(self)
         % Destructor for IClamp.
         %   delete()
+            clib.neuron.hoc_obj_unref(self.ic);
             clibRelease(self.ic)
         end
 
+        function ic = get_ic(self)
+        % Return the C++ IClamp object.
+        %   ic = get_ic() 
+            ic = self.ic;
+        end
         function set_pp_property(self, prop, val)
         % Generic set method, set IClamp property (prop) to value (val).
         %   set_pp_property(prop, val)

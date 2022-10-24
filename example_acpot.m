@@ -2,7 +2,7 @@
 % Generate activation function.
 
 % Initialization.
-clear all;
+clear;
 setup0_paths;
 n = neuron.Neuron();
 axon = neuron.Section("axon");

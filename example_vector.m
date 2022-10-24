@@ -2,7 +2,7 @@
 % Initialize a neuron session, record time and call some vector methods.
 
 % Initialization.
-clear all;
+clear;
 setup0_paths;
 n = neuron.Neuron();
 n.hoc_oc("create soma");

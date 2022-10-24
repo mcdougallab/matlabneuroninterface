@@ -203,15 +203,24 @@ Object* get_vector(int vector_value){
 
 // Make and return a new section.
 Section* new_section(const char* name) {
+    freopen ("stdout.txt", "w", stdout);
+    freopen ("stderr.txt", "w", stderr);
+
     Symbol* symbol = new Symbol;
     auto pitm = new hoc_Item*;
     char* name_ptr = new char[strlen(name)];
     strcpy(name_ptr, name);
     symbol->name = name_ptr;
     symbol->type = 1;
+    assert(symbol);
+    std::cout << "CRASH HAPPENS HERE" << std::endl;
     hoc_install_object_data_index(symbol);
+    std::cout << "NO CRASH!" << std::endl;
     new_sections(nullptr, symbol, pitm, 1);
     return (*pitm)->element.sec;
+
+    fclose(stdout);
+    fclose(stderr);
 }
 
 // Insert mechanism into section.

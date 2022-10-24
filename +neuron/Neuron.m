@@ -71,7 +71,7 @@ classdef Neuron < dynamicprops
             % Is the provided function listed as a Neuron class method?
             elseif any(strcmp(methods(self), func))
                 [varargout{1:nargout}] = builtin('subsref', self, S);
-            % Is this method present in the HOC lookup table, and does it return an NrnRef?
+            % Is this method present in the HOC lookup table, and does it return a double?
             elseif any(strcmp(self.function_list, func+":263"))
                 [varargout{1:nargout}] = clib.neuron.ref(func).get();
             % Is this method present in the HOC lookup table, and does it return a void?

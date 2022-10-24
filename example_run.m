@@ -2,7 +2,7 @@
 % Initialize a neuron session and call some functions.
 
 % Initialization.
-clear all;
+clear;
 setup0_paths;
 n = neuron.Neuron();
 
