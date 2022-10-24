@@ -18,10 +18,17 @@ __declspec(dllimport) optrsptri_function hoc_newobj1;
 __declspec(dllimport) initer_function ivocmain_session;
 __declspec(dllimport) vsecptri_function mech_insert1;
 __declspec(dllimport) voptrsptritemptrptri_function new_sections;
-__declspec(dllimport) vv_function nrnmpi_stubs;
 __declspec(dllimport) dptrsecptrsptrd_function nrn_rangepointer;
+__declspec(dllimport) vsecptri_function nrn_change_nseg;
+__declspec(dllimport) vsecptrd_function nrn_length_change;
+__declspec(dllimport) vv_function nrnmpi_stubs;
+__declspec(dllimport) secptrv_function nrn_sec_pop;
+__declspec(dllimport) cptrsecptr_function secname;
+__declspec(dllimport) vsecptr_function section_unref;
+__declspec(dllimport) vv_function simpleconnectsection;
 
 // Import non-name mangled functions and parameters.
+extern "C" __declspec(dllimport) int diam_changed;
 extern "C" __declspec(dllimport) Symlist* hoc_built_in_symlist;
 extern "C" __declspec(dllimport) dvptrint_function hoc_call_func;
 extern "C" __declspec(dllimport) voptrsptri_function hoc_call_ob_proc;
@@ -29,6 +36,7 @@ extern "C" __declspec(dllimport) dsio_function hoc_call_objfunc;
 extern "C" __declspec(dllimport) vsptr_function hoc_install_object_data_index;
 extern "C" __declspec(dllimport) scptr_function hoc_lookup;
 extern "C" __declspec(dllimport) voptr_function hoc_obj_ref;
+extern "C" __declspec(dllimport) voptr_function hoc_obj_unref;
 extern "C" __declspec(dllimport) Objectdata* hoc_objectdata;
 extern "C" __declspec(dllimport) optrptrv_function hoc_objpop;
 extern "C" __declspec(dllimport) icptr_function hoc_oc;
@@ -45,11 +53,13 @@ extern "C" __declspec(dllimport) dv_function hoc_xpop;
 extern "C" __declspec(dllimport) int nrn_is_python_extension;
 extern "C" __declspec(dllimport) int nrn_main_launch;
 extern "C" __declspec(dllimport) int nrn_nobanner_;
+extern "C" __declspec(dllimport) nptrsecptrd_function node_exact;
+extern "C" __declspec(dllimport) vv_function nrn_popsec;
+extern "C" __declspec(dllimport) vsecptr_function nrn_pushsec;
 extern "C" __declspec(dllimport) vf2icif_function nrnpy_set_pr_etal;
 extern "C" __declspec(dllimport) ppoptr_function ob2pntproc_0;
 extern "C" __declspec(dllimport) ivptr_function vector_capacity;
 extern "C" __declspec(dllimport) dptrvptr_function vector_vec;
-
 
 // Define invocmain_session input.
 static const char* argv[] = {"nrn_test", "-nogui", "-nopython", NULL};
@@ -185,6 +195,10 @@ Object* matlab_hoc_objpop(void) {
     // hoc_tobj_unref(obptr);
     return ob;
 }
+// Object* matlab_hoc_newobj(str::string ob_str, int narg) {
+//     char* ob_chr = const_cast<char*>(ob_str.c_str());
+//     return hoc_newobj1(hoc_lookup(ob_chr), narg);
+// }
 
 // Make and return Vector.
 Object* get_vector(int vector_value){
@@ -238,4 +252,129 @@ Object* get_IClamp(double loc) {
     hoc_pushx(loc);
     auto iclamp = hoc_newobj1(hoc_lookup("IClamp"), 1);
     return iclamp;
+}
+
+// Connect sections.
+void connect(Section* child_sec, double child_x, Section* parent_sec, double parent_x) {
+    nrn_pushsec(child_sec);
+    hoc_pushx(child_x);
+    nrn_pushsec(parent_sec);
+    hoc_pushx(parent_x);
+    simpleconnectsection();
+}
+
+// Add 3D point to Section.
+void pt3dadd(Section* sec, double x, double y, double z, double diam) {
+    nrn_pushsec(sec);
+    hoc_pushx(x);
+    hoc_pushx(y);
+    hoc_pushx(z);
+    hoc_pushx(diam);
+    hoc_call_func(hoc_lookup("pt3dadd"), 4);
+    nrn_sec_pop();
+}
+
+// Set Section length/diameter
+void set_length(Section* sec, double length) {
+    // in NEURON code, there's also a check for can_change_morph(sec)... that checks pt3dconst_
+    sec->prop->dparam[2].val = length;
+    // dparam[7].val is for Ra
+    // nrn_length_change updates 3D points if needed
+    nrn_length_change(sec, length);
+    diam_changed = 1;
+    sec->recalc_area_ = 1;
+}
+void set_node_diam(Node* node, double diam) {
+    // TODO: this is fine if no 3D points; does it work if there are 3D points?
+    for (auto prop = node->prop; prop; prop=prop->next) {
+        if (prop->_type == MORPHOLOGY) {
+            prop->param[0] = diam;
+            diam_changed = 1;
+            node->sec->recalc_area_ = 1;
+            break;
+        }
+    }
+}
+int nseg(Section* sec) {
+    // always one more node than nseg
+    return sec->nnode - 1;
+}
+void set_diameter(Section* sec, double diam) {
+    double my_nseg = nseg(sec);
+    // grab each node (segment), then set the diam there
+    for (auto i = 0; i < my_nseg; i++) {
+        double x = (i + 0.5) / my_nseg;
+        Node* node = node_exact(sec, x);
+        set_node_diam(node, diam);
+    }
+}
+
+// -------------------
+// Print Section info.
+// TODO: cleanup
+// -------------------
+int n3d(Section* sec) {
+    // would prefer to do this through the regular stack interface, but got a
+    // stack underflow when I tried
+    return sec->npt3d;
+}
+double x3d(Section* sec, int i) {
+    // return the x coordinate of the ith 3d point
+    // would prefer to do this through the regular stack interface, but got a
+    // stack underflow when I tried
+    return sec->pt3d[i].x;
+}
+double y3d(Section* sec, int i) {
+    // return the x coordinate of the ith 3d point
+    // would prefer to do this through the regular stack interface, but got a
+    // stack underflow when I tried
+    return sec->pt3d[i].y;
+}
+double z3d(Section* sec, int i) {
+    // return the x coordinate of the ith 3d point
+    // would prefer to do this through the regular stack interface, but got a
+    // stack underflow when I tried
+    return sec->pt3d[i].z;
+}
+double diam3d(Section* sec, int i) {
+    // return the x coordinate of the ith 3d point
+    // would prefer to do this through the regular stack interface, but got a
+    // stack underflow when I tried
+    return sec->pt3d[i].d;
+}
+void print_3d_points_and_segs(Section* sec) {
+    double my_nseg = nseg(sec);
+    Symbol* v = hoc_lookup("v");
+    mlprint(1, (char*)secname(sec));
+    mlprint(1, (char*)" has ");
+    mlprint(1, (char*)(std::to_string(nseg(sec))).c_str());
+    mlprint(1, (char*)" segments and ");
+    mlprint(1, (char*)(std::to_string(n3d(sec))).c_str());
+    mlprint(1, (char*)" 3d points:\n");
+    // print out 3D points
+    for (auto i = 0; i < n3d(sec); i++) {
+        mlprint(1, (char*)"    (");
+        mlprint(1, (char*)(std::to_string(x3d(sec, i))).c_str());
+        mlprint(1, (char*)", ");
+        mlprint(1, (char*)(std::to_string(y3d(sec, i))).c_str());
+        mlprint(1, (char*)", ");
+        mlprint(1, (char*)(std::to_string(z3d(sec, i))).c_str());
+        mlprint(1, (char*)"; ");
+        mlprint(1, (char*)(std::to_string(diam3d(sec, i))).c_str());
+        mlprint(1, (char*)")\n");
+    }
+    // print out membrane potential for each segment
+    // grab each node (segment), then set the diam there
+    for (auto i = 0; i < my_nseg; i++) {
+        double x = (i + 0.5) / my_nseg;
+        Node* node = node_exact(sec, x);
+        mlprint(1, (char*)"    ");
+        mlprint(1, (char*)secname(sec));
+        mlprint(1, (char*)"(");
+        mlprint(1, (char*)(std::to_string(x)).c_str());
+        mlprint(1, (char*)").v = ");
+        mlprint(1, (char*)(std::to_string(*nrn_rangepointer(sec, v, x))).c_str());
+        mlprint(1, (char*)"\n");
+    }
+    mlprint(1, (char*)"\n");
 }

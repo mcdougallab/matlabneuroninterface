@@ -298,6 +298,10 @@ typedef struct Point_process {
     void* _vnt;    /* NrnThread* (for NET_RECEIVE and multicore) */
 } Point_process;
 
+// constants from src/nrnoc/membfunc.h
+#define CABLESECTION 1
+#define MORPHOLOGY   2
+#define CAP          3
 
 typedef void (initer_function)(int, const char**, const char**, int);
 typedef void (vd_function)(double);
@@ -326,8 +330,11 @@ typedef char* (cptrsecptr_function)(Section*);
 typedef double* (dptrsecptrsptrd_function)(Section*, Symbol*, double);
 typedef void (vsecptri_function)(Section*, int);
 typedef void (vsecptr_function)(Section*);
-typedef Point_process* (ppoptr_function)(Object*);
+typedef Section* (secptrv_function)(void);
 typedef char** (cptrptrv_function)(void);
 typedef Object** (optrptrv_function)(void);
+typedef Point_process* (ppoptr_function)(Object*);
+typedef void (vsecptrd_function)(Section*, double);
+typedef Node* (nptrsecptrd_function)(Section*, double);
 
 #endif

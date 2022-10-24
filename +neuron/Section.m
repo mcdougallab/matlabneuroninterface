@@ -4,6 +4,10 @@ classdef Section
         sec     % C++ Section object.
         name    % Name of the section.
     end
+    properties (Dependent)
+        length
+        diameter
+    end
     methods
         function self = Section(name)
         % Initialize a new Section by providing a name.
@@ -38,6 +42,37 @@ classdef Section
         % Return the C++ Section object.
         %   sec = get_sec() 
             sec = self.sec;
+        end
+        function change_nseg(self, nseg)
+        % Change the number of segments in the Section.
+        %   change_nseg(nseg)
+            clib.neuron.nrn_change_nseg(self.sec, nseg);
+        end
+        function connect(self, loc0, sec1, loc1)
+        % Connect this section at loc0 to another section (sec1) at loc1.
+        %   connect(loc0, sec1, loc1)
+            clib.neuron.connect(self.sec, loc0, sec1.get_sec(), loc1);
+        end
+
+        function addpoint(self, x, y, z, diam)
+        % Add point to Section.
+        %   addpoint(x, y, z, diam)
+            clib.neuron.pt3dadd(self.sec, x, y, z, diam)
+        end
+        function self = set_length(self, val)
+        % Set length of Section.
+        %   set_length(val)
+            clib.neuron.set_length(self.sec, val);
+        end
+        function self = set_diameter(self, val)
+        % Set diameter of Section.
+        %   set_diameter(val)
+            clib.neuron.set_diameter(self.sec, val);
+        end
+        function info(self)
+        % Print section info
+        %   info()
+            clib.neuron.print_3d_points_and_segs(self.sec)
         end
     end
 end

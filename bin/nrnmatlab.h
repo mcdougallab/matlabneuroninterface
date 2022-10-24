@@ -55,8 +55,22 @@ double get_pp_property(Object* pp, const char* name);
 // Get IClamp object.
 Object* get_IClamp(double loc);
 
+// Connect sections.
+void connect(Section* child_sec, double child_x, Section* parent_sec, double parent_x);
+
+// Add 3D point to Section.
+void pt3dadd(Section* sec, double x, double y, double z, double diam);
+
+// Set section length/diameter.
+void set_length(Section* sec, double length);
+void set_diameter(Section* sec, double diam);
+
+// Get section info.
+void print_3d_points_and_segs(Section* sec);
+
 // C++ Neuron functions directly accessible from MATLAB.
-extern "C" __declspec(dllimport) void nrn_popsec(void);
-extern "C" __declspec(dllimport) void nrn_pushsec(Section* sec);
-__declspec(dllimport) void section_unref(Section*);
-extern "C" __declspec(dllimport) void hoc_obj_unref(Object*);
+extern "C" void nrn_popsec(void);
+extern "C" void nrn_pushsec(Section* sec);
+extern "C" void hoc_obj_unref(Object*);
+void nrn_change_nseg(Section*, int);
+void section_unref(Section*);
