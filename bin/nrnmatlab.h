@@ -72,6 +72,7 @@ void print_3d_points_and_segs(Section* sec);
 // C++ Neuron functions directly accessible from MATLAB.
 extern "C" void nrn_pushsec(Section* sec);
 extern "C" void hoc_obj_unref(Object*);
+extern "C" Node* node_exact(Section*, double);
 void nrn_change_nseg(Section*, int);
 void section_unref(Section*);
 Section* nrn_sec_pop(void);

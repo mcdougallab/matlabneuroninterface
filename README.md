@@ -18,8 +18,9 @@ To get the toolbox working on your machine, run the MATLAB scripts in the follow
       change the NEURON installation directory)
 - **setup1_define**
     - to generate the library definition file
-    - in this file, you will need to adapt & uncomment the function:
-        - get_vector_vec: `<SHAPE>` is "len"
+    - in this file, you will need to adapt & uncomment:
+        - the function get_vector_vec: `<SHAPE>` is "len"
+        - the Section attribute pt3d: `<MLTYPE>` is "clib.array.neuron.Pt3d", `<SHAPE>` is "npt3d"
 - **setup2_build**
     - to build the library interface
 
