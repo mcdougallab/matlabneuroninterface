@@ -27,6 +27,7 @@ main.addpoint(201, 2, 3, 1);
 
 % Set abstract morphology info for branches.
 branch1.length = 100;
+disp(branch1.length);
 branch1.set_diameter(1);
 branch2.length = 150;
 branch2.set_diameter(0.9);
@@ -63,5 +64,5 @@ for i=1:nseg
     x = double((double(i) - 0.5) / double(nseg));
     % We can get the corresponding node with:
     % node = clib.neuron.node_exact(main.get_sec(), x);
-    disp("v(" + x + ") = " + main.ref("v", x).get());
+    disp("main(" + x + ").v = " + main.ref("v", x).get());
 end
