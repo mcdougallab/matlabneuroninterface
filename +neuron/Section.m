@@ -67,11 +67,13 @@ classdef Section
             clib.neuron.set_length(self.sec, val);
         end
         function value = get.length(self)
-        % Get length of Section.
-            % TODO: instead of a new function get_length(), this can also
-            % be done with existing functions (pushsec, hoc_lookup("L"),
-            % call_func(), secpop)
+        % Get length of Section.            
             value = clib.neuron.get_length(self.sec);
+
+            % TODO: can we do this with existing functions? Something like:
+            % clib.neuron.nrn_pushsec(self.sec);
+            % value = clib.neuron.ref("L").get();  % Causes crash.
+            % clib.neuron.nrn_sec_pop();
         end
         function self = set_diameter(self, val)
         % Set diameter of Section.
