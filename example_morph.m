@@ -26,9 +26,9 @@ main.addpoint(1, 2, 3, 4);
 main.addpoint(201, 2, 3, 1);
 
 % Set abstract morphology info for branches.
-branch1.set_length(100);
+branch1.length = 100;
 branch1.set_diameter(1);
-branch2.set_length(150);
+branch2.length = 150;
 branch2.set_diameter(0.9);
 
 % Construct 3D points for branches.

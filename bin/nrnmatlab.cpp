@@ -126,8 +126,8 @@ void matlab_hoc_oc(std::string hoc_str) {
 }
 
 // Call function from MATLAB.
-void matlab_hoc_call_func(std::string func, int narg){
-    hoc_call_func(hoc_lookup(func.c_str()), narg);
+double matlab_hoc_call_func(std::string func, int narg){
+    return hoc_call_func(hoc_lookup(func.c_str()), narg);
 }
 
 // Get pointer to top-level symbol.
@@ -169,7 +169,7 @@ void matlab_hoc_call_ob_proc(Object* ob, Symbol* sym, int narg) {
 }
 
 // Pushing/popping objects onto/from the stack.
-void matlab_hoc_pushx(double x) {
+void matlab_hoc_pushx(double x) { // TODO: This can be a direct call.
     hoc_pushx(x);
 }
 void matlab_hoc_pushpx(NrnRef* nrnref) {
@@ -182,7 +182,7 @@ void matlab_hoc_pushstr(std::string str) {
 void matlab_hoc_pushobj(Object* ob) {
     hoc_pushobj(&ob);
 }
-double matlab_hoc_xpop(void) {
+double matlab_hoc_xpop(void) { // TODO: This can be a direct call.
     return hoc_xpop();
 }
 std::string matlab_hoc_strpop(void) {
@@ -195,6 +195,7 @@ Object* matlab_hoc_objpop(void) {
     // hoc_tobj_unref(obptr);
     return ob;
 }
+// TODO: replace get_vector() with a call to the more generic function below.
 // Object* matlab_hoc_newobj(str::string ob_str, int narg) {
 //     char* ob_chr = const_cast<char*>(ob_str.c_str());
 //     return hoc_newobj1(hoc_lookup(ob_chr), narg);
@@ -284,6 +285,9 @@ void set_length(Section* sec, double length) {
     diam_changed = 1;
     sec->recalc_area_ = 1;
 }
+double get_length(Section* sec) {
+    return sec->prop->dparam[2].val;
+}
 void set_node_diam(Node* node, double diam) {
     // TODO: this is fine if no 3D points; does it work if there are 3D points?
     for (auto prop = node->prop; prop; prop=prop->next) {
@@ -309,39 +313,7 @@ void set_diameter(Section* sec, double diam) {
     }
 }
 
-// -------------------
 // Print Section info.
-// TODO: cleanup
-// -------------------
-int n3d(Section* sec) {
-    // would prefer to do this through the regular stack interface, but got a
-    // stack underflow when I tried
-    return sec->npt3d;
-}
-double x3d(Section* sec, int i) {
-    // return the x coordinate of the ith 3d point
-    // would prefer to do this through the regular stack interface, but got a
-    // stack underflow when I tried
-    return sec->pt3d[i].x;
-}
-double y3d(Section* sec, int i) {
-    // return the x coordinate of the ith 3d point
-    // would prefer to do this through the regular stack interface, but got a
-    // stack underflow when I tried
-    return sec->pt3d[i].y;
-}
-double z3d(Section* sec, int i) {
-    // return the x coordinate of the ith 3d point
-    // would prefer to do this through the regular stack interface, but got a
-    // stack underflow when I tried
-    return sec->pt3d[i].z;
-}
-double diam3d(Section* sec, int i) {
-    // return the x coordinate of the ith 3d point
-    // would prefer to do this through the regular stack interface, but got a
-    // stack underflow when I tried
-    return sec->pt3d[i].d;
-}
 void print_3d_points_and_segs(Section* sec) {
     double my_nseg = nseg(sec);
     Symbol* v = hoc_lookup("v");
@@ -349,18 +321,18 @@ void print_3d_points_and_segs(Section* sec) {
     mlprint(1, (char*)" has ");
     mlprint(1, (char*)(std::to_string(nseg(sec))).c_str());
     mlprint(1, (char*)" segments and ");
-    mlprint(1, (char*)(std::to_string(n3d(sec))).c_str());
+    mlprint(1, (char*)(std::to_string(sec->npt3d)).c_str());
     mlprint(1, (char*)" 3d points:\n");
     // print out 3D points
-    for (auto i = 0; i < n3d(sec); i++) {
+    for (auto i = 0; i < sec->npt3d; i++) {
         mlprint(1, (char*)"    (");
-        mlprint(1, (char*)(std::to_string(x3d(sec, i))).c_str());
+        mlprint(1, (char*)(std::to_string(sec->pt3d[i].x)).c_str());
         mlprint(1, (char*)", ");
-        mlprint(1, (char*)(std::to_string(y3d(sec, i))).c_str());
+        mlprint(1, (char*)(std::to_string(sec->pt3d[i].y)).c_str());
         mlprint(1, (char*)", ");
-        mlprint(1, (char*)(std::to_string(z3d(sec, i))).c_str());
+        mlprint(1, (char*)(std::to_string(sec->pt3d[i].z)).c_str());
         mlprint(1, (char*)"; ");
-        mlprint(1, (char*)(std::to_string(diam3d(sec, i))).c_str());
+        mlprint(1, (char*)(std::to_string(sec->pt3d[i].d)).c_str());
         mlprint(1, (char*)")\n");
     }
     // print out membrane potential for each segment

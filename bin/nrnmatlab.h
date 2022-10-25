@@ -13,7 +13,7 @@ std::string get_nrn_functions();
 void matlab_hoc_oc(std::string hoc_str);
 
 // Call function from MATLAB.
-void matlab_hoc_call_func(std::string func, int narg);
+double matlab_hoc_call_func(std::string func, int narg);
 
 // Get pointer to top-level symbol.
 NrnRef* ref(const char* tlsym);
@@ -63,14 +63,15 @@ void pt3dadd(Section* sec, double x, double y, double z, double diam);
 
 // Set section length/diameter.
 void set_length(Section* sec, double length);
+double get_length(Section* sec);
 void set_diameter(Section* sec, double diam);
 
 // Get section info.
 void print_3d_points_and_segs(Section* sec);
 
 // C++ Neuron functions directly accessible from MATLAB.
-extern "C" void nrn_popsec(void);
 extern "C" void nrn_pushsec(Section* sec);
 extern "C" void hoc_obj_unref(Object*);
 void nrn_change_nseg(Section*, int);
 void section_unref(Section*);
+Section* nrn_sec_pop(void);

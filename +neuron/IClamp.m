@@ -14,7 +14,7 @@ classdef IClamp
         %   IClamp(sec, loc)
             clib.neuron.nrn_pushsec(sec.get_sec());
             self.ic = clib.neuron.get_IClamp(loc);
-            clib.neuron.nrn_popsec();
+            clib.neuron.nrn_sec_pop();
         end
 
         function delete(self)

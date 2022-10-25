@@ -34,9 +34,9 @@ classdef Neuron < dynamicprops
                         error("Input of type "+class(arg)+" not allowed.");
                     end
                 end
-                clib.neuron.matlab_hoc_call_func(func, n);
+                func_val = clib.neuron.matlab_hoc_call_func(func, n);
                 if (returntype=="double")
-                    value = clib.neuron.matlab_hoc_xpop();
+                    value = func_val;
                 elseif (returntype=="string")
                     value = clib.neuron.matlab_hoc_strpop();
                 elseif (returntype=="object")
@@ -72,20 +72,20 @@ classdef Neuron < dynamicprops
             elseif any(strcmp(methods(self), func))
                 [varargout{1:nargout}] = builtin('subsref', self, S);
             % Is this method present in the HOC lookup table, and does it return a double?
-            elseif any(strcmp(self.function_list, func+":263"))
-                [varargout{1:nargout}] = clib.neuron.ref(func).get();
-            % Is this method present in the HOC lookup table, and does it return a void?
             elseif any(strcmp(self.function_list, func+":280"))
-                [varargout{1:nargout}] = call_func_hoc(self, func, "void", S(2).subs{:});
+                [varargout{1:nargout}] = call_func_hoc(self, func, "double", S(2).subs{:});
             else
-                warning("'"+string(func)+"': not found; call Neuron.list_functions() to see all available methods.")
+                warning("'"+string(func)+"': not found; call Neuron.list_functions() to see all available methods and attributes.")
             end
         end
-        function value = list_functions(self)
-        % Return a list of all top-level functions from Neuron.
-        %   value = list_functions()
-            disp("For now, only functions with type 263 (double) or 280 (void) can be called.");
-            value = self.function_list;
+        function list_functions(self)
+        % List all available top-level functions from Neuron.
+        %   list_functions()
+            warning("For now, only attributes with type 263 (double) or methods with type 280 (double) can be called.");
+            for i=1:length(self.function_list)
+                fnc = self.function_list(i).split(":");
+                disp("Name: " + fnc(1) + ", type: " + fnc(2));
+            end
         end
 
     end

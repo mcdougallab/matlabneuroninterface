@@ -38,7 +38,8 @@ classdef Vector < dynamicprops
 
             % Release self.vec C++ object.
             if (class(self.vec) == "clib.neuron.Object")
-                clib.neuron.hoc_obj_unref(self.vec);
+                % clib.neuron.hoc_obj_unref(self.vec);
+                self.vec.refcount = 0;
                 clibRelease(self.vec);
             end
         end
@@ -98,9 +99,8 @@ classdef Vector < dynamicprops
                     value = clib.neuron.matlab_hoc_xpop();
                 elseif (returntype=="string")
                     value = clib.neuron.matlab_hoc_strpop();
-                elseif (returntype=="clib.neuron.Vector")
-                    nrnvec = clib.neuron.matlab_hoc_objpop();
-                    value = neuron.Vector(0, nrnvec);
+                elseif (returntype=="Object")
+                    value = clib.neuron.matlab_hoc_objpop();
                 elseif (returntype=="void")
                     value = self;
                 end
@@ -114,7 +114,7 @@ classdef Vector < dynamicprops
         function list_methods(self)
         % List all available methods to be called using HOC lookup.
         %   list_methods()
-            disp("For now, only methods with type 270 (double), 329 (object) or 330 (string) can be called.");
+            warning("For now, only methods with type 270 (double), 329 (object) or 330 (string) can be called.");
             for i=1:length(self.method_list)
                 mth = self.method_list(i).split(":");
                 disp("Name: " + mth(1) + ", type: " + mth(2));
@@ -150,9 +150,7 @@ classdef Vector < dynamicprops
                 [varargout{1:nargout}] = call_method_hoc(self, method, "double", S(2).subs{:});
             % Is this method present in the HOC lookup table, and does it return an object?
             elseif any(strcmp(self.method_list, method+":329"))
-                % [varargout{1:nargout}] = call_method_hoc(self, method, "clib.neuron.Vector", S(2).subs{:});
-                % TODO: For now, do not take Object off the stack, until we fix unref issues.
-                [varargout{1:nargout}] = call_method_hoc(self, method, "void", S(2).subs{:});  
+                [varargout{1:nargout}] = call_method_hoc(self, method, "Object", S(2).subs{:});  
             % Is this method present in the HOC lookup table, and does it return a string?
             elseif any(strcmp(self.method_list, method+":330"))
                 [varargout{1:nargout}] = call_method_hoc(self, method, "string", S(2).subs{:});

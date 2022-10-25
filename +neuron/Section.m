@@ -6,7 +6,6 @@ classdef Section
     end
     properties (Dependent)
         length
-        diameter
     end
     methods
         function self = Section(name)
@@ -24,7 +23,11 @@ classdef Section
         % Destroy the Section object.
         %   delete()
             if (class(self.sec) == "clib.neuron.Section")
-                clib.neuron.section_unref(self.sec);
+                % clib.neuron.section_unref(self.sec); % TODO: do we need this?
+                self.sec.refcount = 0;
+                clib.neuron.nrn_pushsec(self.sec);
+                clib.neuron.matlab_hoc_call_func("delete_section", 0);
+                clib.neuron.nrn_sec_pop();
                 clibRelease(self.sec);
             end
         end
@@ -59,10 +62,16 @@ classdef Section
         %   addpoint(x, y, z, diam)
             clib.neuron.pt3dadd(self.sec, x, y, z, diam)
         end
-        function self = set_length(self, val)
+        function self = set.length(self, val)
         % Set length of Section.
-        %   set_length(val)
             clib.neuron.set_length(self.sec, val);
+        end
+        function value = get.length(self)
+        % Get length of Section.
+            % TODO: instead of a new function get_length(), this can also
+            % be done with existing functions (pushsec, hoc_lookup("L"),
+            % call_func(), secpop)
+            value = clib.neuron.get_length(self.sec);
         end
         function self = set_diameter(self, val)
         % Set diameter of Section.
