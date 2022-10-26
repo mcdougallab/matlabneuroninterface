@@ -74,6 +74,9 @@ classdef Section
             % clib.neuron.nrn_pushsec(self.sec);
             % value = clib.neuron.ref("L").get();  % Causes crash.
             % clib.neuron.nrn_sec_pop();
+            %
+            % We cannot directly access self.sec.prop.dparam, because it
+            % is a union, which Matlab does not understand.
         end
         function self = set_diameter(self, val)
         % Set diameter of Section.
