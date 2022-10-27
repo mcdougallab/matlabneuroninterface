@@ -14,6 +14,7 @@
 extern "C" int mexPrintf(const char *message, ...);
 
 // Import C++ name mangled functions.
+__declspec(dllimport) vv_function delete_section;
 __declspec(dllimport) optrsptri_function hoc_newobj1;
 __declspec(dllimport) initer_function ivocmain_session;
 __declspec(dllimport) vsecptri_function mech_insert1;
@@ -120,16 +121,6 @@ std::string get_nrn_functions() {
         str_symbol_table(hoc_top_level_symlist);
 }
 
-// Call hoc_oc from MATLAB.
-void matlab_hoc_oc(std::string hoc_str) {
-    hoc_oc((hoc_str + "\n").c_str());
-}
-
-// Call function from MATLAB.
-double matlab_hoc_call_func(std::string func, int narg){
-    return hoc_call_func(hoc_lookup(func.c_str()), narg);
-}
-
 // Get pointer to top-level symbol.
 NrnRef* ref(const char* tlsym){
     auto sym = hoc_lookup(tlsym);
@@ -169,9 +160,6 @@ void matlab_hoc_call_ob_proc(Object* ob, Symbol* sym, int narg) {
 }
 
 // Pushing/popping objects onto/from the stack.
-void matlab_hoc_pushx(double x) { // TODO: This can be a direct call.
-    hoc_pushx(x);
-}
 void matlab_hoc_pushpx(NrnRef* nrnref) {
     hoc_pushpx(nrnref->ref);
 }
@@ -182,9 +170,6 @@ void matlab_hoc_pushstr(std::string str) {
 void matlab_hoc_pushobj(Object* ob) {
     hoc_pushobj(&ob);
 }
-double matlab_hoc_xpop(void) { // TODO: This can be a direct call.
-    return hoc_xpop();
-}
 std::string matlab_hoc_strpop(void) {
     std::string str_out = std::string(*hoc_strpop());
     return str_out;
@@ -192,28 +177,8 @@ std::string matlab_hoc_strpop(void) {
 Object* matlab_hoc_objpop(void) {
     Object** obptr = hoc_objpop();
     Object* ob = *obptr;
-    // hoc_tobj_unref(obptr);
+    hoc_tobj_unref(obptr);
     return ob;
-}
-// TODO: replace get_vector() with a call to the more generic function below.
-// Object* matlab_hoc_newobj(str::string ob_str, int narg) {
-//     char* ob_chr = const_cast<char*>(ob_str.c_str());
-//     return hoc_newobj1(hoc_lookup(ob_chr), narg);
-// }
-
-// Make and return Vector.
-Object* get_vector(int vector_value){
-
-    Object* my_vec = NULL;
-    // print_class_methods("Vector");
-    if (vector_value > 0) {
-        hoc_pushx(vector_value);
-        my_vec = hoc_newobj1(hoc_lookup("Vector"), 1);
-    } else {
-        my_vec = hoc_newobj1(hoc_lookup("Vector"), 0);
-    }
-
-    return my_vec;
 }
 
 // Make and return a new section.
@@ -248,13 +213,6 @@ double get_pp_property(Object* pp, const char* name) {
     return ob2pntproc_0(pp)->prop->param[index];
 }
 
-// Get IClamp object.
-Object* get_IClamp(double loc) {
-    hoc_pushx(loc);
-    auto iclamp = hoc_newobj1(hoc_lookup("IClamp"), 1);
-    return iclamp;
-}
-
 // Connect sections.
 void connect(Section* child_sec, double child_x, Section* parent_sec, double parent_x) {
     nrn_pushsec(child_sec);
@@ -285,8 +243,8 @@ void set_length(Section* sec, double length) {
     diam_changed = 1;
     sec->recalc_area_ = 1;
 }
-double get_length(Section* sec) {
-    return sec->prop->dparam[2].val;
+double get_dparam(Section* sec, int ind) {
+    return sec->prop->dparam[ind].val;
 }
 void set_node_diam(Node* node, double diam) {
     // TODO: this is fine if no 3D points; does it work if there are 3D points?

@@ -13,7 +13,9 @@ classdef IClamp
         % Construct current clamp on a section (sec) at a location (loc) between 0 and 1.
         %   IClamp(sec, loc)
             clib.neuron.nrn_pushsec(sec.get_sec());
-            self.ic = clib.neuron.get_IClamp(loc);
+            clib.neuron.hoc_pushx(loc);
+            sym = clib.neuron.hoc_lookup("IClamp");
+            self.ic = clib.neuron.hoc_newobj1(sym, 1);
             clib.neuron.nrn_sec_pop();
         end
 
@@ -21,6 +23,7 @@ classdef IClamp
         % Destructor for IClamp.
         %   delete()
             clib.neuron.hoc_obj_unref(self.ic);
+            self.ic.refcount = 0;
             clibRelease(self.ic)
         end
 

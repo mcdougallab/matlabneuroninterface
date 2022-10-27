@@ -18,11 +18,14 @@ classdef Vector < dynamicprops
             if clib.neuron.isinitialized()
                 % Upon initialization, get vector object and list of methods.
                 if (nargin==1)
-                    self.vec = clib.neuron.get_vector(n);
+                    clib.neuron.hoc_pushx(n);
+                    sym = clib.neuron.hoc_lookup("Vector");
+                    self.vec = clib.neuron.hoc_newobj1(sym, 1);
                 elseif (nargin==2)
                     self.vec = vec;
                 else
-                    self.vec = clib.neuron.get_vector(0);
+                    sym = clib.neuron.hoc_lookup("Vector");
+                    self.vec = clib.neuron.hoc_newobj1(sym, 0);
                 end
                 method_str = clib.neuron.get_class_methods("Vector");
                 self.method_list = split(method_str, ";");
@@ -38,7 +41,7 @@ classdef Vector < dynamicprops
 
             % Release self.vec C++ object.
             if (class(self.vec) == "clib.neuron.Object")
-                % clib.neuron.hoc_obj_unref(self.vec);
+                clib.neuron.hoc_obj_unref(self.vec);  % TODO: do we need to do this?
                 self.vec.refcount = 0;
                 clibRelease(self.vec);
             end
@@ -83,7 +86,7 @@ classdef Vector < dynamicprops
                 for i=1:n
                     arg = varargin{i};
                     if (isa(arg, "double"))
-                        clib.neuron.matlab_hoc_pushx(arg);  
+                        clib.neuron.hoc_pushx(arg);  
                     elseif (isa(arg, "string") || isa(arg, "char"))
                         clib.neuron.matlab_hoc_pushstr(arg);  
                     elseif (isa(arg, "clib.neuron.Vector"))
@@ -96,7 +99,7 @@ classdef Vector < dynamicprops
                 end
                 clib.neuron.matlab_hoc_call_ob_proc(self.vec, sym, n);
                 if (returntype=="double")
-                    value = clib.neuron.matlab_hoc_xpop();
+                    value = clib.neuron.hoc_xpop();
                 elseif (returntype=="string")
                     value = clib.neuron.matlab_hoc_strpop();
                 elseif (returntype=="Object")

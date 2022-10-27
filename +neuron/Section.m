@@ -23,10 +23,12 @@ classdef Section
         % Destroy the Section object.
         %   delete()
             if (class(self.sec) == "clib.neuron.Section")
-                % clib.neuron.section_unref(self.sec); % TODO: do we need this?
+                % TODO: how to delete a section so that it no longer appears in the topology?
+                clib.neuron.section_unref(self.sec);
                 self.sec.refcount = 0;
                 clib.neuron.nrn_pushsec(self.sec);
                 clib.neuron.matlab_hoc_call_func("delete_section", 0);
+                clib.neuron.delete_section();
                 clib.neuron.nrn_sec_pop();
                 clibRelease(self.sec);
             end
@@ -67,16 +69,10 @@ classdef Section
             clib.neuron.set_length(self.sec, val);
         end
         function value = get.length(self)
-        % Get length of Section.            
-            value = clib.neuron.get_length(self.sec);
-
-            % TODO: can we do this with existing functions? Something like:
-            % clib.neuron.nrn_pushsec(self.sec);
-            % value = clib.neuron.ref("L").get();  % Causes crash.
-            % clib.neuron.nrn_sec_pop();
-            %
+        % Get length of Section.
             % We cannot directly access self.sec.prop.dparam, because it
             % is a union, which Matlab does not understand.
+            value = clib.neuron.get_dparam(self.sec, 2);
         end
         function self = set_diameter(self, val)
         % Set diameter of Section.

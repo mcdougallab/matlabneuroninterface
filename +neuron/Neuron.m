@@ -23,7 +23,7 @@ classdef Neuron < dynamicprops
                 for i=1:n
                     arg = varargin{i};
                     if (isa(arg, "double"))
-                        clib.neuron.matlab_hoc_pushx(arg);  
+                        clib.neuron.hoc_pushx(arg);  
                     elseif (isa(arg, "string") || isa(arg, "char"))
                         clib.neuron.matlab_hoc_pushstr(arg);  
                     elseif (isa(arg, "Vector"))
@@ -34,7 +34,10 @@ classdef Neuron < dynamicprops
                         error("Input of type "+class(arg)+" not allowed.");
                     end
                 end
-                func_val = clib.neuron.matlab_hoc_call_func(func, n);
+                % TODO: remove
+                % func_val = clib.neuron.matlab_hoc_call_func(func, n);
+                sym = clib.neuron.hoc_lookup(func);
+                func_val = clib.neuron.hoc_call_func(sym, n);
                 if (returntype=="double")
                     value = func_val;
                 elseif (returntype=="string")
@@ -90,10 +93,10 @@ classdef Neuron < dynamicprops
 
     end
     methods(Static)
-        function hoc_oc(str)
+        function value = hoc_oc(str)
         % Pass string to hoc_oc.
         %   hoc_oc()
-            clib.neuron.matlab_hoc_oc(str);
+            value = clib.neuron.hoc_oc(str);
         end
         function nrnref = ref(sym)
         % Return an NrnRef containing a pointer to a top-level symbol (sym).
