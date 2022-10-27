@@ -54,15 +54,15 @@ branch1.info();
 branch2.info();
 
 % Print info again but using Matlab object.
-nseg = main.get_sec().nnode - 1;
-npt3d = main.get_sec().npt3d;
-disp("main has " + npt3d + " pt3d and " + nseg + " segments.");
+nseg = branch1.get_sec().nnode - 1;
+npt3d = branch1.get_sec().npt3d;
+disp("branch1 has " + npt3d + " pt3d and " + nseg + " segments.");
 for i=1:npt3d
-    disp(main.get_sec().pt3d(i));
+    disp(branch1.get_sec().pt3d(i));
 end
 for i=1:nseg
     x = double((double(i) - 0.5) / double(nseg));
     % We can get the corresponding node with:
-    % node = clib.neuron.node_exact(main.get_sec(), x);
-    disp("main(" + x + ").v = " + main.ref("v", x).get());
+    % node = clib.neuron.node_exact(branch1.get_sec(), x);
+    disp("branch1(" + x + ").v = " + branch1.ref("v", x).get());
 end
