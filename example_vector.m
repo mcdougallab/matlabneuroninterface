@@ -30,7 +30,6 @@ for i = 5:9
     disp("t: "+n.t);
     n.fadvance();
 end
-v.append(1.);
 disp("After 9 x fadvance() and 1 x append():")
 disp(v.get_vec());
 disp("Size: " + length(v));
