@@ -31,6 +31,8 @@ Then, you can test the toolbox by running:
     - to create a Vector object and calculate some properties
 - **example_acpot** 
     - to generate an action potential
+- **example_morph** 
+    - to generate a morphology by connecting different Sections
 
 **example_acpot** should result in:
 
