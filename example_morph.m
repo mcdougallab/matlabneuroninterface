@@ -5,6 +5,7 @@
 clear;
 setup0_paths;
 n = neuron.Neuron();
+n.reset_sections();
 
 % Make sections.
 main = neuron.Section("main");

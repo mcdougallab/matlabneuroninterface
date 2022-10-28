@@ -5,6 +5,9 @@
 clear;
 setup0_paths;
 n = neuron.Neuron();
+n.reset_sections();
+
+% Make axon.
 axon = neuron.Section("axon");
 axon.insert_mechanism("hh");
 n.topology();

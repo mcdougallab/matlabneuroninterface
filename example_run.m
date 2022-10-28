@@ -5,6 +5,7 @@
 clear;
 setup0_paths;
 n = neuron.Neuron();
+n.reset_sections();
 
 % Run HOC code.
 n.hoc_oc("create soma");

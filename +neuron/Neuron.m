@@ -103,5 +103,8 @@ classdef Neuron < dynamicprops
         %   nrnref = ref(sym)
             nrnref = clib.neuron.ref(sym);
         end
+        function reset_sections()
+            clib.neuron.hoc_oc("forall delete_section()");
+        end
     end
 end

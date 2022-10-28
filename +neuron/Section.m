@@ -23,12 +23,23 @@ classdef Section
         % Destroy the Section object.
         %   delete()
             if (class(self.sec) == "clib.neuron.Section")
-                % TODO: how to delete a section so that it no longer appears in the topology?
-                % clib.neuron.nrn_pushsec(self.sec);
-                % clibRelease(self.sec);
+
+                % TODO: finish testing delete(Section).
+
+                % clib.neuron.section_unref(self.sec);
+                % self.sec.refcount = 0;
+
+                clib.neuron.nrn_pushsec(self.sec);
+                clibRelease(self.sec);
+
+                sym = clib.neuron.hoc_lookup("delete_section");
+                clib.neuron.hoc_call_func(sym, 0);
+
                 % clib.neuron.hoc_oc("delete_section()");
-                % clib.neuron.nrn_sec_pop();
-                clib.neuron.matlab_delete_section(self.sec);
+
+                % clib.neuron.delete_section();
+
+                clib.neuron.nrn_sec_pop();
             end
         end
         function insert_mechanism(self, mech_name)

@@ -2,6 +2,7 @@
 clear;
 setup0_paths;
 n = neuron.Neuron();
+n.reset_sections();
 v = neuron.Vector(10);
 
 disp(v.contains());  

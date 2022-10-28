@@ -21,7 +21,6 @@ To get the toolbox working on your machine, run the MATLAB scripts in the follow
     - in this file, you will need to adapt & uncomment:
         - the function get_vector_vec: `<SHAPE>` is "len"
         - the Section attribute pt3d: `<MLTYPE>` is "clib.array.neuron.Pt3d", `<SHAPE>` is "npt3d"
-        - (testing: the function new_section: add as defineOutput() arguments `"DeleteFcn", "matlab_delete_section"`)
 - **setup2_build**
     - to build the library interface
 

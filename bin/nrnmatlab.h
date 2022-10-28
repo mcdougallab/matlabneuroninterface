@@ -31,19 +31,16 @@ Object* matlab_hoc_objpop(void);
 
 // Make a new section / delete section.
 Section* new_section(const char* name);
-void matlab_delete_section(Section* sec);
 
 // Set/get object property.
 void set_pp_property(Object* pp, const char* name, double value);
 double get_pp_property(Object* pp, const char* name);
 
 // Set section length/diameter.
-// void set_length(Section* sec, double length);
 double get_dparam(Section* sec, int ind);
 void set_dparam(Section* sec, int ind, double value);
 void set_diam_changed(int value);
 void set_node_diam(Node* node, double diam);
-// void set_diameter(Section* sec, double diam);
 
 // C++ Neuron functions directly accessible from MATLAB.
 extern "C" void nrn_pushsec(Section* sec);
