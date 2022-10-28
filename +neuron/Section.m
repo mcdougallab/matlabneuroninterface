@@ -23,23 +23,14 @@ classdef Section
         % Destroy the Section object.
         %   delete()
             if (class(self.sec) == "clib.neuron.Section")
-
-                % TODO: finish testing delete(Section).
-
-                % clib.neuron.section_unref(self.sec);
+                % clib.neuron.section_unref(self.sec);  % TODO: is this needed?
                 % self.sec.refcount = 0;
-
                 clib.neuron.nrn_pushsec(self.sec);
                 clibRelease(self.sec);
-
                 sym = clib.neuron.hoc_lookup("delete_section");
                 clib.neuron.hoc_call_func(sym, 0);
-
-                % clib.neuron.hoc_oc("delete_section()");
-
-                % clib.neuron.delete_section();
-
-                clib.neuron.nrn_sec_pop();
+                % It looks like delete_section already pops the section off the stack.
+                % clib.neuron.nrn_sec_pop();
             end
         end
         function insert_mechanism(self, mech_name)
@@ -110,6 +101,14 @@ classdef Section
             end
 
         end
+        function psection(self)
+        % Print psection info
+        %   psection()
+            clib.neuron.nrn_pushsec(self.sec);
+            sym = clib.neuron.hoc_lookup("psection");
+            clib.neuron.hoc_call_func(sym, 0);
+            clib.neuron.nrn_sec_pop();
+        end
         function info(self)
         % Print section info
         %   info()
@@ -126,6 +125,8 @@ classdef Section
                 x = double((double(i) - 0.5) / double(nseg));
                 disp(self.name + "(" + x + ").v = " ...
                     + self.ref("v", x).get());
+                disp(self.name + "(" + x + ").diam = " ...
+                    + self.ref("diam", x).get());
             end
 
         end

@@ -23,7 +23,7 @@ classdef IClamp
         % Destructor for IClamp.
         %   delete()
             clib.neuron.hoc_obj_unref(self.ic);
-            self.ic.refcount = 0;
+            % self.ic.refcount = 0;
             clibRelease(self.ic)
         end
 

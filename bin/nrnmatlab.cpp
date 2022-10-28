@@ -128,7 +128,6 @@ Object* matlab_hoc_objpop(void) {
 }
 
 // Make and return a new section.
-extern "C" __declspec(dllimport) Objectdata* hoc_top_level_data;
 Section* new_section(const char* name) {
     Symbol* symbol = new Symbol;
     auto pitm = new hoc_Item*;

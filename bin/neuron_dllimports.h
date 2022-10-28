@@ -39,6 +39,7 @@ extern "C" __declspec(dllimport) vv_function hoc_ret;
 extern "C" __declspec(dllimport) cptrptrv_function hoc_strpop;
 extern "C" __declspec(dllimport) scptrslptr_function hoc_table_lookup;
 extern "C" __declspec(dllimport) voptrptr_function hoc_tobj_unref;
+extern "C" __declspec(dllimport) Objectdata* hoc_top_level_data;
 extern "C" __declspec(dllimport) Symlist* hoc_top_level_symlist;
 extern "C" __declspec(dllimport) dv_function hoc_xpop;
 extern "C" __declspec(dllimport) int nrn_is_python_extension;

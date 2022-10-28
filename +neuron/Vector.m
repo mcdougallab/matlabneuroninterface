@@ -42,7 +42,7 @@ classdef Vector < dynamicprops
             % Release self.vec C++ object.
             if (class(self.vec) == "clib.neuron.Object")
                 clib.neuron.hoc_obj_unref(self.vec);  % TODO: do we need to do this?
-                self.vec.refcount = 0;
+                % self.vec.refcount = 0;
                 clibRelease(self.vec);
             end
         end

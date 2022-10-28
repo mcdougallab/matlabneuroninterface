@@ -10,12 +10,16 @@ n.reset_sections();
 
 % Make section.
 main = neuron.Section("main");
-branch = neuron.Section("branch");
-branch.connect(0, main, 1);
+branch1 = neuron.Section("branch1");
+branch1.connect(0, main, 1);
+branch2 = neuron.Section("branch2");
+branch2.connect(0, main, 1);
 n.topology();
 
 % Delete sections.
-delete(branch);
+delete(branch2);
+n.topology();
+delete(branch1);
 n.topology();
 delete(main);
 n.topology();
