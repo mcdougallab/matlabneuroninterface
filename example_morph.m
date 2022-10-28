@@ -50,3 +50,8 @@ end
 
 % Print info.
 branch1.info();
+
+% We are unhappy with branch2, so let's remove it.
+n.topology();
+delete(branch2);
+n.topology();
