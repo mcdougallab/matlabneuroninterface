@@ -81,7 +81,6 @@ classdef Vector < dynamicprops
         %   value = call_method_double(method, varargin)
             
             try
-                sym = clib.neuron.get_method_sym(self.vec, method);
                 n = length(varargin);
                 for i=1:n
                     arg = varargin{i};
@@ -97,7 +96,9 @@ classdef Vector < dynamicprops
                         error("Input of type "+class(arg)+" not allowed.");
                     end
                 end
-                clib.neuron.matlab_hoc_call_ob_proc(self.vec, sym, n);
+                sym = clib.neuron.hoc_table_lookup(method, ...
+                    self.vec.ctemplate.symtable);
+                clib.neuron.hoc_call_ob_proc(self.vec, sym, n);
                 if (returntype=="double")
                     value = clib.neuron.hoc_xpop();
                 elseif (returntype=="string")

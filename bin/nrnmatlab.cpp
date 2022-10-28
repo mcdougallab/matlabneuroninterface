@@ -6,6 +6,7 @@
 #include <cstring>
 #include <string>
 #include "neuron_api_headers.h"
+#include "neuron_dllimports.h"
 #include "neuron_matlab_headers.h"
 
 // Declare mexPrintf
@@ -13,57 +14,11 @@
 // "error Using MATLAB Data API with C Matrix API is not supported."
 extern "C" int mexPrintf(const char *message, ...);
 
-// Import C++ name mangled functions.
-__declspec(dllimport) vv_function delete_section;
-__declspec(dllimport) optrsptri_function hoc_newobj1;
-__declspec(dllimport) initer_function ivocmain_session;
-__declspec(dllimport) vsecptri_function mech_insert1;
-__declspec(dllimport) voptrsptritemptrptri_function new_sections;
-__declspec(dllimport) dptrsecptrsptrd_function nrn_rangepointer;
-__declspec(dllimport) vsecptri_function nrn_change_nseg;
-__declspec(dllimport) vsecptrd_function nrn_length_change;
-__declspec(dllimport) vv_function nrnmpi_stubs;
-__declspec(dllimport) secptrv_function nrn_sec_pop;
-__declspec(dllimport) cptrsecptr_function secname;
-__declspec(dllimport) vsecptr_function section_unref;
-__declspec(dllimport) vv_function simpleconnectsection;
-
-// Import non-name mangled functions and parameters.
-extern "C" __declspec(dllimport) int diam_changed;
-extern "C" __declspec(dllimport) Symlist* hoc_built_in_symlist;
-extern "C" __declspec(dllimport) dvptrint_function hoc_call_func;
-extern "C" __declspec(dllimport) voptrsptri_function hoc_call_ob_proc;
-extern "C" __declspec(dllimport) dsio_function hoc_call_objfunc;
-extern "C" __declspec(dllimport) vsptr_function hoc_install_object_data_index;
-extern "C" __declspec(dllimport) scptr_function hoc_lookup;
-extern "C" __declspec(dllimport) voptr_function hoc_obj_ref;
-extern "C" __declspec(dllimport) voptr_function hoc_obj_unref;
-extern "C" __declspec(dllimport) Objectdata* hoc_objectdata;
-extern "C" __declspec(dllimport) optrptrv_function hoc_objpop;
-extern "C" __declspec(dllimport) icptr_function hoc_oc;
-extern "C" __declspec(dllimport) voptrptr_function hoc_pushobj;
-extern "C" __declspec(dllimport) vdptr_function hoc_pushpx;
-extern "C" __declspec(dllimport) vcptrptr_function hoc_pushstr;
-extern "C" __declspec(dllimport) vd_function hoc_pushx;
-extern "C" __declspec(dllimport) vv_function hoc_ret;
-extern "C" __declspec(dllimport) cptrptrv_function hoc_strpop;
-extern "C" __declspec(dllimport) scptrslptr_function hoc_table_lookup;
-extern "C" __declspec(dllimport) voptrptr_function hoc_tobj_unref;
-extern "C" __declspec(dllimport) Symlist* hoc_top_level_symlist;
-extern "C" __declspec(dllimport) dv_function hoc_xpop;
-extern "C" __declspec(dllimport) int nrn_is_python_extension;
-extern "C" __declspec(dllimport) int nrn_main_launch;
-extern "C" __declspec(dllimport) int nrn_nobanner_;
-extern "C" __declspec(dllimport) nptrsecptrd_function node_exact;
-extern "C" __declspec(dllimport) vv_function nrn_popsec;
-extern "C" __declspec(dllimport) vsecptr_function nrn_pushsec;
-extern "C" __declspec(dllimport) vf2icif_function nrnpy_set_pr_etal;
-extern "C" __declspec(dllimport) ppoptr_function ob2pntproc_0;
-extern "C" __declspec(dllimport) ivptr_function vector_capacity;
-extern "C" __declspec(dllimport) dptrvptr_function vector_vec;
-
 // Define invocmain_session input.
 static const char* argv[] = {"nrn_test", "-nogui", "-nopython", NULL};
+
+// Keep track of whether NEURON session is already initialized.
+bool initialized = false;
 
 // Print to MATLAB command window.
 int mlprint(int stream, char* msg) {
@@ -78,7 +33,6 @@ int mlprint(int stream, char* msg) {
 }
 
 // Initialize NEURON session.
-bool initialized = false;
 void initialize(){
 
     if (!initialized) {
@@ -151,14 +105,6 @@ const double* get_vector_vec(Object* vec, int len){
     return vector_vec(vec->u.this_pointer);
 }
 
-// Calling Object methods from MATLAB.
-Symbol* get_method_sym(Object* ob, const char* methodname){
-    return hoc_table_lookup(methodname, ob->ctemplate->symtable);
-}
-void matlab_hoc_call_ob_proc(Object* ob, Symbol* sym, int narg) {
-    hoc_call_ob_proc(ob, sym, narg);
-}
-
 // Pushing/popping objects onto/from the stack.
 void matlab_hoc_pushpx(NrnRef* nrnref) {
     hoc_pushpx(nrnref->ref);
@@ -195,12 +141,11 @@ Section* new_section(const char* name) {
     return (*pitm)->element.sec;
 }
 
-// Insert mechanism into section.
-void insert_mechanism(Section* sec, const char* mech_name) {
-    auto sym = hoc_lookup(mech_name);
-    assert(sym);
-    // the type indicates that it's a mechanism; the subtype indicates which
-    mech_insert1(sec, sym->subtype);
+// Delete section.
+void matlab_delete_section(Section* sec) {
+    nrn_pushsec(sec);
+    hoc_oc("delete_section()");
+    nrn_sec_pop();
 }
 
 // Set/get object property.
@@ -211,26 +156,6 @@ void set_pp_property(Object* pp, const char* name, double value) {
 double get_pp_property(Object* pp, const char* name) {
     int index = hoc_table_lookup(name, pp->ctemplate->symtable)->u.rng.index;
     return ob2pntproc_0(pp)->prop->param[index];
-}
-
-// Connect sections.
-void connect(Section* child_sec, double child_x, Section* parent_sec, double parent_x) {
-    nrn_pushsec(child_sec);
-    hoc_pushx(child_x);
-    nrn_pushsec(parent_sec);
-    hoc_pushx(parent_x);
-    simpleconnectsection();
-}
-
-// Add 3D point to Section.
-void pt3dadd(Section* sec, double x, double y, double z, double diam) {
-    nrn_pushsec(sec);
-    hoc_pushx(x);
-    hoc_pushx(y);
-    hoc_pushx(z);
-    hoc_pushx(diam);
-    hoc_call_func(hoc_lookup("pt3dadd"), 4);
-    nrn_sec_pop();
 }
 
 // Set Section length/diameter
@@ -257,54 +182,12 @@ void set_node_diam(Node* node, double diam) {
         }
     }
 }
-int nseg(Section* sec) {
-    // always one more node than nseg
-    return sec->nnode - 1;
-}
 void set_diameter(Section* sec, double diam) {
-    double my_nseg = nseg(sec);
+    double my_nseg = sec->nnode - 1; // one more node than nseg
     // grab each node (segment), then set the diam there
     for (auto i = 0; i < my_nseg; i++) {
         double x = (i + 0.5) / my_nseg;
         Node* node = node_exact(sec, x);
         set_node_diam(node, diam);
     }
-}
-
-// Print Section info.
-void print_3d_points_and_segs(Section* sec) {
-    double my_nseg = nseg(sec);
-    Symbol* v = hoc_lookup("v");
-    mlprint(1, (char*)secname(sec));
-    mlprint(1, (char*)" has ");
-    mlprint(1, (char*)(std::to_string(nseg(sec))).c_str());
-    mlprint(1, (char*)" segments and ");
-    mlprint(1, (char*)(std::to_string(sec->npt3d)).c_str());
-    mlprint(1, (char*)" 3d points:\n");
-    // print out 3D points
-    for (auto i = 0; i < sec->npt3d; i++) {
-        mlprint(1, (char*)"    (");
-        mlprint(1, (char*)(std::to_string(sec->pt3d[i].x)).c_str());
-        mlprint(1, (char*)", ");
-        mlprint(1, (char*)(std::to_string(sec->pt3d[i].y)).c_str());
-        mlprint(1, (char*)", ");
-        mlprint(1, (char*)(std::to_string(sec->pt3d[i].z)).c_str());
-        mlprint(1, (char*)"; ");
-        mlprint(1, (char*)(std::to_string(sec->pt3d[i].d)).c_str());
-        mlprint(1, (char*)")\n");
-    }
-    // print out membrane potential for each segment
-    // grab each node (segment), then set the diam there
-    for (auto i = 0; i < my_nseg; i++) {
-        double x = (i + 0.5) / my_nseg;
-        Node* node = node_exact(sec, x);
-        mlprint(1, (char*)"    ");
-        mlprint(1, (char*)secname(sec));
-        mlprint(1, (char*)"(");
-        mlprint(1, (char*)(std::to_string(x)).c_str());
-        mlprint(1, (char*)").v = ");
-        mlprint(1, (char*)(std::to_string(*nrn_rangepointer(sec, v, x))).c_str());
-        mlprint(1, (char*)"\n");
-    }
-    mlprint(1, (char*)"\n");
 }

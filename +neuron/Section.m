@@ -24,19 +24,18 @@ classdef Section
         %   delete()
             if (class(self.sec) == "clib.neuron.Section")
                 % TODO: how to delete a section so that it no longer appears in the topology?
-                clib.neuron.section_unref(self.sec);
-                self.sec.refcount = 0;
-                clib.neuron.nrn_pushsec(self.sec);
-                clib.neuron.matlab_hoc_call_func("delete_section", 0);
-                clib.neuron.delete_section();
-                clib.neuron.nrn_sec_pop();
-                clibRelease(self.sec);
+                % clib.neuron.nrn_pushsec(self.sec);
+                % clibRelease(self.sec);
+                % clib.neuron.hoc_oc("delete_section()");
+                % clib.neuron.nrn_sec_pop();
+                clib.neuron.matlab_delete_section(self.sec);
             end
         end
         function insert_mechanism(self, mech_name)
         % Insert a mechanism by providing a mechanism name.
         %   insert_mechanism(mech_name)
-            clib.neuron.insert_mechanism(self.sec, mech_name);
+            sym = clib.neuron.hoc_lookup(mech_name);
+            clib.neuron.mech_insert1(self.sec, sym.subtype);
         end
         function nrnref = ref(self, sym, loc)
         % Return an NrnRef to a quantity (sym) at a location along the segment (loc) between 0 and 1.
@@ -53,16 +52,27 @@ classdef Section
         %   change_nseg(nseg)
             clib.neuron.nrn_change_nseg(self.sec, nseg);
         end
-        function connect(self, loc0, sec1, loc1)
-        % Connect this section at loc0 to another section (sec1) at loc1.
-        %   connect(loc0, sec1, loc1)
-            clib.neuron.connect(self.sec, loc0, sec1.get_sec(), loc1);
+        function connect(self, loc, parent_sec, parent_loc)
+        % Connect this section at loc to another section (parent_sec) at parent_loc.
+        %   connect(loc, parent_sec, parent_loc)
+            clib.neuron.nrn_pushsec(self.sec);
+            clib.neuron.hoc_pushx(loc);
+            clib.neuron.nrn_pushsec(parent_sec.get_sec());
+            clib.neuron.hoc_pushx(parent_loc);
+            clib.neuron.simpleconnectsection();
         end
 
         function addpoint(self, x, y, z, diam)
         % Add point to Section.
-        %   addpoint(x, y, z, diam)
-            clib.neuron.pt3dadd(self.sec, x, y, z, diam)
+        %   addpoint(x, y, z, diam)            
+            clib.neuron.nrn_pushsec(self.sec);
+            clib.neuron.hoc_pushx(x);
+            clib.neuron.hoc_pushx(y);
+            clib.neuron.hoc_pushx(z);
+            clib.neuron.hoc_pushx(diam);
+            sym = clib.neuron.hoc_lookup("pt3dadd");
+            clib.neuron.hoc_call_func(sym, 4);
+            clib.neuron.nrn_sec_pop();
         end
         function self = set.length(self, val)
         % Set length of Section.
@@ -82,7 +92,22 @@ classdef Section
         function info(self)
         % Print section info
         %   info()
-            clib.neuron.print_3d_points_and_segs(self.sec)
+            
+            nseg = self.sec.nnode - 1;
+            npt3d = self.sec.npt3d;
+            disp(self.name + " has " + npt3d + " pt3d and " ...
+                + nseg + " segment(s).");
+            for i=1:npt3d
+                disp(self.sec.pt3d(i));
+            end
+            for i=1:nseg
+                x = double((double(i) - 0.5) / double(nseg));
+                % We can get the corresponding node with:
+                % node = clib.neuron.node_exact(branch1.get_sec(), x);
+                disp(self.name + "(" + x + ").v = " ...
+                    + self.ref("v", x).get());
+            end
+
         end
     end
 end
