@@ -180,12 +180,3 @@ void set_node_diam(Node* node, double diam) {
         }
     }
 }
-// void set_diameter(Section* sec, double diam) {
-//     double my_nseg = sec->nnode - 1; // one more node than nseg
-//     // grab each node (segment), then set the diam there
-//     for (auto i = 0; i < my_nseg; i++) {
-//         double x = (i + 0.5) / my_nseg;
-//         Node* node = node_exact(sec, x);
-//         set_node_diam(node, diam);
-//     }
-// }
