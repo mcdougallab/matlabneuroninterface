@@ -38,9 +38,12 @@ void set_pp_property(Object* pp, const char* name, double value);
 double get_pp_property(Object* pp, const char* name);
 
 // Set section length/diameter.
-void set_length(Section* sec, double length);
+// void set_length(Section* sec, double length);
 double get_dparam(Section* sec, int ind);
-void set_diameter(Section* sec, double diam);
+void set_dparam(Section* sec, int ind, double value);
+void set_diam_changed(int value);
+void set_node_diam(Node* node, double diam);
+// void set_diameter(Section* sec, double diam);
 
 // C++ Neuron functions directly accessible from MATLAB.
 extern "C" void nrn_pushsec(Section* sec);
@@ -56,6 +59,7 @@ extern "C" int hoc_oc(const char*);
 void delete_section(void);
 Object* hoc_newobj1(Symbol*, int);
 void nrn_change_nseg(Section*, int);
+void nrn_length_change(Section*, double);
 void mech_insert1(Section*, int);
 Section* nrn_sec_pop(void);
 void section_unref(Section*);

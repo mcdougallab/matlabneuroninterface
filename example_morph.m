@@ -27,7 +27,6 @@ main.addpoint(201, 2, 3, 1);
 
 % Set abstract morphology info for branches.
 branch1.length = 100;
-disp(branch1.length);
 branch1.set_diameter(1);
 branch2.length = 150;
 branch2.set_diameter(0.9);

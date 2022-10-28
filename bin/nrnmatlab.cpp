@@ -158,19 +158,17 @@ double get_pp_property(Object* pp, const char* name) {
     return ob2pntproc_0(pp)->prop->param[index];
 }
 
-// Set Section length/diameter
-void set_length(Section* sec, double length) {
-    // in NEURON code, there's also a check for can_change_morph(sec)... that checks pt3dconst_
-    sec->prop->dparam[2].val = length;
-    // dparam[7].val is for Ra
-    // nrn_length_change updates 3D points if needed
-    nrn_length_change(sec, length);
-    diam_changed = 1;
-    sec->recalc_area_ = 1;
-}
+// Set Section dparams.
 double get_dparam(Section* sec, int ind) {
     return sec->prop->dparam[ind].val;
 }
+void set_dparam(Section* sec, int ind, double value) {
+    sec->prop->dparam[ind].val = value;
+}
+void set_diam_changed(int value) {
+    diam_changed = value;
+};
+
 void set_node_diam(Node* node, double diam) {
     // TODO: this is fine if no 3D points; does it work if there are 3D points?
     for (auto prop = node->prop; prop; prop=prop->next) {
@@ -182,12 +180,12 @@ void set_node_diam(Node* node, double diam) {
         }
     }
 }
-void set_diameter(Section* sec, double diam) {
-    double my_nseg = sec->nnode - 1; // one more node than nseg
-    // grab each node (segment), then set the diam there
-    for (auto i = 0; i < my_nseg; i++) {
-        double x = (i + 0.5) / my_nseg;
-        Node* node = node_exact(sec, x);
-        set_node_diam(node, diam);
-    }
-}
+// void set_diameter(Section* sec, double diam) {
+//     double my_nseg = sec->nnode - 1; // one more node than nseg
+//     // grab each node (segment), then set the diam there
+//     for (auto i = 0; i < my_nseg; i++) {
+//         double x = (i + 0.5) / my_nseg;
+//         Node* node = node_exact(sec, x);
+//         set_node_diam(node, diam);
+//     }
+// }

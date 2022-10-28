@@ -76,7 +76,10 @@ classdef Section
         end
         function self = set.length(self, val)
         % Set length of Section.
-            clib.neuron.set_length(self.sec, val);
+            clib.neuron.set_dparam(self.sec, 2, val);
+            clib.neuron.nrn_length_change(self.sec, val);
+            clib.neuron.set_diam_changed(1);
+            self.sec.recalc_area_ = 1;
         end
         function value = get.length(self)
         % Get length of Section.
@@ -87,7 +90,14 @@ classdef Section
         function self = set_diameter(self, val)
         % Set diameter of Section.
         %   set_diameter(val)
-            clib.neuron.set_diameter(self.sec, val);
+
+            nseg = self.sec.nnode - 1;
+            for i=1:nseg
+                x = double((double(i) - 0.5) / double(nseg));
+                node = clib.neuron.node_exact(self.sec, x);
+                clib.neuron.set_node_diam(node, val);
+            end
+
         end
         function info(self)
         % Print section info
@@ -95,6 +105,7 @@ classdef Section
             
             nseg = self.sec.nnode - 1;
             npt3d = self.sec.npt3d;
+            disp(self.name + " has length " + self.length + ".");
             disp(self.name + " has " + npt3d + " pt3d and " ...
                 + nseg + " segment(s).");
             for i=1:npt3d
@@ -102,8 +113,6 @@ classdef Section
             end
             for i=1:nseg
                 x = double((double(i) - 0.5) / double(nseg));
-                % We can get the corresponding node with:
-                % node = clib.neuron.node_exact(branch1.get_sec(), x);
                 disp(self.name + "(" + x + ").v = " ...
                     + self.ref("v", x).get());
             end

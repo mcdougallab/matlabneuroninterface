@@ -50,7 +50,7 @@ classdef Neuron < dynamicprops
                 end
             % TODO: if the above code fails, Matlab often just crashes instead of catching an error.
             catch  
-                warning("'"+string(func)+"': number or type of arguments incorrect.")
+                warning("'"+string(func)+"': number or type of arguments incorrect.");
             end
 
         end
