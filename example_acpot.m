@@ -45,6 +45,12 @@ while n.t < 10
     n.fadvance();
 end
 
+% Display the number of active Vectors and IClamps.
+veclist = n.List("Vector");
+icllist = n.List("IClamp");
+disp("Number of Vectors: " + veclist.count());
+disp("Number of IClamps: " + icllist.count());
+
 % Plot results.
 figure;
 hold on;
