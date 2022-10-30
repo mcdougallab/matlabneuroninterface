@@ -9,7 +9,7 @@ n.hoc_oc("create soma");
 n.topology();
 
 % Try vector.
-v = neuron.Vector();
+v = n.Vector();
 disp("Before recording:");
 disp(v.get_vec());
 disp("Size: " + length(v));

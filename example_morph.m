@@ -8,9 +8,9 @@ n = neuron.Neuron();
 n.reset_sections();
 
 % Make sections.
-main = neuron.Section("main");
-branch1 = neuron.Section("branch1");
-branch2 = neuron.Section("branch2");
+main = n.Section("main");
+branch1 = n.Section("branch1");
+branch2 = n.Section("branch2");
 
 % Change number of segments.
 main.change_nseg(3);
@@ -37,7 +37,7 @@ n.define_shape();
 
 % Set up simple simulation.
 main.insert_mechanism("pas");
-iclamp = neuron.IClamp(main, 0);
+iclamp = n.IClamp(main, 0);
 iclamp.del = 0;
 iclamp.dur = 10000;
 iclamp.amp = 1;
@@ -48,7 +48,8 @@ for i=1:10
     n.fadvance();
 end
 
-% Print info.
+% Print info, 2 ways.
+branch1.psection();
 branch1.info();
 
 % We are unhappy with branch2, so let's remove it.
