@@ -34,6 +34,8 @@ classdef IClamp < neuron.Object
         end
 
         % Get/set dependent properties.
+        % TODO: these can be dynamically generated also; all these
+        % properties have Neuron type 311.
         function set.del(self, val)
             clib.neuron.set_pp_property(self.obj, "del", val);
         end

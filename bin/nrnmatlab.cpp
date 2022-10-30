@@ -110,6 +110,16 @@ void matlab_hoc_pushpx(NrnRef* nrnref) {
     hoc_pushpx(nrnref->ref);
 }
 void matlab_hoc_pushstr(const char* strin) {
+    // TODO: By using a static char* here, we can only ever have one string
+    // on the stack, which is enough for our current example scripts. 
+    // However, adding a second string changes the first one. Maybe this 
+    // can be fixed in the future by using something like:
+    //      char** ts = hoc_temp_charptr();
+    //      *ts = strin.c_str();
+    //      hoc_pushstr(ts);
+    // However, then we need to keep track of ts and free it later to
+    // prevent a memory leak. Moreover, hoc_temp_charptr can only hold 128 
+    // items.
     static char* cptr = new char[strlen(strin)];
     strcpy(cptr, strin);
     hoc_pushstr(&cptr);
