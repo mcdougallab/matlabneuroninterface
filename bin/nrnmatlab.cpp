@@ -109,9 +109,10 @@ const double* get_vector_vec(Object* vec, int len){
 void matlab_hoc_pushpx(NrnRef* nrnref) {
     hoc_pushpx(nrnref->ref);
 }
-void matlab_hoc_pushstr(std::string str) {
-    char* strchr = const_cast<char*>(str.c_str());
-    hoc_pushstr(&strchr);
+void matlab_hoc_pushstr(const char* strin) {
+    static char* cptr = new char[strlen(strin)];
+    strcpy(cptr, strin);
+    hoc_pushstr(&cptr);
 }
 void matlab_hoc_pushobj(Object* ob) {
     hoc_pushobj(&ob);
