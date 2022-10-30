@@ -1,8 +1,5 @@
-classdef IClamp
+classdef IClamp < neuron.Object
 % IClamp Current clamp class
-    properties (Access=private)
-        ic      % C++ IClamp object
-    end
     properties (Dependent)
         del     % Delay.
         dur     % Duration.
@@ -13,54 +10,47 @@ classdef IClamp
         % Construct current clamp on a section (sec) at a location (loc) between 0 and 1.
         %   IClamp(sec, loc)
             clib.neuron.nrn_pushsec(sec.get_sec());
-            clib.neuron.hoc_pushx(loc);
+            neuron.hoc_push(loc);
             sym = clib.neuron.hoc_lookup("IClamp");
-            self.ic = clib.neuron.hoc_newobj1(sym, 1);
+            obj = clib.neuron.hoc_newobj1(sym, 1);
             clib.neuron.nrn_sec_pop();
-        end
-
-        function delete(self)
-        % Destructor for IClamp.
-        %   delete()
-            clib.neuron.hoc_obj_unref(self.ic);
-            % self.ic.refcount = 0;
-            clibRelease(self.ic)
+            self = self@neuron.Object("IClamp", obj);
         end
 
         function ic = get_ic(self)
         % Return the C++ IClamp object.
         %   ic = get_ic() 
-            ic = self.ic;
+            ic = self.obj;
         end
         function set_pp_property(self, prop, val)
         % Generic set method, set IClamp property (prop) to value (val).
         %   set_pp_property(prop, val)
-            clib.neuron.set_pp_property(self.ic, prop, val);
+            clib.neuron.set_pp_property(self.obj, prop, val);
         end
         function value = get_pp_property(self, prop)
         % Generic get method for property (prop).
         %   value = get_pp_property(prop)
-            value = clib.neuron.set_pp_property(self.ic, prop, val);
+            value = clib.neuron.set_pp_property(self.obj, prop, val);
         end
 
         % Get/set dependent properties.
-        function self = set.del(self, val)
-            clib.neuron.set_pp_property(self.ic, "del", val);
+        function set.del(self, val)
+            clib.neuron.set_pp_property(self.obj, "del", val);
         end
         function value = get.del(self)
-            value = clib.neuron.get_pp_property(self.ic, "del");
+            value = clib.neuron.get_pp_property(self.obj, "del");
         end
-        function self = set.dur(self, val)
-            clib.neuron.set_pp_property(self.ic, "dur", val);
+        function set.dur(self, val)
+            clib.neuron.set_pp_property(self.obj, "dur", val);
         end
         function value = get.dur(self)
-            value = clib.neuron.get_pp_property(self.ic, "dur");
+            value = clib.neuron.get_pp_property(self.obj, "dur");
         end
-        function self = set.amp(self, val)
-            clib.neuron.set_pp_property(self.ic, "amp", val);
+        function set.amp(self, val)
+            clib.neuron.set_pp_property(self.obj, "amp", val);
         end
         function value = get.amp(self)
-            value = clib.neuron.get_pp_property(self.ic, "amp");
+            value = clib.neuron.get_pp_property(self.obj, "amp");
         end
     end
 end
