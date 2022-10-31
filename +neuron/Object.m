@@ -101,8 +101,9 @@ classdef Object < dynamicprops
             % Special case: size
             % If we make an array of Objects, and ask for its size, Matlab
             % throws an error if we don't exclude this special case here.
+            % TODO: check behavior for Objects other than Vector.
             elseif (method == "size")
-                % Do nothing.
+                % Do nothing; method is replaced by self.length().
             % Is this method present in the HOC lookup table, and does it return a double?
             elseif any(strcmp(self.method_list, method+":270"))
                 [varargout{1:nargout}] = call_method_hoc(self, method, "double", S(2).subs{:});
