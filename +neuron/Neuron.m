@@ -15,7 +15,7 @@ classdef Neuron < dynamicprops
             self.function_list = arr(1:end-1);
 
             % Add dynamic properties.
-            % TODO: Setting crashes for n.L (and perhaps for other variables as well).
+            % TODO: Setting the property crashes for n.L (and perhaps for other variables as well).
             % Hence, we cannot neatly set all properties upon initialization like we do for neuron.Object.
             for i=1:length(self.function_list)
                 func = split(self.function_list(i), ":");
@@ -29,7 +29,7 @@ classdef Neuron < dynamicprops
         % If a function is called, but it is not listed as a Neuron class method, try to run it by calling self.call_func_hoc().
         %   Available functions are displayed using Neuron.list_function().
         %
-        %   Getting/setting direct top-level variable access is possible using:
+        %   Getting/setting direct top-level variables is possible using:
         %   n = neuron.Neuron();
         %   n.t, n.dt, n.GAMMA, n.PHI, etc.
 

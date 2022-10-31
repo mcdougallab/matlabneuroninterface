@@ -25,18 +25,124 @@ To get the toolbox working on your machine, run the MATLAB scripts in the follow
     - to build the library interface
 
 Then, you can test the toolbox by running:
-- **example_run** 
+- **examples/example_run** 
     - to initialize a Neuron session and call some top-level functions from the library
-- **example_vector** 
+- **examples/example_vector** 
     - to create a Vector object and calculate some properties
-- **example_acpot** 
-    - to generate an action potential
-- **example_morph** 
+- **examples/example_morph** 
     - to generate a morphology by connecting different Sections
+- **examples/example_acpot** 
+    - to generate an action potential
 
 **example_acpot** should result in:
 
 ![Action potential](doc/acpot.jpg)
+
+## Code structure
+
+### The Neuron class
+
+The main Neuron class can be found at neuron.Neuron. We can
+initialize a Neuron session by running:
+
+```matlab
+n = neuron.Neuron();
+```
+
+Now, all top-level variables, functions and classes can be accessed
+using this object. The available variables, functions and classes, as 
+well as their Neuron types can be displayed with:
+
+```matlab
+n.list_functions();
+```
+
+For now, only top-level variables of type double (Neuron type 263), 
+functions returning a double (Neuron type 280), and objects 
+(Neuron type 325) can be called. E.g.:
+
+```matlab
+v = n.Vector();
+vlist = n.List("Vector");
+```
+
+These variables, functions and objects are created dynamically. This works 
+by making the Neuron class a subclass of `dynamicprops`, allowing us to
+pass the name of whichever variable, functions or object the user is calling to 
+`clib.neuron.hoc_lookup` as a string. `clib.neuron.hoc_lookup` returns a 
+`clib.neuron.Symbol` pointing to the correct variable, function or object. 
+Depending on the Neuron type, this `Symbol` can be passed to:
+
+```matlab
+clib.neuron.ref             % variables, type 263
+clib.neuron.hoc_call_func   % functions, type 280
+clib.neuron.hoc_newobj1     % objects, type 325
+```
+
+Moreover, a Neuron function can expect some number of arguments,
+which it will take from the Neuron stack machine. These arguments
+need to be placed on the stack before calling the function, using
+`neuron.push_hoc`. Output can be read by popping items of the stack
+with `neuron.pop_hoc`. If the user provides
+the incorrect number or types of input arguments, or tries to pop
+output off the stack if there is none, the code might crash.
+
+### Neuron Objects
+
+A Neuron C++ Object is wrapped by MATLAB in the class neuron.Object.
+It has variables and methods, which are also generated dynamically 
+using a `dynamicprops` subclassing construction.
+Object variables and methods can be displayed using `list_methods`:
+
+```matlab
+v = n.Vector();
+v.list_methods();
+```
+
+For now, we can only call attributes of type double (Neuron type 311), 
+and methods with return types double (Neuron type 270), object 
+(Neuron type 329) or string (Neuron type 330). If the user provides
+the incorrect number or types of input arguments, the code might crash.
+
+The C++ object can be accessed with:
+
+```
+Cpp_obj = v.get_obj();
+```
+
+Keep in mind that not all C++ object attributes are recognized by
+MATLAB: it cannot understand unions, for example.
+
+### Sections
+
+The neuron.Section class is the most straightforward MATLAB class in 
+terms of implementation. Its methods and attributes are not generated 
+dynamically.
+
+For calls to some top-level variables, functions or objects, it is
+necessary to put a Section on the stack first. For example,
+to make an IClamp on a Section, we need to first push the Section 
+onto the stack with `clib.neuron.nrn_pushsec`. Then we can create
+the IClamp. Finally, we must not forget to run 
+`clib.neuron.nrn_sec_pop` to take the Section off the stack again.
+The neuron.Neuron class takes care of this automatically
+(see `neuron.Neuron.hoc_new_obj`) if the user provides a Section
+as input.
+
+### NrnRef
+
+The class clib.neuron.NrnRef is a wrapper class holding a pointer
+to a Neuron variable, to make sure MATLAB handles pointers correctly. 
+The NrnRef can be given to `neuron.hoc_push` to put the pointer
+on the Neuron stack.
+
+The variable itself can be set or read with:
+
+```matlab
+t = n.ref("t");     % n.ref returns an NrnRef to a top-level variable
+t.set(3.14);        % Sets the variable; equivalent to n.t = 3.14;
+disp(t.get());      % Display the variable
+```
 
 ## Notes
 
