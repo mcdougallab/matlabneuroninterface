@@ -18,9 +18,22 @@ classdef Object < dynamicprops
             if clib.neuron.isinitialized()
                 self.objtype = objtype;
                 self.obj = obj;
+
+                % Get method list.
                 method_str = clib.neuron.get_class_methods(self.objtype);
                 self.method_list = split(method_str, ";");
                 self.method_list = self.method_list(1:end-1);
+
+                % Add dynamic properties.
+                for i=1:length(self.method_list)
+                    method = split(self.method_list(i), ":");
+                    if (method(2) == "311")
+                        disp(method(1));
+                        p = self.addprop(method(1));
+                        p.SetMethod = self.set_prop(method(1));
+                        self.(method(1)) = clib.neuron.get_pp_property(self.obj, method(1));
+                    end
+                end
             else
                 warning("Initialize a Neuron session before making an Object.");
             end
@@ -83,6 +96,9 @@ classdef Object < dynamicprops
             % Is the provided method listed above?
             if any(strcmp(methods(self), method))
                 [varargout{1:nargout}] = builtin('subsref', self, S);
+            % Are we trying to directly access a class property?
+            elseif (isa(method, "char") && length(S) == 1 && any(strcmp(self.method_list, method+":311")))
+                [varargout{1:nargout}] = clib.neuron.get_pp_property(self.obj, method);
             % Special case: size
             % If we make an array of Objects, and ask for its size, Matlab
             % throws an error if we don't exclude this special case here.
@@ -102,5 +118,14 @@ classdef Object < dynamicprops
             end
         end
 
+        function p = set_prop(self, propname)
+        % Set dynamic property.
+        %   set_prop(obj, propname)
+            function set_pp_property(~, value)
+                clib.neuron.set_pp_property(self.obj, propname, value);
+                self.(propname) = value;
+            end
+            p = @set_pp_property;
+        end
     end
 end

@@ -31,12 +31,8 @@ classdef Neuron < dynamicprops
             % Are we trying to directly access a top-level variable?
             if (isa(func, "char") && length(S) == 1 && any(strcmp(self.function_list, func+":263")))
                 [varargout{1:nargout}] = clib.neuron.ref(func).get();
-            % Check for special types (IClamp/Section);
+            % Check for special type "Section";
             % the special type "Vector" is checked in self.hoc_new_obj().
-            elseif (func == "IClamp")
-                sec = S(2).subs{1};
-                loc = S(2).subs{2};
-                [varargout{1:nargout}] = neuron.IClamp(sec, loc);
             elseif (func == "Section")
                 name = S(2).subs{1};
                 [varargout{1:nargout}] = neuron.Section(name);
@@ -68,7 +64,7 @@ classdef Neuron < dynamicprops
         function value = call_func_hoc(func, returntype, varargin)
         % Call function by passing function name (func) to HOC lookup, along with its return type (returntype) and arguments (varargin).
         %   value = call_func_hoc(func, returntype, varargin)
-            
+
             try
                 n = length(varargin);
                 for i=1:n
@@ -90,18 +86,29 @@ classdef Neuron < dynamicprops
         function obj = hoc_new_obj(objtype, varargin)
         % Make object by providing object type (objtype) and constructor arguments (varargin).
         %   obj = hoc_new_obj(objtype, varargin)
-            
+
             try
-                n = length(varargin);
-                for i=1:n
-                    neuron.hoc_push(varargin{i});
+                nargs = length(varargin);
+                nsecs = 0;
+                for i=1:length(varargin)
+                    arg = varargin{i};
+                    if (isa(arg, "neuron.Section"))
+                        nargs = nargs - 1;
+                        nsecs = nsecs + 1;
+                        clib.neuron.nrn_pushsec(arg.get_sec());
+                    else
+                        neuron.hoc_push(arg);
+                    end
                 end
                 sym = clib.neuron.hoc_lookup(objtype);
-                cppobj = clib.neuron.hoc_newobj1(sym, n);
+                cppobj = clib.neuron.hoc_newobj1(sym, nargs);
                 if (objtype == "Vector")
                     obj = neuron.Vector(cppobj);
                 else
                     obj = neuron.Object(objtype, cppobj);
+                end
+                for i=1:nsecs
+                    clib.neuron.nrn_sec_pop();
                 end
             catch  
                 warning("'"+string(objtype)+"': number or type of arguments incorrect.");
