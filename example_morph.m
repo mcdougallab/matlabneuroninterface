@@ -13,7 +13,7 @@ branch1 = n.Section("branch1");
 branch2 = n.Section("branch2");
 
 % Change number of segments.
-main.change_nseg(3);
+main.nseg = 3;
 
 % Connect beginning of branches to end of main.
 branch1.connect(0, main, 1);

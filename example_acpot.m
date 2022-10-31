@@ -9,7 +9,7 @@ n.reset_sections();
 
 % Make axon.
 axon = n.Section("axon");
-axon.change_nseg(3);
+axon.nseg = 3;
 axon.set_diameter(50);
 axon.insert_mechanism("hh");
 

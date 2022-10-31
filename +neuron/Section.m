@@ -6,6 +6,7 @@ classdef Section
     end
     properties (Dependent)
         length
+        nseg
     end
     methods
         function self = Section(name)
@@ -49,11 +50,6 @@ classdef Section
         %   sec = get_sec() 
             sec = self.sec;
         end
-        function change_nseg(self, nseg)
-        % Change the number of segments in the Section.
-        %   change_nseg(nseg)
-            clib.neuron.nrn_change_nseg(self.sec, nseg);
-        end
         function connect(self, loc, parent_sec, parent_loc)
         % Connect this section at loc to another section (parent_sec) at parent_loc.
         %   connect(loc, parent_sec, parent_loc)
@@ -89,13 +85,20 @@ classdef Section
             % is a union, which Matlab does not understand.
             value = clib.neuron.get_dparam(self.sec, 2);
         end
+        function self = set.nseg(self, val)
+        % Set the number of segments in the Section.
+            clib.neuron.nrn_change_nseg(self.sec, val);
+        end
+        function value = get.nseg(self)
+        % Get the number of segments in the Section.
+            value = self.sec.nnode - 1;
+        end
         function self = set_diameter(self, val)
         % Set diameter of Section.
         %   set_diameter(val)
 
-            nseg = self.sec.nnode - 1;
-            for i=1:nseg
-                x = double((double(i) - 0.5) / double(nseg));
+            for i=1:self.nseg
+                x = double((double(i) - 0.5) / double(self.nseg));
                 node = clib.neuron.node_exact(self.sec, x);
                 clib.neuron.set_node_diam(node, val);
             end
@@ -113,16 +116,15 @@ classdef Section
         % Print section info
         %   info()
             
-            nseg = self.sec.nnode - 1;
             npt3d = self.sec.npt3d;
             disp(self.name + " has length " + self.length + ".");
             disp(self.name + " has " + npt3d + " pt3d and " ...
-                + nseg + " segment(s).");
+                + self.nseg + " segment(s).");
             for i=1:npt3d
                 disp(self.sec.pt3d(i));
             end
-            for i=1:nseg
-                x = double((double(i) - 0.5) / double(nseg));
+            for i=1:self.nseg
+                x = double((double(i) - 0.5) / double(self.nseg));
                 disp(self.name + "(" + x + ").v = " ...
                     + self.ref("v", x).get());
                 disp(self.name + "(" + x + ").diam = " ...
