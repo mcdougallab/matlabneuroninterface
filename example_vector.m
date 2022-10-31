@@ -17,15 +17,14 @@ disp(v.double());
 disp("----------");
 
 % Track time in vector.
-t = n.ref("t");
-v.record(t);
+v.record(n.ref("t"));
 n.finitialize(-65);
 disp("Tracking 10 time steps with Vector.record()...");
 for i = 1:4
     disp("t: "+n.t);
     n.fadvance();
 end
-t.set(3.14);
+n.t = 3.14;
 for i = 5:9
     disp("t: "+n.t);
     n.fadvance();

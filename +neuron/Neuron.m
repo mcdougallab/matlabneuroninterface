@@ -13,16 +13,25 @@ classdef Neuron < dynamicprops
             clib.neuron.initialize();
             arr = split(clib.neuron.get_nrn_functions(), ";");
             self.function_list = arr(1:end-1);
+
+            % Add dynamic properties.
+            % TODO: Setting crashes for n.L (and perhaps for other variables as well).
+            % Hence, we cannot neatly set all properties upon initialization like we do for neuron.Object.
+            for i=1:length(self.function_list)
+                func = split(self.function_list(i), ":");
+                if (func(2) == "263")
+                    p = self.addprop(func(1));
+                    p.SetMethod = self.set_prop(func(1));
+                end
+            end
         end
         function varargout = subsref(self, S)
         % If a function is called, but it is not listed as a Neuron class method, try to run it by calling self.call_func_hoc().
         %   Available functions are displayed using Neuron.list_function().
         %
-        %   Getting (NOT setting) direct top-level variable access is possible using:
+        %   Getting/setting direct top-level variable access is possible using:
         %   n = neuron.Neuron();
         %   n.t, n.dt, n.GAMMA, n.PHI, etc.
-        %
-        %   TODO: Crashes for n.L (and perhaps for other variables as well).
 
             % S(1).subs is function name;
             % S(2).subs is a cell array containing arguments.
@@ -57,6 +66,16 @@ classdef Neuron < dynamicprops
                 fnc = self.function_list(i).split(":");
                 disp("Name: " + fnc(1) + ", type: " + fnc(2));
             end
+        end
+
+        function p = set_prop(self, propname)
+        % Set dynamic property.
+        %   set_prop(obj, propname)
+            function set_nrn_property(~, value)
+                clib.neuron.ref(propname).set(value);
+                self.(propname) = value;
+            end
+            p = @set_nrn_property;
         end
 
     end
