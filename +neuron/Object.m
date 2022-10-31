@@ -28,7 +28,6 @@ classdef Object < dynamicprops
                 for i=1:length(self.method_list)
                     method = split(self.method_list(i), ":");
                     if (method(2) == "311")
-                        disp(method(1));
                         p = self.addprop(method(1));
                         p.SetMethod = self.set_prop(method(1));
                         self.(method(1)) = clib.neuron.get_pp_property(self.obj, method(1));
@@ -79,7 +78,7 @@ classdef Object < dynamicprops
         function list_methods(self)
         % List all available methods to be called using HOC lookup.
         %   list_methods()
-            warning("For now, only methods with type 270 (double), 329 (object) or 330 (string) can be called.");
+            warning("For now, only properties with type 311 and methods with type 270 (double), 329 (object) or 330 (string) can be called.");
             for i=1:length(self.method_list)
                 mth = self.method_list(i).split(":");
                 disp("Name: " + mth(1) + ", type: " + mth(2));
