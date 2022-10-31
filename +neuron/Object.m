@@ -29,8 +29,8 @@ classdef Object < dynamicprops
                     method = split(self.method_list(i), ":");
                     if (method(2) == "311")
                         p = self.addprop(method(1));
-                        p.SetMethod = self.set_prop(method(1));
                         self.(method(1)) = clib.neuron.get_pp_property(self.obj, method(1));
+                        p.SetMethod = self.set_prop(method(1));
                     end
                 end
             else
