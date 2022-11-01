@@ -2,6 +2,9 @@
 % Run this function to generate the MATLAB-NEURON interface DLL.
 function setup_build_interface()
 
+    % Set paths.
+    setup_nrn_paths;
+
     % Create definition file for NEURON library.
     HeaderFilePath = "bin/nrnmatlab.h";
     SourceFilePath = "bin/nrnmatlab.cpp";

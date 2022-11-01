@@ -13,7 +13,9 @@ function setup_nrn_paths()
     % WINDOWS: Put them on the PATH
     dllpath = fullfile(NeuronInstallationDirectory, 'bin');
     syspath = getenv('PATH'); 
-    setenv('PATH', [dllpath pathsep syspath]);
+    if ~contains(string(syspath), string(dllpath)+pathsep)
+        setenv('PATH', [dllpath pathsep syspath]);
+    end
     
     % Path to the generated interface library.
     addpath neuron;
