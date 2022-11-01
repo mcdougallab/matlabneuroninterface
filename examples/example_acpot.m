@@ -3,7 +3,7 @@
 
 % Initialization.
 clear;
-setup0_paths;
+setup_nrn_paths;
 n = neuron.Neuron();
 n.reset_sections();
 

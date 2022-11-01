@@ -13,15 +13,14 @@ MATLAB is a registered trademark of The MathWorks, Inc.
 First, make sure NEURON for Windows is installed (see http://neuron.yale.edu/).
 
 To get the toolbox working on your machine, run the MATLAB scripts in the following order:
-- **setup0_paths** 
+- **setup_nrn_paths** 
     - to add the appropriate directories to your path (you might need to
       change the NEURON installation directory)
-- **setup1_define**
+- **setup_build_interface**
     - to generate the library definition file
-    - in this file, you will need to adapt & uncomment:
+    - to automatically adapt & uncomment in the library definition file:
         - the function get_vector_vec: `<SHAPE>` is "len"
         - the Section attribute pt3d: `<MLTYPE>` is "clib.array.neuron.Pt3d", `<SHAPE>` is "npt3d"
-- **setup2_build**
     - to build the library interface
 
 Then, you can test the toolbox by running:

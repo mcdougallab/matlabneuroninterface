@@ -1,6 +1,6 @@
 % Cause a crash while running NEURON in MATLAB:
 clear;
-setup0_paths;
+setup_nrn_paths;
 n = neuron.Neuron();
 n.reset_sections();
 v = n.Vector(10);
