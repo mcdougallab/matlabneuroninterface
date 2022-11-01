@@ -106,7 +106,7 @@ the incorrect number or types of input arguments, the code might crash.
 
 The C++ object can be accessed with:
 
-```
+```matlab
 Cpp_obj = v.get_obj();
 ```
 
@@ -118,6 +118,13 @@ MATLAB: it cannot understand unions, for example.
 The neuron.Section class is the most straightforward MATLAB class in 
 terms of implementation. Its methods and attributes are not generated 
 dynamically.
+
+```matlab
+main = n.Section("main");       % Make main Section
+branch = n.Section("branch");   % Make branch
+branch.connect(0, main, 1);     % Connect start of branch to end of main
+n.topology();                   % Display resulting topology
+```
 
 For calls to some top-level variables, functions or objects, it is
 necessary to put a Section on the stack first. For example,
