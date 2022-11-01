@@ -42,7 +42,7 @@ Then, you can test the toolbox by running:
 ### The Neuron class
 
 The main Neuron class can be found at `neuron.Neuron`. We can
-initialize a Neuron session by running:
+initialize a Neuron session by instantiating it:
 
 ```matlab
 n = neuron.Neuron();
@@ -115,7 +115,7 @@ MATLAB: it cannot understand unions, for example.
 
 ### Sections
 
-The neuron.Section class is the most straightforward MATLAB class in 
+The `neuron.Section` class is the most straightforward MATLAB class in 
 terms of implementation. Its methods and attributes are not generated 
 dynamically.
 
@@ -132,7 +132,7 @@ before attaching an IClamp to a Section, we need to first push the
 Section onto the stack with `clib.neuron.nrn_pushsec`. 
 After creating the IClamp, we must not forget to run 
 `clib.neuron.nrn_sec_pop` to take the Section off the stack again.
-The neuron.Neuron class takes care of this automatically
+The `neuron.Neuron` class takes care of this automatically
 (see `neuron.Neuron.hoc_new_obj`) if the user provides a Section
 as input.
 
