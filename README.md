@@ -68,7 +68,7 @@ v = n.Vector();             % Create a Vector object
 
 These variables, functions and objects are created dynamically. This works 
 by making the Neuron class a subclass of `dynamicprops`, allowing us to
-pass the name of whichever variable, functions or object the user is calling to 
+pass the name of whichever variable, function or object the user is calling to 
 `clib.neuron.hoc_lookup` as a string. `clib.neuron.hoc_lookup` returns a 
 `clib.neuron.Symbol` pointing to the correct variable, function or object. 
 Depending on the Neuron type, this `clib.neuron.Symbol` can be passed to:
@@ -82,7 +82,7 @@ clib.neuron.hoc_newobj1     % objects, type 325
 Moreover, a Neuron function can expect some number of arguments,
 which it will take from the Neuron stack machine. These arguments
 need to be placed on the stack before calling the function, using
-`neuron.push_hoc`. Output can be read by popping items of the stack
+`neuron.push_hoc`. Output can be read by popping items off the stack
 with `neuron.pop_hoc`. If the user provides
 the incorrect number or types of input arguments, or tries to pop
 output off the stack if there is none, the code might crash.
