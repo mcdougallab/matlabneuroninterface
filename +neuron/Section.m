@@ -1,8 +1,10 @@
 classdef Section
 % Section Class for manipulating Neuron sections.
     properties (Access=private)
-        sec     % C++ Section object.
-        name    % Name of the section.
+        sec         % C++ Section object.
+        name        % Name of the section.
+        mech_list   % List of allowed insertable mechanisms.
+        range_list  % List of allowed range variables.
     end
     properties (Dependent)
         length
@@ -15,6 +17,22 @@ classdef Section
             if clib.neuron.isinitialized()
                 self.name = name;
                 self.sec = clib.neuron.new_section(name);
+                self.mech_list = [];
+                self.range_list = [];
+
+                arr = split(clib.neuron.get_nrn_functions(), ";");
+                arr = arr(1:end-1);
+    
+                % Add dynamic mechanisms and range variables.
+                for i=1:length(arr)
+                    var = split(arr(i), ":");
+                    if (var(2) == "311") % range variable
+                        self.range_list = [self.range_list var(1)];
+                    elseif (var(2) == "312") % insertable mechanism
+                        self.mech_list = [self.mech_list var(1)];
+                    end
+                end
+
             else
                 self.name = name;
                 warning("Initialize a Neuron session before making a Section.");
@@ -37,13 +55,30 @@ classdef Section
         function insert_mechanism(self, mech_name)
         % Insert a mechanism by providing a mechanism name.
         %   insert_mechanism(mech_name)
-            sym = clib.neuron.hoc_lookup(mech_name);
-            clib.neuron.mech_insert1(self.sec, sym.subtype);
+            if any(strcmp(self.mech_list, mech_name))
+                sym = clib.neuron.hoc_lookup(mech_name);
+                clib.neuron.mech_insert1(self.sec, sym.subtype);
+            else
+                warning("Insertable mechanism '"+mech_name+"' not found.");
+                disp("Available insertable mechanisms:")
+                for i=1:self.mech_list.length()
+                    disp("    "+self.mech_list(i));
+                end
+            end
         end
-        function nrnref = ref(self, sym, loc)
-        % Return an NrnRef to a quantity (sym) at a location along the segment (loc) between 0 and 1.
-        %   nrnref = ref(sym, loc) 
-            nrnref = clib.neuron.range_ref(self.sec, sym, loc);
+        function nrnref = ref(self, rangevar, loc)
+        % Return an NrnRef to a range variable (rangeref) at a location 
+        % along the segment (loc) between 0 and 1.
+        %   nrnref = ref(rangevar, loc) 
+            if any(strcmp(self.range_list, rangevar))
+                nrnref = clib.neuron.range_ref(self.sec, rangevar, loc);
+            else
+                warning("Range variable '"+rangevar+"' not found.");
+                disp("Available range variable:")
+                for i=1:self.range_list.length()
+                    disp("    "+self.range_list(i));
+                end
+            end
         end
         function sec = get_sec(self)
         % Return the C++ Section object.
