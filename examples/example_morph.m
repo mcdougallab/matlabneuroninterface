@@ -22,9 +22,13 @@ branch2.connect(0, main, 1);
 % Show topology.
 n.topology();
 
-% Add 3D points to main.
+% Add 3D point to main.
 main.addpoint(1, 2, 3, 4);
-main.addpoint(201, 2, 3, 1);
+
+% Alternative way to add 3D point to main using dynamic top-level function.
+main.push();
+n.pt3dadd(201, 2, 3, 1);
+main.pop();
 
 % Set abstract morphology info for branches.
 branch1.length = 100;

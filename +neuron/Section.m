@@ -95,17 +95,23 @@ classdef Section
             clib.neuron.simpleconnectsection();
         end
 
+        function push(self)
+        % Push self to Section stack.
+        %   push()
+            clib.neuron.nrn_pushsec(self.sec);
+        end
+
         function addpoint(self, x, y, z, diam)
         % Add point to Section.
         %   addpoint(x, y, z, diam)            
-            clib.neuron.nrn_pushsec(self.sec);
+            self.push();
             clib.neuron.hoc_pushx(x);
             clib.neuron.hoc_pushx(y);
             clib.neuron.hoc_pushx(z);
             clib.neuron.hoc_pushx(diam);
             sym = clib.neuron.hoc_lookup("pt3dadd");
             clib.neuron.hoc_call_func(sym, 4);
-            clib.neuron.nrn_sec_pop();
+            self.pop();
         end
         function self = set.length(self, val)
         % Set length of Section.
@@ -167,5 +173,14 @@ classdef Section
             end
 
         end
+    end
+    methods(Static)
+
+        function pop()
+        % Pop (any) section from stack.
+        %   pop()
+            clib.neuron.nrn_sec_pop;      
+        end
+
     end
 end
