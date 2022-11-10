@@ -1,8 +1,11 @@
 classdef Neuron < dynamicprops
 % Neuron Class for initializing a Neuron session and running generic Neuron functions.
 
-    properties (Access=private)
-        function_list       % List of top-level functions.
+    properties (SetAccess=protected, GetAccess=public)
+        var_list        % List of top-level Neuron variables.
+        fn_double_list  % List of top-level Neuron functions returning a double.
+        fn_string_list  % List of top-level Neuron functions returning a string.
+        object_list     % List of Neuron Objects.
     end
 
     methods
@@ -12,16 +15,23 @@ classdef Neuron < dynamicprops
             self = self@dynamicprops;
             clib.neuron.initialize();
             arr = split(clib.neuron.get_nrn_functions(), ";");
-            self.function_list = arr(1:end-1);
+            call_list = arr(1:end-1);
 
             % Add dynamic properties.
             % TODO: Setting the property crashes for n.L (and perhaps for other variables as well).
             % Hence, we cannot neatly set all properties upon initialization like we do for neuron.Object.
-            for i=1:length(self.function_list)
-                func = split(self.function_list(i), ":");
-                if (func(2) == "263")
-                    p = self.addprop(func(1));
-                    p.SetMethod = self.set_prop(func(1));
+            for i=1:length(call_list)
+                f = split(call_list(i), ":");
+                if (f(2) == "263") % variable
+                    self.var_list = [self.var_list f(1)];
+                    p = self.addprop(f(1));
+                    p.SetMethod = self.set_prop(f(1));
+                elseif (f(2) == "280") % function returning a double
+                    self.fn_double_list = [self.fn_double_list f(1)];
+                elseif (f(2) == "296") % function returning a string
+                    self.fn_string_list = [self.fn_string_list f(1)];
+                elseif (f(2) == "325") % object
+                    self.object_list = [self.object_list f(1)];
                 end
             end
         end
@@ -38,8 +48,11 @@ classdef Neuron < dynamicprops
             func = S(1).subs;
 
             % Are we trying to directly access a top-level variable?
-            if (isa(func, "char") && length(S) == 1 && any(strcmp(self.function_list, func+":263")))
+            if (isa(func, "char") && length(S) == 1 && any(strcmp(self.var_list, func)))
                 [varargout{1:nargout}] = clib.neuron.ref(func).get();
+            % Are we trying to directly access a Matlab defined property?
+            elseif (isa(func, "char") && length(S) == 1 && any(strcmp(properties(self), func)))
+                [varargout{1:nargout}] = self.(func);
             % Check for special type "Section";
             % the special type "Vector" is checked in self.hoc_new_obj().
             elseif (func == "Section")
@@ -49,11 +62,14 @@ classdef Neuron < dynamicprops
             elseif any(strcmp(methods(self), func))
                 [varargout{1:nargout}] = builtin('subsref', self, S);
             % Is this method present in the HOC lookup table, and does it return a double?
-            elseif any(strcmp(self.function_list, func+":280"))
+            elseif any(strcmp(self.fn_double_list, func))
                 [varargout{1:nargout}] = self.call_func_hoc(func, "double", S(2).subs{:});
             % Is this method present in the HOC lookup table, and does it return an Object?
-            elseif any(strcmp(self.function_list, func+":325"))
+            elseif any(strcmp(self.object_list, func))
                 [varargout{1:nargout}] = self.hoc_new_obj(func, S(2).subs{:});
+            % Is this method present in the HOC lookup table, and does it return a string?
+            elseif any(strcmp(self.fn_string_list, func))
+                [varargout{1:nargout}] = self.call_func_hoc(func, "string", S(2).subs{:});
             else
                 warning("'"+string(func)+"': not found; call Neuron.list_functions() to see all available methods and attributes.")
             end
@@ -61,10 +77,21 @@ classdef Neuron < dynamicprops
         function list_functions(self)
         % List all available top-level functions from Neuron.
         %   list_functions()
-            warning("For now, only attributes with type 263 (double) or methods with type 280 (double) can be called.");
-            for i=1:length(self.function_list)
-                fnc = self.function_list(i).split(":");
-                disp("Name: " + fnc(1) + ", type: " + fnc(2));
+            disp("Available variables:")
+            for i=1:self.var_list.length()
+                disp("    "+self.var_list(i));
+            end
+            disp("Available functions (returning a double):")
+            for i=1:self.fn_double_list.length()
+                disp("    "+self.fn_double_list(i));
+            end
+            disp("Available functions (returning a string):")
+            for i=1:self.fn_string_list.length()
+                disp("    "+self.fn_string_list(i));
+            end
+            disp("Available objects:")
+            for i=1:self.object_list.length()
+                disp("    "+self.object_list(i));
             end
         end
 

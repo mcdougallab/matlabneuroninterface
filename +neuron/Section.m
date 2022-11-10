@@ -3,12 +3,14 @@ classdef Section
     properties (Access=private)
         sec         % C++ Section object.
         name        % Name of the section.
+    end
+    properties (SetAccess=protected, GetAccess=public)
         mech_list   % List of allowed insertable mechanisms.
         range_list  % List of allowed range variables.
     end
     properties (Dependent)
-        length
-        nseg
+        length      % Section length.
+        nseg        % Number of segments.
     end
     methods
         function self = Section(name)

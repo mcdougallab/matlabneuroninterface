@@ -1,10 +1,13 @@
 classdef Object < dynamicprops
 % Neuron Object Class
 
-    properties (Access=protected)
+    properties (SetAccess=protected, GetAccess=public)
         objtype         % Neuron Object type
         obj             % C++ Neuron Object.
-        method_list     % List of methods of the C++ object.
+        attr_list       % List of attributes of the C++ object.
+        mt_double_list  % List of methods of the C++ object, returning a double.
+        mt_object_list  % List of methods of the C++ object, returning an object.
+        mt_string_list  % List of methods of the C++ object, returning a string.
     end
     
     methods
@@ -21,16 +24,23 @@ classdef Object < dynamicprops
 
                 % Get method list.
                 method_str = clib.neuron.get_class_methods(self.objtype);
-                self.method_list = split(method_str, ";");
-                self.method_list = self.method_list(1:end-1);
+                method_list = split(method_str, ";");
+                method_list = method_list(1:end-1);
 
                 % Add dynamic properties.
-                for i=1:length(self.method_list)
-                    method = split(self.method_list(i), ":");
+                for i=1:length(method_list)
+                    method = split(method_list(i), ":");
                     if (method(2) == "311")
+                        self.attr_list = [self.attr_list method(1)];
                         p = self.addprop(method(1));
                         self.(method(1)) = clib.neuron.get_pp_property(self.obj, method(1));
                         p.SetMethod = self.set_prop(method(1));
+                    elseif (method(2) == "270")
+                        self.mt_double_list = [self.mt_double_list method(1)];
+                    elseif (method(2) == "329")
+                        self.mt_object_list = [self.mt_object_list method(1)];
+                    elseif (method(2) == "330")
+                        self.mt_string_list = [self.mt_string_list method(1)];
                     end
                 end
             else
@@ -78,10 +88,29 @@ classdef Object < dynamicprops
         function list_methods(self)
         % List all available methods to be called using HOC lookup.
         %   list_methods()
-            warning("For now, only properties with type 311 and methods with type 270 (double), 329 (object) or 330 (string) can be called.");
-            for i=1:length(self.method_list)
-                mth = self.method_list(i).split(":");
-                disp("Name: " + mth(1) + ", type: " + mth(2));
+            if ~isempty(self.attr_list)
+                disp("Available attributes:")
+                for i=1:length(self.attr_list)
+                    disp("    "+self.attr_list(i));
+                end
+            end
+            if ~isempty(self.mt_double_list)
+                disp("Available methods (returning a double):")
+                for i=1:length(self.mt_double_list)
+                    disp("    "+self.mt_double_list(i));
+                end
+            end
+            if ~isempty(self.mt_object_list)
+                disp("Available methods (returning an object):")
+                for i=1:length(self.mt_object_list)
+                    disp("    "+self.mt_object_list(i));
+                end
+            end
+            if ~isempty(self.mt_string_list)
+                disp("Available methods (returning a string):")
+                for i=1:length(self.mt_string_list)
+                    disp("    "+self.mt_string_list(i));
+                end
             end
         end
 
@@ -95,9 +124,12 @@ classdef Object < dynamicprops
             % Is the provided method listed above?
             if any(strcmp(methods(self), method))
                 [varargout{1:nargout}] = builtin('subsref', self, S);
-            % Are we trying to directly access a class property?
-            elseif (isa(method, "char") && length(S) == 1 && any(strcmp(self.method_list, method+":311")))
+            % Are we trying to directly access a Neuron class property?
+            elseif (isa(method, "char") && length(S) == 1 && any(strcmp(self.attr_list, method)))
                 [varargout{1:nargout}] = clib.neuron.get_pp_property(self.obj, method);
+            % Are we trying to directly access a Matlab class property?
+            elseif (isa(method, "char") && length(S) == 1 && any(strcmp(properties(self), method)))
+                [varargout{1:nargout}] = self.(method);
             % Special case: size
             % If we make an array of Objects, and ask for its size, Matlab
             % throws an error if we don't exclude this special case here.
@@ -105,13 +137,13 @@ classdef Object < dynamicprops
             elseif (method == "size")
                 % Do nothing; method is replaced by self.length().
             % Is this method present in the HOC lookup table, and does it return a double?
-            elseif any(strcmp(self.method_list, method+":270"))
+            elseif any(strcmp(self.mt_double_list, method))
                 [varargout{1:nargout}] = call_method_hoc(self, method, "double", S(2).subs{:});
             % Is this method present in the HOC lookup table, and does it return an object?
-            elseif any(strcmp(self.method_list, method+":329"))
+            elseif any(strcmp(self.mt_object_list, method))
                 [varargout{1:nargout}] = call_method_hoc(self, method, "Object", S(2).subs{:});  
             % Is this method present in the HOC lookup table, and does it return a string?
-            elseif any(strcmp(self.method_list, method+":330"))
+            elseif any(strcmp(self.mt_string_list, method))
                 [varargout{1:nargout}] = call_method_hoc(self, method, "string", S(2).subs{:});
             else
                 warning("'"+string(method)+"': not found; call Object.list_methods() to see all available methods.")
