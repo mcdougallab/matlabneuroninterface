@@ -54,6 +54,7 @@ extern "C" __declspec(dllimport) int diam_changed;
 extern "C" __declspec(dllimport) int nrn_is_python_extension;
 extern "C" __declspec(dllimport) int nrn_main_launch;
 extern "C" __declspec(dllimport) int nrn_nobanner_;
+extern "C" __declspec(dllimport) int nrn_try_catch_nest_depth;
 extern "C" __declspec(dllimport) vf2icif_function nrnpy_set_pr_etal;
 extern "C" __declspec(dllimport) nptrsecptrd_function node_exact;
 
