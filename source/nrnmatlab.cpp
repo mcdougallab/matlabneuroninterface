@@ -62,6 +62,10 @@ int increase_try_catch_nest_depth() {
     nrn_try_catch_nest_depth++;
     return nrn_try_catch_nest_depth;
 }
+int decrease_try_catch_nest_depth() {
+    nrn_try_catch_nest_depth--;
+    return nrn_try_catch_nest_depth;
+}
 
 // Return all functions/methods/attributes as a string with separators ";"
 // between methods, and ":" between method name and method type.
