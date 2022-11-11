@@ -43,16 +43,16 @@ void set_diam_changed(int value);
 void set_node_diam(Node* node, double diam);
 
 // C++ Neuron functions directly accessible from MATLAB.
-extern "C" void nrn_pushsec(Section* sec);
-extern "C" void hoc_obj_unref(Object*);
-extern "C" Node* node_exact(Section*, double);
-extern "C" double hoc_call_func(Symbol*, int);
-extern "C" void hoc_call_ob_proc(Object*, Symbol*, int);
-extern "C" Symbol* hoc_lookup(const char*);
-extern "C" void hoc_pushx(double);
-extern "C" Symbol* hoc_table_lookup(const char*, Symlist*);
-extern "C" double hoc_xpop(void);
-extern "C" int hoc_oc(const char*);
+Node* node_exact(Section*, double);
+void nrn_pushsec(Section* sec);
+void hoc_obj_unref(Object*);
+double hoc_call_func(Symbol*, int);
+void hoc_call_ob_proc(Object*, Symbol*, int);
+Symbol* hoc_lookup(const char*);
+void hoc_pushx(double);
+Symbol* hoc_table_lookup(const char*, Symlist*);
+double hoc_xpop(void);
+int hoc_oc(const char*);
 void delete_section(void);
 Object* hoc_newobj1(Symbol*, int);
 void nrn_change_nseg(Section*, int);
