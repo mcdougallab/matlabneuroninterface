@@ -92,6 +92,8 @@ classdef Object < dynamicprops
                 warning("'"+string(method)+"': number or type of arguments incorrect.");
             end
 
+            clib.neuron.decrease_try_catch_nest_depth();
+
         end
 
         function list_methods(self)
