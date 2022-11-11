@@ -42,6 +42,9 @@ void set_dparam(Section* sec, int ind, double value);
 void set_diam_changed(int value);
 void set_node_diam(Node* node, double diam);
 
+// Increase try/catch nest depth after catching an error.
+int increase_try_catch_nest_depth();
+
 // C++ Neuron functions directly accessible from MATLAB.
 Node* node_exact(Section*, double);
 void nrn_pushsec(Section* sec);

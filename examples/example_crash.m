@@ -6,4 +6,6 @@ n.reset_sections();
 v = n.Vector(10);
 
 disp(v.contains());  
-% With NEURON 9, this prints error to screen and does not crash!
+% With NEURON 9, the first time we run this, it prints an error to the
+% console and does not crash! However, the second time we run it, it still
+% crashes...
