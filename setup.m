@@ -4,14 +4,14 @@ function setup()
 
     % User setting:
     NeuronInstallationDirectory = 'C:\nrn-dev';
-    
+
     % Check if NEURON directory is correct.
-    filename = fullfile(NeuronInstallationDirectory, 'bin', 'libnrniv.dll');
+    filename = fullfile(nrnpath, 'bin', 'libnrniv.dll');
     assert(exist(filename, 'file') == 2, 'NEURON directory not found.');
     
     % All dependencies of the generated interface library must be findable.
     % WINDOWS: Put them on the PATH
-    dllpath = fullfile(NeuronInstallationDirectory, 'bin');
+    dllpath = fullfile(nrnpath, 'bin');
     syspath = getenv('PATH'); 
     if ~contains(string(syspath), string(dllpath)+pathsep)
         setenv('PATH', [dllpath pathsep syspath]);
