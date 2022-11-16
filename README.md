@@ -62,9 +62,7 @@ well as their Neuron types can be displayed with:
 n.list_functions();
 ```
 
-For now, only top-level variables of type double (Neuron type 263), 
-functions returning a double (Neuron type 280), and objects 
-(Neuron type 325) can be called. E.g.:
+Top-level variables, functions and objects can be called directly. E.g.:
 
 ```matlab
 disp(n.t);                  % Display the time
@@ -105,10 +103,9 @@ v = n.Vector();
 v.list_methods();
 ```
 
-For now, we can only call attributes of type double (Neuron type 311), 
-and methods with return types double (Neuron type 270), object 
-(Neuron type 329) or string (Neuron type 330). If the user provides
-the incorrect number or types of input arguments, the code might crash.
+Watch out: if the user provides
+the incorrect number or types of input arguments, the code might crash! We
+hope to fix this behavior in NEURON 9, in which error handling will be updated.
 
 The C++ object can be accessed with:
 
