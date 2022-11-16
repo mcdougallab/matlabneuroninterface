@@ -37,6 +37,8 @@ Then, you can test the toolbox by running:
 
 ![Action potential](doc/acpot.jpg)
 
+A comprehensive example can be found at **examples/example_livescript.mlx**.
+
 ## Code structure
 
 ### The Neuron class
