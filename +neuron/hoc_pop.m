@@ -1,4 +1,6 @@
 function value = hoc_pop(returntype)
+% Pop an object of type returntype ("double", "string", "Object" or "void") off the NEURON stack.
+%   hoc_pop(returntype)
     if (returntype=="double")
         value = clib.neuron.hoc_xpop();
     elseif (returntype=="string" || returntype=="char")

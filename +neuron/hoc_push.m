@@ -1,4 +1,6 @@
 function hoc_push(value)
+% Push a double, string, Vector, Object or NrnRef to the NEURON stack.
+%   hoc_push(value)
     if (isa(value, "double"))
         clib.neuron.hoc_pushx(value);  
     elseif (isa(value, "string") || isa(value, "char"))
