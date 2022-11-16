@@ -78,9 +78,9 @@ pass the name of whichever variable, function or object the user is calling to
 Depending on the Neuron type, this `clib.neuron.Symbol` can be passed to:
 
 ```matlab
-clib.neuron.ref             % variables, type 263
-clib.neuron.hoc_call_func   % functions, type 280
-clib.neuron.hoc_newobj1     % objects, type 325
+clib.neuron.ref             % Variables
+clib.neuron.hoc_call_func   % Functions
+clib.neuron.hoc_newobj1     % Objects
 ```
 
 Moreover, a Neuron function can expect some number of arguments,
