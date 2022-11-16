@@ -10,6 +10,8 @@ MATLAB is a registered trademark of The MathWorks, Inc.
 
 ## Usage
 
+### Setup
+
 First, make sure NEURON for Windows is installed (see http://neuron.yale.edu/).
 
 To get the toolbox working on your machine, run the MATLAB scripts in the following order:
@@ -23,7 +25,11 @@ To get the toolbox working on your machine, run the MATLAB scripts in the follow
         - the Section attribute pt3d: `<MLTYPE>` is "clib.array.neuron.Pt3d", `<SHAPE>` is "npt3d"
     - to build the library interface
 
-Then, you can test the toolbox by running:
+### Example scripts
+
+A comprehensive example live script can be found at **examples/example_livescript.mlx**.
+
+Smaller example scripts are available at:
 - **examples/example_run** 
     - to initialize a Neuron session and call some top-level functions from the library
 - **examples/example_vector** 
@@ -36,8 +42,6 @@ Then, you can test the toolbox by running:
 **example_acpot** should result in:
 
 ![Action potential](doc/acpot.jpg)
-
-A comprehensive example can be found at **examples/example_livescript.mlx**.
 
 ## Code structure
 
