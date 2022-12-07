@@ -28,6 +28,7 @@ classdef Object < dynamicprops
                 method_list = method_list(1:end-1);
 
                 % Add dynamic properties.
+                % See: doc/DEV_README.md
                 for i=1:length(method_list)
                     method = split(method_list(i), ":");
                     if (method(2) == "311")

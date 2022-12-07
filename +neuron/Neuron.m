@@ -18,6 +18,7 @@ classdef Neuron < dynamicprops
             call_list = arr(1:end-1);
 
             % Add dynamic properties.
+            % See: doc/DEV_README.md
             % TODO: Setting the property crashes for n.L (and perhaps for other variables as well).
             % Hence, we cannot neatly set all properties upon initialization like we do for neuron.Object.
             for i=1:length(call_list)

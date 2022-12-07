@@ -18,6 +18,7 @@ classdef Vector < neuron.Object
             arr = arr(1:end-1);
 
             % Add dynamic mechanisms and range variables.
+            % See: doc/DEV_README.md
             for i=1:length(arr)
                 var = split(arr(i), ":");
                 if (var(2) == "264")

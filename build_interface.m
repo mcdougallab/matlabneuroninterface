@@ -1,9 +1,9 @@
 % Define and build Neuron interface.
 % Run this function to generate the MATLAB-NEURON interface DLL.
-function setup_build_interface()
+function build_interface()
 
     % Set paths.
-    setup_nrn_paths;
+    setup;
 
     % Create definition file for NEURON library.
     HeaderFilePath = "bin/nrnmatlab.h";
@@ -23,7 +23,9 @@ function setup_build_interface()
     % We want to use the generated .m file, not the .mlx file.
     delete defineneuron.mlx
     
-    % Automatically change lines.
+    % Automatically change lines:
+    % - the Section attribute pt3d: `<MLTYPE>` is "clib.array.neuron.Pt3d", `<SHAPE>` is "npt3d"
+    % - the function get_vector_vec: `<SHAPE>` is "len"
     change_from = {};
     change_from{1} = 'addProperty(SectionDefinition, "pt3d", "clib.neuron.Pt3d", 1, ... % <MLTYPE> can be "clib.neuron.Pt3d", or "clib.array.neuron.Pt3d"';
     change_from{2} = '%get_vector_vecDefinition = addFunction(libDef, ...';

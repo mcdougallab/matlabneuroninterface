@@ -1,6 +1,6 @@
 % Setup Neuron paths.
 % Run this function once to set up your Matlab session for Neuron interaction.
-function setup_nrn_paths()
+function setup()
 
     % User setting:
     NeuronInstallationDirectory = 'C:\nrn';

@@ -3,7 +3,7 @@
 
 % Initialization.
 clear;
-setup_nrn_paths;
+setup;
 n = neuron.Neuron();
 n.hoc_oc("create soma");
 n.topology();
