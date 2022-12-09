@@ -36,8 +36,9 @@ classdef Object < dynamicprops
                         p = self.addprop(method(1));
                         % Get the property value upon object initialization 
                         % so it can be displayed properly in MATLAB.
-                        self.(method(1)) = clib.neuron.get_pp_property(self.obj, method(1));
-                        p.SetMethod = self.set_prop(method(1));
+                        % self.(method(1)) = clib.neuron.get_pp_property(self.obj, method(1));
+                        p.GetMethod = @(self)get_prop(self, method(1));
+                        p.SetMethod = @(self, value)set_prop(self, method(1), value);
                     elseif (method(2) == "270")
                         self.mt_double_list = [self.mt_double_list method(1)];
                     elseif (method(2) == "329")
@@ -127,11 +128,8 @@ classdef Object < dynamicprops
             % Is the provided method listed above?
             if any(strcmp(methods(self), method))
                 [varargout{1:nargout}] = builtin('subsref', self, S);
-            % Are we trying to directly access a Neuron class property?
-            elseif (isa(method, "char") && length(S) == 1 && any(strcmp(self.attr_list, method)))
-                [varargout{1:nargout}] = clib.neuron.get_pp_property(self.obj, method);
-            % Are we trying to directly access a Matlab class property?
-            elseif (isa(method, "char") && length(S) == 1 && any(strcmp(properties(self), method)))
+            % Are we trying to directly access a class property?
+            elseif (isa(method, "char") && length(S) == 1 && isprop(self, method))
                 [varargout{1:nargout}] = self.(method);
             % Special case: size
             % If we make an array of Objects, and ask for its size, Matlab
@@ -153,14 +151,16 @@ classdef Object < dynamicprops
             end
         end
 
-        function p = set_prop(self, propname)
+        function set_prop(self, propname, value)
         % Set dynamic property.
-        %   set_prop(obj, propname)
-            function set_pp_property(~, value)
-                clib.neuron.set_pp_property(self.obj, propname, value);
-                self.(propname) = value;
-            end
-            p = @set_pp_property;
+        %   set_prop(propname)
+            clib.neuron.set_pp_property(self.obj, propname, value);
+        end
+
+        function value = get_prop(self, propname)
+        % Get dynamic property.
+        %   value = get_prop(propname)
+            value = clib.neuron.get_pp_property(self.obj, propname);
         end
     end
 end

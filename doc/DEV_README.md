@@ -135,3 +135,4 @@ steps:
 - [Releasing C++ memory](https://nl.mathworks.com/help/matlab/ref/clibrelease.html?s_tid=doc_ta)
 - [Dynamic methods with subsref](https://nl.mathworks.com/matlabcentral/answers/59026-is-it-possible-to-dynamically-add-methods-to-an-object-or-to-build-a-generic-method-that-catches-a)
 - [dynamicprops](https://nl.mathworks.com/help/matlab/ref/dynamicprops-class.html)
+- [Set/get methods for dynamicprops](https://nl.mathworks.com/matlabcentral/answers/48831-set-methods-for-dynamic-properties-with-unknown-names?s_tid=answers_rc1-2_p2_MLT)

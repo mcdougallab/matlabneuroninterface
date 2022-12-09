@@ -19,14 +19,16 @@ classdef Neuron < dynamicprops
 
             % Add dynamic properties.
             % See: doc/DEV_README.md#neuron-types
-            % TODO: Setting the property crashes for n.L (and perhaps for other variables as well).
-            % Hence, we cannot neatly set all properties upon initialization like we do for neuron.Object.
+            % TODO: 
+            % - Setting the property crashes for n.L (and perhaps for other variables as well).
+            % - p.GetMethod also crashes for the same variables
+            % - Hence, we cannot neatly get/set all properties upon initialization like we do for neuron.Object.
             for i=1:length(call_list)
                 f = split(call_list(i), ":");
                 if (f(2) == "263") % variable
                     self.var_list = [self.var_list f(1)];
                     p = self.addprop(f(1));
-                    p.SetMethod = self.set_prop(f(1));
+                    p.SetMethod = @(value)set_prop(f(1), value);
                 elseif (f(2) == "280") % function returning a double
                     self.fn_double_list = [self.fn_double_list f(1)];
                 elseif (f(2) == "296") % function returning a string
@@ -52,7 +54,7 @@ classdef Neuron < dynamicprops
             if (isa(func, "char") && length(S) == 1 && any(strcmp(self.var_list, func)))
                 [varargout{1:nargout}] = clib.neuron.ref(func).get();
             % Are we trying to directly access a Matlab defined property?
-            elseif (isa(func, "char") && length(S) == 1 && any(strcmp(properties(self), func)))
+            elseif (isa(func, "char") && length(S) == 1 && isprop(self, func))
                 [varargout{1:nargout}] = self.(func);
             % Check for special type "Section";
             % the special type "Vector" is checked in self.hoc_new_obj().
@@ -96,18 +98,13 @@ classdef Neuron < dynamicprops
             end
         end
 
-        function p = set_prop(self, propname)
-        % Set dynamic property.
-        %   set_prop(obj, propname)
-            function set_nrn_property(~, value)
-                clib.neuron.ref(propname).set(value);
-                self.(propname) = value;
-            end
-            p = @set_nrn_property;
-        end
-
     end
     methods(Static)
+        function set_prop(propname, value)
+        % Set dynamic property.
+        %   set_prop(propname, value)
+            clib.neuron.ref(propname).set(value);
+        end
         function value = call_func_hoc(func, returntype, varargin)
         % Call function by passing function name (func) to HOC lookup, along with its return type (returntype) and arguments (varargin).
         %   value = call_func_hoc(func, returntype, varargin)
