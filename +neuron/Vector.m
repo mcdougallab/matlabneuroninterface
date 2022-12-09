@@ -34,10 +34,14 @@ classdef Vector < neuron.Object
             vec = self.obj;
         end
 
-        function arr = data(self)
+        function arr = data(self, index)
         % Access Vector data.
         %   arr = data()
+        %   element = data(index)
             arr = clib.neuron.get_vector_vec(self.obj, self.length());
+            if nargin == 2
+                arr = arr(index);
+            end
         end
         
         function value = length(self)
@@ -46,14 +50,18 @@ classdef Vector < neuron.Object
             value = self.call_method_hoc('size', 'double');
         end
 
-        function arr = double(self)
+        function arr = double(self, index)
         % Access Vector data as Matlab doubles.
         %   arr = double()
+        %   element = double(index)
             vec_len = self.length();
             arr = zeros(1, vec_len);
             vec_data = self.data();
             for i=1:vec_len
                 arr(i) = vec_data(i);
+            end
+            if nargin == 2
+                arr = arr(index);
             end
         end
 
