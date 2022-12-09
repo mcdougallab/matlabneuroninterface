@@ -112,9 +112,7 @@ Vector related:
 - 264: math functions that return a double (these are all functions of 1 variable), that can
   be applied on the vector data
 
-## Notes
-
-### Static library file
+## Static library file
 
 We use clibgen with MinGW64, and give it a .a static library file, 
 which is included in bin/.
@@ -129,7 +127,7 @@ steps:
 - The DLL can then be converted to a .a file with `dlltool -d bin/libnrniv.def -D bin/libnrniv.dll -l bin/libnrniv.a`
 - dlltool.exe can be found (for me) at C:\ProgramData\MATLAB\SupportPackages\R2022a\3P.instrset\mingw_w64.instrset\bin\dlltool.exe
 
-### Useful links
+## Useful links
 
 - [Creating a definition file](https://nl.mathworks.com/help/matlab/ref/clibgen.generatelibrarydefinition.html)
 - [MATLAB/C++ data type mapping](https://nl.mathworks.com/help/matlab/matlab_external/matlab-to-c-data-type-mapping.html)
