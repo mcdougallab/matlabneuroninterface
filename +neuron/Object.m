@@ -34,6 +34,8 @@ classdef Object < dynamicprops
                     if (method(2) == "311")
                         self.attr_list = [self.attr_list method(1)];
                         p = self.addprop(method(1));
+                        % Get the property value upon object initialization 
+                        % so it can be displayed properly in MATLAB.
                         self.(method(1)) = clib.neuron.get_pp_property(self.obj, method(1));
                         p.SetMethod = self.set_prop(method(1));
                     elseif (method(2) == "270")
