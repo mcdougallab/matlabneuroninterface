@@ -126,7 +126,7 @@ classdef Object < dynamicprops
             method = S(1).subs;
 
             % Is the provided method listed above?
-            if any(strcmp(methods(self), method))
+            if ismethod(self, method)
                 [varargout{1:nargout}] = builtin('subsref', self, S);
             % Are we trying to directly access a class property?
             elseif (isa(method, "char") && length(S) == 1 && isprop(self, method))

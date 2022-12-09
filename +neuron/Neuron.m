@@ -28,7 +28,7 @@ classdef Neuron < dynamicprops
                 if (f(2) == "263") % variable
                     self.var_list = [self.var_list f(1)];
                     p = self.addprop(f(1));
-                    p.SetMethod = @(value)set_prop(f(1), value);
+                    p.SetMethod = @(self, value)set_prop(self, f(1), value);
                 elseif (f(2) == "280") % function returning a double
                     self.fn_double_list = [self.fn_double_list f(1)];
                 elseif (f(2) == "296") % function returning a string
@@ -62,7 +62,7 @@ classdef Neuron < dynamicprops
                 name = S(2).subs{1};
                 [varargout{1:nargout}] = neuron.Section(name);
             % Is the provided function listed as a Neuron class method?
-            elseif any(strcmp(methods(self), func))
+            elseif ismethod(self, func)
                 [varargout{1:nargout}] = builtin('subsref', self, S);
             % Is this method present in the HOC lookup table, and does it return a double?
             elseif any(strcmp(self.fn_double_list, func))
@@ -97,14 +97,16 @@ classdef Neuron < dynamicprops
                 disp("    "+self.object_list(i));
             end
         end
+        function set_prop(~, propname, value)
+        % Set dynamic property.
+        %   set_prop(propname, value)
+            % TODO: this method does not work as SetMethod is we move
+            % it to methods(Static)... why?
+            clib.neuron.ref(propname).set(value);
+        end
 
     end
     methods(Static)
-        function set_prop(propname, value)
-        % Set dynamic property.
-        %   set_prop(propname, value)
-            clib.neuron.ref(propname).set(value);
-        end
         function value = call_func_hoc(func, returntype, varargin)
         % Call function by passing function name (func) to HOC lookup, along with its return type (returntype) and arguments (varargin).
         %   value = call_func_hoc(func, returntype, varargin)
