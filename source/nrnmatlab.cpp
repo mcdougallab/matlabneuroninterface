@@ -14,7 +14,7 @@
 // "error Using MATLAB Data API with C Matrix API is not supported."
 extern "C" int mexPrintf(const char *message, ...);
 
-// Define invocmain_session input.
+// Define ivocmain_session input.
 static const char* argv[] = {"nrn_test", "-nogui", "-nopython", NULL};
 
 // Keep track of whether NEURON session is already initialized.

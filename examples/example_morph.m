@@ -1,5 +1,5 @@
 % Proof of concept for running NEURON in MATLAB:
-% Morphology.
+% Creating and editing a morphology.
 
 % Initialization.
 clear;

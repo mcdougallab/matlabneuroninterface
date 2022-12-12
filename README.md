@@ -45,25 +45,27 @@ First, make sure NEURON for Windows is installed (see http://neuron.yale.edu/).
 To get the toolbox working on your machine, run the MATLAB scripts in the following order:
 - **setup** 
     - to add the appropriate directories to your path (you might need to
-      change the NEURON installation directory)
+      change the hardcoded NEURON installation directory)
     - **this script needs to be run every time a new MATLAB session is started**
-- **build_interface**
+- **utils.build_interface**
     - to build the library interface (neuron/neuronInterface.dll)
     - **this script needs to be run only once to generate the library interface**,
       it only needs to be re-run if the interface changes (for example when using a newer Neuron version)
 
 ### Example scripts
 
-A comprehensive example live script can be found at **examples/example_livescript.mlx**.
+A comprehensive example live script, encompassing the smaller examples and providing additional explanation, can be found at **examples/example_livescript.mlx**.
 
 Smaller example scripts are available at:
-- **examples/example_run** 
+- **examples/example_run.m** 
     - to initialize a Neuron session and call some top-level functions from the library
-- **examples/example_vector** 
+- **examples/example_vector.m** 
     - to create a Vector object and calculate some properties
-- **examples/example_morph** 
-    - to generate a morphology by connecting different Sections
-- **examples/example_acpot** 
+- **examples/example_morph.m** 
+    - to generate a morphology by connecting different Sections, and add 3D points to them
+- **examples/example_crash.m** 
+    - to cause a :warning: crash by causing a method with the wrong arguments
+- **examples/example_acpot.m** 
     - to generate an action potential
 
 **example_acpot** should result in:

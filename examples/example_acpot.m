@@ -1,5 +1,5 @@
 % Proof of concept for running NEURON in MATLAB:
-% Generate action potential.
+% Generates a plot of an action potential.
 
 % Initialization.
 clear;
@@ -52,12 +52,15 @@ disp("Number of Vectors: " + veclist.count());
 disp("Number of IClamps: " + icllist.count());
 
 % Plot results.
-figure;
+fig = figure;
+ax = axes(fig);
 hold on;
-plot(t_vec, v1_vec);
-plot(t_vec, v2_vec);
-legend('Center of axon', 'End of branch')
-title("Action potential");
-xlabel("t (ms)");
-ylabel("voltage (mV)");
+% Providing a Vector as an input to plot() calls Vector.double() 
+% in the background.
+plot(ax, t_vec, v1_vec, "DisplayName", "Center of axon");
+plot(ax, t_vec, v2_vec, "DisplayName", "End of branch");
 hold off;
+legend(ax);
+title(ax, "Action potential");
+xlabel(ax, "t (ms)");
+ylabel(ax, "voltage (mV)");

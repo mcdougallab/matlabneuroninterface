@@ -1,5 +1,20 @@
 # NEURON Toolbox for MATLAB: developer's readme
 
+## Static library file
+
+We use clibgen with MinGW64, and give it a .a static library file, 
+which is included in source/.
+
+Hence this version only works on Windows (for now) for MATLAB versions 
+R2022a and up; at this version support for .a static libraries was added. 
+
+To convert the libnrniv.dll file to a static library we used the following
+steps:
+- We can see the libnrniv.dll contents with `dumpbin /exports source/libnrniv.dll`
+- All the exports listed there were saved to source/libnrniv.def
+- The DLL can then be converted to a .a file with `dlltool -d source/libnrniv.def -D source/libnrniv.dll -l source/libnrniv.a`
+- dlltool.exe can be found (for me) at C:\ProgramData\MATLAB\SupportPackages\R2022a\3P.instrset\mingw_w64.instrset\bin\dlltool.exe
+
 ## Code structure
 
 ### Dynamic Neuron variables, functions an objects
@@ -111,21 +126,6 @@ Object related:
 Vector related:
 - 264: math functions that return a double (these are all functions of 1 variable), that can
   be applied on the vector data
-
-## Static library file
-
-We use clibgen with MinGW64, and give it a .a static library file, 
-which is included in bin/.
-
-Hence this version only works on Windows (for now) for MATLAB versions 
-R2022a and up; at this version support for .a static libraries was added. 
-
-To convert the libnrniv.dll file to a static library we used the following
-steps:
-- We can see the libnrniv.dll contents with `dumpbin /exports bin/libnrniv.dll`
-- All the exports listed there were saved to bin/libnrniv.def
-- The DLL can then be converted to a .a file with `dlltool -d bin/libnrniv.def -D bin/libnrniv.dll -l bin/libnrniv.a`
-- dlltool.exe can be found (for me) at C:\ProgramData\MATLAB\SupportPackages\R2022a\3P.instrset\mingw_w64.instrset\bin\dlltool.exe
 
 ## Useful links
 
