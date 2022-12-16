@@ -1,6 +1,8 @@
 #include <string>
 #include "neuron_api_headers.h"
-#include "neuron_matlab_headers.h"
+
+class SavedState;
+class NrnRef;
 
 // Initialize NEURON session.
 void initialize();
@@ -47,21 +49,68 @@ int increase_try_catch_nest_depth();
 int decrease_try_catch_nest_depth();
 
 // C++ Neuron functions directly accessible from MATLAB.
-Node* node_exact(Section*, double);
-void nrn_pushsec(Section* sec);
-void hoc_obj_unref(Object*);
-double hoc_call_func(Symbol*, int);
-void hoc_call_ob_proc(Object*, Symbol*, int);
-Symbol* hoc_lookup(const char*);
-void hoc_pushx(double);
-Symbol* hoc_table_lookup(const char*, Symlist*);
-double hoc_xpop(void);
-int hoc_oc(const char*);
-void delete_section(void);
-Object* hoc_newobj1(Symbol*, int);
-void nrn_change_nseg(Section*, int);
-void nrn_length_change(Section*, double);
-void mech_insert1(Section*, int);
-Section* nrn_sec_pop(void);
-void section_unref(Section*);
-void simpleconnectsection(void);
+__declspec(dllimport) Node* node_exact(Section*, double);
+__declspec(dllimport) void nrn_pushsec(Section* sec);
+__declspec(dllimport) void hoc_obj_unref(Object*);
+__declspec(dllimport) double hoc_call_func(Symbol*, int);
+__declspec(dllimport) void hoc_call_ob_proc(Object*, Symbol*, int);
+__declspec(dllimport) Symbol* hoc_lookup(const char*);
+__declspec(dllimport) void hoc_pushx(double);
+__declspec(dllimport) Symbol* hoc_table_lookup(const char*, Symlist*);
+__declspec(dllimport) double hoc_xpop(void);
+__declspec(dllimport) int hoc_oc(const char*);
+__declspec(dllimport) void delete_section(void);
+__declspec(dllimport) Object* hoc_newobj1(Symbol*, int);
+__declspec(dllimport) void nrn_change_nseg(Section*, int);
+__declspec(dllimport) void nrn_length_change(Section*, double);
+__declspec(dllimport) void mech_insert1(Section*, int);
+__declspec(dllimport) Section* nrn_sec_pop(void);
+__declspec(dllimport) void section_unref(Section*);
+__declspec(dllimport) void simpleconnectsection(void);
+
+// Pointer class for MATLAB interface.
+class NrnRef { /* Holds a pointer to a double. */
+    public:
+        double* ref;
+        NrnRef(double* x);
+        void set(double x);
+        double get();
+};
+
+// State
+class SavedState {
+    public:
+        SavedState();
+        void restore();
+
+    private:
+        // hoc_oop
+        Object* o1;
+        Objectdata* o2;
+        int o4;
+        Symlist* o5;
+
+        // code
+        Inst* c1;
+        Inst* c2;
+        std::size_t c3;
+        void* c4;
+        int c5;
+        int c6;
+        Inst* c7;
+        void* c8;
+        std::size_t c9;
+        Symlist* c10;
+        Inst* c11;
+        int c12;
+
+        // input_info
+        const char* i1;
+        int i2;
+        int i3;
+        void* i4;
+
+        // cabcode
+        int cc1;
+        int cc2;
+};

@@ -337,4 +337,10 @@ typedef Point_process* (ppoptr_function)(Object*);
 typedef void (vsecptrd_function)(Section*, double);
 typedef Node* (nptrsecptrd_function)(Section*, double);
 
+typedef void (hoc_oop_ss)(Object**, Objectdata**, int*, Symlist**);
+typedef void (code_ss)(Inst**, Inst**, std::size_t&, void**, int*, int*, Inst**, void**, std::size_t&, Symlist**, Inst**, int*);
+typedef void (input_info_ss)(const char**, int*, int*, void**);
+typedef void (input_info_rs)(const char*, int, int, void*);
+typedef void (cabcode_ss)(int*, int*);
+
 #endif
