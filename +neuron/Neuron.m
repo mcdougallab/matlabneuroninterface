@@ -121,6 +121,7 @@ classdef Neuron < dynamicprops
                 value = propref.get();
             % TODO: this just crashes for n.L, for example.
             catch  
+                value = NaN;
                 warning("'"+string(propname)+"': cannot get value.");
             end
             delete(state);
@@ -146,6 +147,7 @@ classdef Neuron < dynamicprops
                     value = neuron.hoc_pop(returntype);
                 end
             catch  
+                value = NaN;
                 warning("'"+string(func)+"': number or type of arguments incorrect.");
             end
             delete(state);
@@ -183,6 +185,7 @@ classdef Neuron < dynamicprops
                     clib.neuron.nrn_sec_pop();
                 end
             catch  
+                obj = NaN;
                 warning("'"+string(objtype)+"': number or type of arguments incorrect.");
             end
             delete(state);
