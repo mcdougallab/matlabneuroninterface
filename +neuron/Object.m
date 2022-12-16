@@ -73,9 +73,9 @@ classdef Object < dynamicprops
         % Call method by passing method name (method) to HOC lookup, along with its return type (returntype) and method arguments (varargin).
         %   value = call_method_double(method, varargin)
             
-            % TESTING nrn_try_catch_nest_depth.
+            % Save state & try/catch in case the call fails.
             clib.neuron.increase_try_catch_nest_depth();
-
+            state = clib.neuron.SavedState();
             try
                 n = length(varargin);
                 for i=1:n
@@ -85,13 +85,11 @@ classdef Object < dynamicprops
                     self.obj.ctemplate.symtable);
                 clib.neuron.hoc_call_ob_proc(self.obj, sym, n);
                 value = neuron.hoc_pop(returntype);
-            % TODO: if the above code fails, the first time an error is
-            % caught, but the second time the program just crashes (see 
-            % examples/example_crash.m).
             catch  
                 warning("'"+string(method)+"': number or type of arguments incorrect.");
+                state.restore();
             end
-
+            delete(state);
             clib.neuron.decrease_try_catch_nest_depth();
 
         end

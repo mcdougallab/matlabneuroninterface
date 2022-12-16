@@ -7,7 +7,7 @@
 #include <string>
 #include "neuron_api_headers.h"
 #include "neuron_dllimports.h"
-#include "neuron_matlab_headers.h"
+#include "nrnmatlab.h"
 
 // Declare mexPrintf
 // We cannot include mex.h with clib, because during build will give
@@ -196,4 +196,37 @@ void set_node_diam(Node* node, double diam) {
             break;
         }
     }
+}
+
+
+// adapted from ocjump.cpp
+SavedState::SavedState() {
+    // not complete but it is good for expressions and it can be improved
+    oc_save_hoc_oop(&(this->o1), &(this->o2), &(this->o4), &(this->o5));
+    oc_save_code(&(this->c1), &(this->c2), this->c3, &(this->c4), &(this->c5), 
+                 &(this->c6), &(this->c7), &(this->c8), this->c9, &(this->c10), 
+                 &(this->c11), &(this->c12));
+    oc_save_input_info(&(this->i1), &(this->i2), &(this->i3), &(this->i4));
+    oc_save_cabcode(&(this->cc1), &(this->cc2));
+}
+
+void SavedState::restore() {
+    oc_restore_hoc_oop(&(this->o1), &(this->o2), &(this->o4), &(this->o5));
+    oc_restore_code(&(this->c1), &(this->c2), this->c3, &(this->c4), &(this->c5), 
+                    &(this->c6), &(this->c7), &(this->c8), this->c9, &(this->c10), 
+                    &(this->c11), &(this->c12));
+    oc_restore_input_info(this->i1, this->i2, this->i3, this->i4);
+    oc_restore_cabcode(&(this->cc1), &(this->cc2));
+}
+
+
+// Helper class for MATLAB interface.
+NrnRef::NrnRef(double* x) {
+    this->ref = x;
+}
+void NrnRef::set(double x) {
+    *(this->ref) = x;
+}
+double NrnRef::get() {
+    return *(this->ref);
 }

@@ -111,10 +111,28 @@ classdef Neuron < dynamicprops
 
     end
     methods(Static)
+        function value = get_prop(propname)
+        % Get top-level symbol value
+            % Save state & try/catch in case the call fails.
+            clib.neuron.increase_try_catch_nest_depth();
+            state = clib.neuron.SavedState();
+            propref = clib.neuron.ref(propname);
+            try
+                value = propref.get();
+            % TODO: this just crashes for n.L, for example.
+            catch  
+                warning("'"+string(propname)+"': cannot get value.");
+            end
+            delete(state);
+            clib.neuron.decrease_try_catch_nest_depth();
+        end
         function value = call_func_hoc(func, returntype, varargin)
         % Call function by passing function name (func) to HOC lookup, along with its return type (returntype) and arguments (varargin).
         %   value = call_func_hoc(func, returntype, varargin)
 
+            % Save state & try/catch in case the call fails.
+            clib.neuron.increase_try_catch_nest_depth();
+            state = clib.neuron.SavedState();
             try
                 n = length(varargin);
                 for i=1:n
@@ -127,16 +145,20 @@ classdef Neuron < dynamicprops
                 else
                     value = neuron.hoc_pop(returntype);
                 end
-            % TODO: if the above code fails, Matlab often just crashes instead of catching an error.
             catch  
                 warning("'"+string(func)+"': number or type of arguments incorrect.");
             end
+            delete(state);
+            clib.neuron.decrease_try_catch_nest_depth();
 
         end
         function obj = hoc_new_obj(objtype, varargin)
         % Make object by providing object type (objtype) and constructor arguments (varargin).
         %   obj = hoc_new_obj(objtype, varargin)
 
+            % Save state & try/catch in case the call fails.
+            clib.neuron.increase_try_catch_nest_depth();
+            state = clib.neuron.SavedState();
             try
                 nargs = length(varargin);
                 nsecs = 0;
@@ -163,6 +185,8 @@ classdef Neuron < dynamicprops
             catch  
                 warning("'"+string(objtype)+"': number or type of arguments incorrect.");
             end
+            delete(state);
+            clib.neuron.decrease_try_catch_nest_depth();
 
         end
         function value = hoc_oc(str)
