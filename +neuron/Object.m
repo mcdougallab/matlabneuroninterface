@@ -87,6 +87,7 @@ classdef Object < dynamicprops
                 value = neuron.hoc_pop(returntype);
             catch  
                 warning("'"+string(method)+"': number or type of arguments incorrect.");
+                value = NaN;
                 state.restore();
             end
             delete(state);
