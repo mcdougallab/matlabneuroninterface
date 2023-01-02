@@ -63,7 +63,8 @@ std::string str_symbol_table(Symlist* table) {
     std::string tabstr, new_tabstr;
     for (Symbol* sp = table->first; sp != NULL; sp = sp->next) {
         new_tabstr = std::string(sp->name) + ":" + 
-                     std::to_string(sp->type) + ";";
+                     std::to_string(sp->type) + "-" + 
+                     std::to_string(sp->subtype) + ";";
         tabstr = tabstr + new_tabstr;
     }
     return tabstr;

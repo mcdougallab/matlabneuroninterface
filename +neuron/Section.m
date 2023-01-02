@@ -29,9 +29,12 @@ classdef Section
                 % See: doc/DEV_README.md#neuron-types
                 for i=1:length(arr)
                     var = split(arr(i), ":");
-                    if (var(2) == "311") % range variable
+                    var_types = split(var(2), "-");
+                    var_type = var_types(1);
+                    % var_subtype = var_types(2);
+                    if (var_type == "311") % range variable
                         self.range_list = [self.range_list var(1)];
-                    elseif (var(2) == "312") % insertable mechanism
+                    elseif (var_type == "312") % insertable mechanism
                         self.mech_list = [self.mech_list var(1)];
                     end
                 end

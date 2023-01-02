@@ -19,21 +19,21 @@ classdef Neuron < dynamicprops
 
             % Add dynamic properties.
             % See: doc/DEV_README.md#neuron-types
-            % TODO: 
-            % - Setting the property crashes for n.L (and perhaps for other variables as well).
-            % - p.GetMethod also crashes for the same variables
-            % - Hence, we cannot neatly get/set all properties upon initialization like we do for neuron.Object.
             for i=1:length(call_list)
                 f = split(call_list(i), ":");
-                if (f(2) == "263") % variable
+                f_types = split(f(2), "-");
+                f_type = f_types(1);
+                f_subtype = f_types(2);
+                if (f_type == "263" && f_subtype == "2") % variable
                     self.var_list = [self.var_list f(1)];
                     p = self.addprop(f(1));
+                    p.GetMethod = @(self)get_prop(self, f(1));
                     p.SetMethod = @(self, value)set_prop(self, f(1), value);
-                elseif (f(2) == "280") % function returning a double
+                elseif (f_type == "280") % function returning a double
                     self.fn_double_list = [self.fn_double_list f(1)];
-                elseif (f(2) == "296") % function returning a string
+                elseif (f_type == "296") % function returning a string
                     self.fn_string_list = [self.fn_string_list f(1)];
-                elseif (f(2) == "325") % object
+                elseif (f_type == "325") % object
                     self.object_list = [self.object_list f(1)];
                 end
             end
@@ -50,11 +50,8 @@ classdef Neuron < dynamicprops
             % S(2).subs is a cell array containing arguments.
             func = S(1).subs;
 
-            % Are we trying to directly access a top-level variable?
-            if (isa(func, "char") && length(S) == 1 && any(strcmp(self.var_list, func)))
-                [varargout{1:nargout}] = clib.neuron.ref(func).get();
             % Are we trying to directly access a Matlab defined property?
-            elseif (isa(func, "char") && length(S) == 1 && isprop(self, func))
+            if (isa(func, "char") && length(S) == 1 && isprop(self, func))
                 [varargout{1:nargout}] = self.(func);
             % Check for special type "Section";
             % the special type "Vector" is checked in self.hoc_new_obj().
@@ -97,10 +94,17 @@ classdef Neuron < dynamicprops
                 disp("    "+self.object_list(i));
             end
         end
+        function value = get_prop(~, propname)
+        % Get dynamic property.
+        %   get_prop(propname)
+            % TODO: this method does not work as GetMethod if we move
+            % it to methods(Static)... why?
+            value = clib.neuron.ref(propname).get();
+        end
         function set_prop(~, propname, value)
         % Set dynamic property.
         %   set_prop(propname, value)
-            % TODO: this method does not work as SetMethod is we move
+            % TODO: this method does not work as SetMethod if we move
             % it to methods(Static)... why?
             clib.neuron.ref(propname).set(value);
         end

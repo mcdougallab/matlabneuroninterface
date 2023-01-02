@@ -31,19 +31,19 @@ classdef Object < dynamicprops
                 % See: doc/DEV_README.md#neuron-types
                 for i=1:length(method_list)
                     method = split(method_list(i), ":");
-                    if (method(2) == "311")
+                    method_types = split(method(2), "-");
+                    method_type = method_types(1);
+                    % method_subtype = method_types(2);
+                    if (method_type == "311")
                         self.attr_list = [self.attr_list method(1)];
                         p = self.addprop(method(1));
-                        % Get the property value upon object initialization 
-                        % so it can be displayed properly in MATLAB.
-                        % self.(method(1)) = clib.neuron.get_pp_property(self.obj, method(1));
                         p.GetMethod = @(self)get_prop(self, method(1));
                         p.SetMethod = @(self, value)set_prop(self, method(1), value);
-                    elseif (method(2) == "270")
+                    elseif (method_type == "270")
                         self.mt_double_list = [self.mt_double_list method(1)];
-                    elseif (method(2) == "329")
+                    elseif (method_type == "329")
                         self.mt_object_list = [self.mt_object_list method(1)];
-                    elseif (method(2) == "330")
+                    elseif (method_type == "330")
                         self.mt_string_list = [self.mt_string_list method(1)];
                     end
                 end
