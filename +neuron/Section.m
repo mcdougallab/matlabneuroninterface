@@ -80,7 +80,7 @@ classdef Section
                 nrnref = clib.neuron.range_ref(self.sec, rangevar, loc);
             else
                 warning("Range variable '"+rangevar+"' not found.");
-                disp("Available range variable:")
+                disp("Available range variables:")
                 for i=1:self.range_list.length()
                     disp("    "+self.range_list(i));
                 end
