@@ -111,22 +111,6 @@ classdef Neuron < dynamicprops
 
     end
     methods(Static)
-        function value = get_prop(propname)
-        % Get top-level symbol value
-            % Save state & try/catch in case the call fails.
-            clib.neuron.increase_try_catch_nest_depth();
-            state = clib.neuron.SavedState();
-            propref = clib.neuron.ref(propname);
-            try
-                value = propref.get();
-            % TODO: this just crashes for n.L, for example.
-            catch  
-                value = NaN;
-                warning("'"+string(propname)+"': cannot get value.");
-            end
-            delete(state);
-            clib.neuron.decrease_try_catch_nest_depth();
-        end
         function value = call_func_hoc(func, returntype, varargin)
         % Call function by passing function name (func) to HOC lookup, along with its return type (returntype) and arguments (varargin).
         %   value = call_func_hoc(func, returntype, varargin)
