@@ -41,6 +41,7 @@ For more detailed technical information about e.g. code structure, see [doc/DEV_
 ### Setup
 
 First, make sure NEURON for Windows is installed (see http://neuron.yale.edu/).
+Also make sure to set MinGW-w64 as your MEX C++ compiler; for more information about this, run `mex -setup cpp` in MATLAB.
 
 To get the toolbox working on your machine, run the MATLAB scripts in the following order:
 - **setup** 

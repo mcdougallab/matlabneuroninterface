@@ -3,17 +3,30 @@
 ## Static library file
 
 We use clibgen with MinGW64, and give it a .a static library file, 
-which is included in source/.
+which is included in `source/`.
 
 Hence this version only works on Windows (for now) for MATLAB versions 
 R2022a and up; at this version support for .a static libraries was added. 
 
-To convert the libnrniv.dll file to a static library we used the following
+To convert the `libnrniv.dll` file in the NEURON `bin/` directory to a static library we used the following
 steps:
-- We can see the libnrniv.dll contents with `dumpbin /exports source/libnrniv.dll`
-- All the exports listed there were saved to source/libnrniv.def
-- The DLL can then be converted to a .a file with `dlltool -d source/libnrniv.def -D source/libnrniv.dll -l source/libnrniv.a`
-- dlltool.exe can be found (for me) at C:\ProgramData\MATLAB\SupportPackages\R2022a\3P.instrset\mingw_w64.instrset\bin\dlltool.exe
+- We can see the libnrniv.dll contents with `objdump -x libnrniv.dll`, these were saved to `source/objdump.txt`
+- All the exports listed between the lines `[Ordinal/Name Pointer] Table` and `The Function Table (interpreted .pdata section contents)` were saved to `source/libnrniv.def` (there is a (slow) batch script to do this, called `get_exports.bat`)
+- The DLL can then be converted to a .a file with `dlltool -d libnrniv.def -D libnrniv.dll -l libnrniv.a`
+- If you installed MinGW within MATLAB (R2022a, in this case), the standard directory for objdump.exe and dlltool.exe is `C:\ProgramData\MATLAB\SupportPackages\R2022a\3P.instrset\mingw_w64.instrset\x86_64-w64-mingw32\bin\`
+
+In other words, for default NEURON and MATLAB 2022a directories, the static library can be made by running:
+
+```
+cd source
+
+C:\ProgramData\MATLAB\SupportPackages\R2022a\3P.instrset\mingw_w64.instrset\x86_64-w64-mingw32\bin\objdump -x C:\nrn\bin\libnrniv.dll > objdump.txt
+
+.\get_exports.bat
+
+C:\ProgramData\MATLAB\SupportPackages\R2022a\3P.instrset\mingw_w64.instrset\x86_64-w64-mingw32\bin\dlltool -d libnrniv.def -D C:\nrn\bin\libnrniv.dll -l libnrniv.a
+```
+
 
 ## Code structure
 
@@ -55,6 +68,10 @@ v.list_methods();
 Watch out: if the user provides
 the incorrect number or types of input arguments, the code might crash! We
 hope to fix this behavior in NEURON 9, in which error handling will be updated.
+
+Some Neuron Objects are defined __on__ a Section (e.g. IClamps); for these Objects, 
+the constructor takes that Section as a first argument. These arguments are handled in
+`Neuron.hoc_new_obj()`, which takes care of pushing and popping the Section.
 
 The C++ object can be accessed with:
 
