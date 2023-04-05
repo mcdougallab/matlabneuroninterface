@@ -14,6 +14,11 @@ classdef Neuron < dynamicprops
         %   Neuron()
             self = self@dynamicprops;
             clib.neuron.initialize();
+            self.fill_dynamic_props();
+        end
+        function fill_dynamic_props(self)
+        % Fill var_list, fn_double_list, fn_string_list, object_list with dynamic variables, functions and objects.
+        %   fill_dynamic_props()
             arr = split(clib.neuron.get_nrn_functions(), ";");
             call_list = arr(1:end-1);
 
@@ -24,17 +29,36 @@ classdef Neuron < dynamicprops
                 f_types = split(f(2), "-");
                 f_type = f_types(1);
                 f_subtype = f_types(2);
-                if (f_type == "263" && f_subtype == "2") % variable
-                    self.var_list = [self.var_list f(1)];
-                    p = self.addprop(f(1));
-                    p.GetMethod = @(self)get_prop(self, f(1));
-                    p.SetMethod = @(self, value)set_prop(self, f(1), value);
+                if (f_type == "263" && f_subtype == "1") % int variable
+                    if ~isprop(self, f(1))
+                        self.var_list = [self.var_list f(1)];
+                        p = self.addprop(f(1));
+                        p.GetMethod = @(self)get_prop(self, f(1));
+                        p.SetMethod = @(self, value)set_prop(self, f(1), value);
+                    end
+                elseif (f_type == "263" && f_subtype == "2") % double variable
+                    if ~isprop(self, f(1))
+                        self.var_list = [self.var_list f(1)];
+                        p = self.addprop(f(1));
+                        p.GetMethod = @(self)get_prop(self, f(1));
+                        p.SetMethod = @(self, value)set_prop(self, f(1), value);
+                    end
+                elseif (f_type == "271") % HOC-function returning a double (?)
+                    if ~any(strcmp(self.fn_double_list, f(1)))
+                        self.fn_double_list = [self.fn_double_list f(1)];
+                    end
                 elseif (f_type == "280") % function returning a double
-                    self.fn_double_list = [self.fn_double_list f(1)];
+                    if ~any(strcmp(self.fn_double_list, f(1)))
+                        self.fn_double_list = [self.fn_double_list f(1)];
+                    end
                 elseif (f_type == "296") % function returning a string
-                    self.fn_string_list = [self.fn_string_list f(1)];
+                    if ~any(strcmp(self.fn_string_list, f(1)))
+                        self.fn_string_list = [self.fn_string_list f(1)];
+                    end
                 elseif (f_type == "325") % object
-                    self.object_list = [self.object_list f(1)];
+                    if ~any(strcmp(self.object_list, f(1)))
+                        self.object_list = [self.object_list f(1)];
+                    end
                 end
             end
         end
@@ -107,6 +131,12 @@ classdef Neuron < dynamicprops
             % TODO: this method does not work as SetMethod if we move
             % it to methods(Static)... why?
             clib.neuron.ref(propname).set(value);
+        end
+        function value = load_file(self, filename)
+        % Load hoc file.
+        %   load_file(filename)
+            value = self.call_func_hoc("load_file", "double", filename);
+            self.fill_dynamic_props();
         end
 
     end
