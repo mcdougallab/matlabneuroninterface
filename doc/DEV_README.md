@@ -8,12 +8,20 @@ which is included in `source/`.
 Hence this version only works on Windows (for now) for MATLAB versions 
 R2022a and up; at this version support for .a static libraries was added. 
 
-To convert the `libnrniv.dll` file in the NEURON `bin/` directory to a static library we used the following
+To convert the `libnrniv.dll` file in the NEURON `bin` directory 
+(default `C:\nrn\bin\libnrniv.dll`) to a static library we used the following
 steps:
-- We can see the libnrniv.dll contents with `objdump -x libnrniv.dll`, these were saved to `source/objdump.txt`
-- All the exports listed between the lines `[Ordinal/Name Pointer] Table` and `The Function Table (interpreted .pdata section contents)` were saved to `source/libnrniv.def` (there is a (slow) batch script to do this, called `get_exports.bat`)
-- The DLL can then be converted to a .a file with `dlltool -d libnrniv.def -D libnrniv.dll -l libnrniv.a`
-- If you installed MinGW within MATLAB (R2022a, in this case), the standard directory for objdump.exe and dlltool.exe is `C:\ProgramData\MATLAB\SupportPackages\R2022a\3P.instrset\mingw_w64.instrset\x86_64-w64-mingw32\bin\`
+- We can see the libnrniv.dll contents with `objdump -x C:\nrn\bin\libnrniv.dll`, 
+  these were saved to `source\objdump.txt`
+- All the exports listed between the lines `[Ordinal/Name Pointer] Table` and 
+  `The Function Table (interpreted .pdata section contents)` were saved to 
+  `source\libnrniv.def` (there is a (slow) batch script to do this, called 
+  `get_exports.bat`)
+- The DLL can then be converted to a .a file with `dlltool -d source\libnrniv.def 
+  -D C:\nrn\bin\libnrniv.dll -l source\libnrniv.a`
+- If you installed MinGW within MATLAB (R2022a, in this case), the standard 
+  directory for objdump.exe and dlltool.exe is 
+  `C:\ProgramData\MATLAB\SupportPackages\R2022a\3P.instrset\mingw_w64.instrset\x86_64-w64-mingw32\bin\`
 
 In other words, for default NEURON and MATLAB 2022a directories, the static library can be made by running:
 
@@ -26,7 +34,6 @@ C:\ProgramData\MATLAB\SupportPackages\R2022a\3P.instrset\mingw_w64.instrset\x86_
 
 C:\ProgramData\MATLAB\SupportPackages\R2022a\3P.instrset\mingw_w64.instrset\x86_64-w64-mingw32\bin\dlltool -d libnrniv.def -D C:\nrn\bin\libnrniv.dll -l libnrniv.a
 ```
-
 
 ## Code structure
 
