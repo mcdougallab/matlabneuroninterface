@@ -33,7 +33,9 @@ function build_interface()
     
     % We want to use the generated .m file, not the .mlx file, because we 
     % will be making some automated changes to the contents of the file.
-    delete defineneuron.mlx
+    if isfile('defineneuron.mlx')
+        delete defineneuron.mlx
+    end
     
     % Automatically change lines:
     % - the Section attribute pt3d: `<MLTYPE>` is "clib.array.neuron.Pt3d", `<SHAPE>` is "npt3d"
