@@ -111,9 +111,3 @@ function compiler_exists = check_compiler(lang)
         end
     end
 end
-
-function out = check_admin()
-    out = System.Security.Principal.WindowsPrincipal(...
-          System.Security.Principal.WindowsIdentity.GetCurrent()).IsInRole(...
-          System.Security.Principal.WindowsBuiltInRole.Administrator);
-end
