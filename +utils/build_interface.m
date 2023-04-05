@@ -7,20 +7,29 @@
 %   source/libnrniv.a (to generate it yourself, see doc/DEV_README.md)
 function build_interface()
 
+    % Check if there is a C++ compiler.
+    if ~check_compiler('C++')
+        error("No C++ compiler found.");
+    end
+
     % Create definition file for NEURON library.
     HeaderFilePath = "source/nrnmatlab.h";
     SourceFilePath = "source/nrnmatlab.cpp";
     StaticLibPath = "source/libnrniv.a";
     LibMexPath = fullfile(matlabroot, "extern", "lib", "win64", "mingw64", "libmex.lib"); % For mexPrintf
     HeadersIncludePath = "source";
-    clibgen.generateLibraryDefinition(HeaderFilePath, ...
-        SupportingSourceFiles=SourceFilePath, ...
-        Libraries=[StaticLibPath, LibMexPath], ...
-        OverwriteExistingDefinitionFiles=true, ...
-        IncludePath=HeadersIncludePath, ...
-        PackageName="neuron", ...
-        TreatObjectPointerAsScalar=true, ...
-        TreatConstCharPointerAsCString=true);
+    try
+        clibgen.generateLibraryDefinition(HeaderFilePath, ...
+            SupportingSourceFiles=SourceFilePath, ...
+            Libraries=[StaticLibPath, LibMexPath], ...
+            OverwriteExistingDefinitionFiles=true, ...
+            IncludePath=HeadersIncludePath, ...
+            PackageName="neuron", ...
+            TreatObjectPointerAsScalar=true, ...
+            TreatConstCharPointerAsCString=true);
+    catch
+        error("Error while running clibgen.generateLibraryDefinition(), please check if you have administrator rights.")
+    end
     
     % We want to use the generated .m file, not the .mlx file, because we 
     % will be making some automated changes to the contents of the file.
@@ -88,4 +97,21 @@ function [] = func_replace_strings(InputFile, OutputFile, ChangeStrings)
         fprintf(fid, '%s\n', char(data{i}));
     end
     fclose(fid);
+end
+
+function compiler_exists = check_compiler(lang)
+    confs = mex.getCompilerConfigurations;
+    compiler_exists = false;
+    for i = 1:length(confs)
+        conf = confs(i);
+        if strcmp(conf.Language, lang)
+            compiler_exists = true;
+        end
+    end
+end
+
+function out = check_admin()
+    out = System.Security.Principal.WindowsPrincipal(...
+          System.Security.Principal.WindowsIdentity.GetCurrent()).IsInRole(...
+          System.Security.Principal.WindowsBuiltInRole.Administrator);
 end
