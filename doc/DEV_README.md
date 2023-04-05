@@ -15,8 +15,8 @@ steps:
   these were saved to `source\objdump.txt`
 - All the exports listed between the lines `[Ordinal/Name Pointer] Table` and 
   `The Function Table (interpreted .pdata section contents)` were saved to 
-  `source\libnrniv.def` (there is a (slow) batch script to do this, called 
-  `get_exports.bat`)
+  `source\libnrniv.def` (there is a (slow) batch script to do this at 
+  `source\get_exports.bat`)
 - The DLL can then be converted to a .a file with `dlltool -d source\libnrniv.def 
   -D C:\nrn\bin\libnrniv.dll -l source\libnrniv.a`
 - If you installed MinGW within MATLAB (R2022a, in this case), the standard 
