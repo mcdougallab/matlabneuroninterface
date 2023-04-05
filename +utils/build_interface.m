@@ -3,13 +3,15 @@
 % Before running it, make sure that:
 % - The Neuron path is set (by running setup.m)
 % - For Windows, your compiler is set to MinGW64 (using mex -setup)
-% - For Windows+MingGW64, the static library file is present at 
+% - For Windows+MingGW64, the static library file is present at
 %   source/libnrniv.a (to generate it yourself, see doc/DEV_README.md)
 function build_interface()
 
     % Check if there is a C++ compiler.
     if ~check_compiler('C++')
         error("No C++ compiler found.");
+    elseif ispc && ~check_compiler('C++', 'mingw64-g++')
+        error("On windows the C++ compiler must be mingw64")
     end
 
     % Create definition file for NEURON library.
@@ -27,16 +29,17 @@ function build_interface()
             PackageName="neuron", ...
             TreatObjectPointerAsScalar=true, ...
             TreatConstCharPointerAsCString=true);
-    catch
+    catch ME
+        disp(ME);
         error("Error while running clibgen.generateLibraryDefinition(), please check if you have administrator rights.")
     end
-    
-    % We want to use the generated .m file, not the .mlx file, because we 
+
+    % We want to use the generated .m file, not the .mlx file, because we
     % will be making some automated changes to the contents of the file.
     if isfile('defineneuron.mlx')
         delete defineneuron.mlx
     end
-    
+
     % Automatically change lines:
     % - the Section attribute pt3d: `<MLTYPE>` is "clib.array.neuron.Pt3d", `<SHAPE>` is "npt3d"
     % - the function get_vector_vec: `<SHAPE>` is "len"
@@ -70,7 +73,7 @@ function build_interface()
         'to', 'validate(get_vector_vecDefinition);');
 
     func_replace_strings("defineneuron.m", "defineneuron.m", change_lines)
-    
+
 
     % Build the library interface.
     build(defineneuron);
@@ -101,13 +104,21 @@ function [] = func_replace_strings(InputFile, OutputFile, ChangeStrings)
     fclose(fid);
 end
 
-function compiler_exists = check_compiler(lang)
+function compiler_exists = check_compiler(lang, shortname)
+    arguments
+        lang;
+        shortname='';
+    end
     confs = mex.getCompilerConfigurations;
     compiler_exists = false;
     for i = 1:length(confs)
         conf = confs(i);
         if strcmp(conf.Language, lang)
-            compiler_exists = true;
+            if ~isempty(shortname)
+                compiler_exists = strcmp(shortname, conf.ShortName);
+            else
+                compiler_exists = true;
+            end
         end
     end
 end
