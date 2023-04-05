@@ -17,10 +17,14 @@ function setup()
         setenv('PATH', [dllpath pathsep syspath]);
     end
     
+    % Path to the current directory.
+    mlnrnpath = fileparts(mfilename('fullpath'));
+    addpath(mlnrnpath);
+    
     % Path to the generated interface library.
-    addpath neuron;
+    addpath(fullfile(mlnrnpath, 'neuron'));
     
     % Path to example scripts.
-    addpath examples;
+    addpath(fullfile(mlnrnpath, 'examples'));
 
 end
