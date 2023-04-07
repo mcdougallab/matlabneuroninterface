@@ -5,6 +5,8 @@ function hoc_push(value)
         clib.neuron.hoc_pushx(value);  
     elseif (isa(value, "string") || isa(value, "char"))
         clib.neuron.matlab_hoc_pushstr(value);  
+    elseif (isa(value, "neuron.Vector") || isa(value, "neuron.Object"))
+        clib.neuron.matlab_hoc_pushobj(value.obj);  
     elseif (isa(value, "clib.neuron.Vector") || isa(value, "clib.neuron.Object"))
         clib.neuron.matlab_hoc_pushobj(value);  
     elseif (isa(value, "clib.neuron.NrnRef"))

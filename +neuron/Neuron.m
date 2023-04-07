@@ -5,6 +5,7 @@ classdef Neuron < dynamicprops
         var_list        % List of top-level Neuron variables.
         fn_double_list  % List of top-level Neuron functions returning a double.
         fn_string_list  % List of top-level Neuron functions returning a string.
+        fn_void_list    % List of top-level Neuron functions returning nothing.
         object_list     % List of Neuron Objects.
     end
 
@@ -43,9 +44,13 @@ classdef Neuron < dynamicprops
                         p.GetMethod = @(self)get_prop(self, f(1));
                         p.SetMethod = @(self, value)set_prop(self, f(1), value);
                     end
-                elseif (f_type == "271") % HOC-function returning a double (?)
+                elseif (f_type == "270") % HOC function returning a double
                     if ~any(strcmp(self.fn_double_list, f(1)))
                         self.fn_double_list = [self.fn_double_list f(1)];
+                    end
+                elseif (f_type == "271") % HOC procedures (returning nothing)
+                    if ~any(strcmp(self.fn_void_list, f(1)))
+                        self.fn_void_list = [self.fn_void_list f(1)];
                     end
                 elseif (f_type == "280") % function returning a double
                     if ~any(strcmp(self.fn_double_list, f(1)))
@@ -85,6 +90,9 @@ classdef Neuron < dynamicprops
             % Is the provided function listed as a Neuron class method?
             elseif ismethod(self, func)
                 [varargout{1:nargout}] = builtin('subsref', self, S);
+            % Is this method present in the HOC lookup table, and does it return nothing?
+            elseif any(strcmp(self.fn_void_list, func))
+                [varargout{1:nargout}] = self.call_func_hoc(func, "void", S(2).subs{:});
             % Is this method present in the HOC lookup table, and does it return a double?
             elseif any(strcmp(self.fn_double_list, func))
                 [varargout{1:nargout}] = self.call_func_hoc(func, "double", S(2).subs{:});
@@ -104,6 +112,10 @@ classdef Neuron < dynamicprops
             disp("Available variables:")
             for i=1:self.var_list.length()
                 disp("    "+self.var_list(i));
+            end
+            disp("Available procedures (returning nothing):")
+            for i=1:self.fn_void_list.length()
+                disp("    "+self.fn_void_list(i));
             end
             disp("Available functions (returning a double):")
             for i=1:self.fn_double_list.length()
