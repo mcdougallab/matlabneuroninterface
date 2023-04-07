@@ -8,8 +8,7 @@ function value = hoc_pop(returntype)
     elseif (returntype=="Object")
         value = clib.neuron.matlab_hoc_objpop();
     elseif (returntype=="void")
-        % This returntype is not used by any objects, but it can be useful
-        % during development.
+        % For procedures returning nothing.
         value = 1.0;
     end
 end
