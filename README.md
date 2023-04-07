@@ -52,6 +52,8 @@ To get the toolbox working on your machine, run the MATLAB scripts in the follow
     - to build the library interface (neuron/neuronInterface.dll)
     - **this script needs to be run only once to generate the library interface**,
       it only needs to be re-run if the interface changes (for example when using a newer Neuron version)
+    - please note: you need administrator rights to run build_interface
+      (i.e. you need to run MATLAB as administrator)
 
 ### Example scripts
 
