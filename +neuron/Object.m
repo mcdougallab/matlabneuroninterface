@@ -34,16 +34,16 @@ classdef Object < dynamicprops
                     method_types = split(method(2), "-");
                     method_type = method_types(1);
                     % method_subtype = method_types(2);
-                    if (method_type == "311")
+                    if (method_type == "310")
                         self.attr_list = [self.attr_list method(1)];
                         p = self.addprop(method(1));
                         p.GetMethod = @(self)get_prop(self, method(1));
                         p.SetMethod = @(self, value)set_prop(self, method(1), value);
                     elseif (method_type == "270")
                         self.mt_double_list = [self.mt_double_list method(1)];
-                    elseif (method_type == "329")
+                    elseif (method_type == "328")
                         self.mt_object_list = [self.mt_object_list method(1)];
-                    elseif (method_type == "330")
+                    elseif (method_type == "329")
                         self.mt_string_list = [self.mt_string_list method(1)];
                     end
                 end

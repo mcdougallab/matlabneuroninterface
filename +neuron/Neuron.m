@@ -33,7 +33,7 @@ classdef Neuron < dynamicprops
                     self.fn_double_list = [self.fn_double_list f(1)];
                 elseif (f_type == "296") % function returning a string
                     self.fn_string_list = [self.fn_string_list f(1)];
-                elseif (f_type == "325") % object
+                elseif (f_type == "324") % object
                     self.object_list = [self.object_list f(1)];
                 end
             end
