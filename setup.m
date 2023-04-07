@@ -3,7 +3,7 @@
 function setup()
 
     % User setting:
-    NeuronInstallationDirectory  = 'C:\nrn-dev';
+    NeuronInstallationDirectory  = 'C:\nrn';
 
     % Check if NEURON directory is correct.
     filename = fullfile(NeuronInstallationDirectory , 'bin', 'libnrniv.dll');

@@ -32,9 +32,9 @@ classdef Section
                     var_types = split(var(2), "-");
                     var_type = var_types(1);
                     % var_subtype = var_types(2);
-                    if (var_type == "311") % range variable
+                    if (var_type == "310") % range variable
                         self.range_list = [self.range_list var(1)];
-                    elseif (var_type == "312") % insertable mechanism
+                    elseif (var_type == "311") % insertable mechanism
                         self.mech_list = [self.mech_list var(1)];
                     end
                 end

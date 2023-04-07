@@ -26,7 +26,6 @@ __declspec(dllimport) vsecptr_function nrn_pushsec;
 __declspec(dllimport) secptrv_function nrn_sec_pop;
 
 // C++ name mangled hoc_* functions.
-__declspec(dllimport) Symlist* hoc_built_in_symlist;
 __declspec(dllimport) dvptrint_function hoc_call_func;
 __declspec(dllimport) voptrsptri_function hoc_call_ob_proc;
 __declspec(dllimport) dsio_function hoc_call_objfunc;
@@ -35,7 +34,6 @@ __declspec(dllimport) scptr_function hoc_lookup;
 __declspec(dllimport) optrsptri_function hoc_newobj1;
 __declspec(dllimport) voptr_function hoc_obj_ref;
 __declspec(dllimport) voptr_function hoc_obj_unref;
-__declspec(dllimport) Objectdata* hoc_objectdata;
 __declspec(dllimport) optrptrv_function hoc_objpop;
 __declspec(dllimport) icptr_function hoc_oc;
 __declspec(dllimport) voptrptr_function hoc_pushobj;
@@ -46,8 +44,6 @@ __declspec(dllimport) vv_function hoc_ret;
 __declspec(dllimport) cptrptrv_function hoc_strpop;
 __declspec(dllimport) scptrslptr_function hoc_table_lookup;
 __declspec(dllimport) voptrptr_function hoc_tobj_unref;
-__declspec(dllimport) Objectdata* hoc_top_level_data;
-__declspec(dllimport) Symlist* hoc_top_level_symlist;
 __declspec(dllimport) dv_function hoc_xpop;
 
 // C++ name mangled oc_* functions.
@@ -58,6 +54,10 @@ __declspec(dllimport) cabcode_ss oc_restore_cabcode;
 
 // Import non-name mangled functions and parameters.
 extern "C" __declspec(dllimport) int diam_changed;
+extern "C" __declspec(dllimport) Symlist* hoc_built_in_symlist;
+extern "C" __declspec(dllimport) Objectdata* hoc_objectdata;
+extern "C" __declspec(dllimport) Objectdata* hoc_top_level_data;
+extern "C" __declspec(dllimport) Symlist* hoc_top_level_symlist;
 extern "C" __declspec(dllimport) int nrn_is_python_extension;
 extern "C" __declspec(dllimport) int nrn_main_launch;
 extern "C" __declspec(dllimport) int nrn_nobanner_;
