@@ -17,8 +17,6 @@ __declspec(dllimport) secptrv_function nrn_sec_pop;
 __declspec(dllimport) cptrsecptr_function secname;
 __declspec(dllimport) vsecptr_function section_unref;
 __declspec(dllimport) vv_function simpleconnectsection;
-__declspec(dllimport) vsptr_function hoc_pushs;
-__declspec(dllimport) dptrv_function hoc_pxpop;
 
 // Import non-name mangled functions and parameters.
 extern "C" __declspec(dllimport) int diam_changed;
@@ -37,6 +35,8 @@ extern "C" __declspec(dllimport) voptrptr_function hoc_pushobj;
 extern "C" __declspec(dllimport) vdptr_function hoc_pushpx;
 extern "C" __declspec(dllimport) vcptrptr_function hoc_pushstr;
 extern "C" __declspec(dllimport) vd_function hoc_pushx;
+extern "C" __declspec(dllimport) vsptr_function hoc_pushs;
+extern "C" __declspec(dllimport) dptrv_function hoc_pxpop;
 extern "C" __declspec(dllimport) vv_function hoc_ret;
 extern "C" __declspec(dllimport) cptrptrv_function hoc_strpop;
 extern "C" __declspec(dllimport) scptrslptr_function hoc_table_lookup;
