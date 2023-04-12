@@ -29,8 +29,10 @@ _Z10hoc_objpopv
 _Z6hoc_ocPKc
 _Z11hoc_pushobjPP6Object
 _Z10hoc_pushpxPd
+_Z9hoc_pushsP6Symbol
 _Z11hoc_pushstrPPc
 _Z9hoc_pushxd
+_Z9hoc_pxpopv
 _Z7hoc_retv
 _Z10hoc_strpopv
 _Z16hoc_symbol_unitsP6SymbolPKc
