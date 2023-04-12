@@ -174,6 +174,22 @@ double get_pp_property(Object* pp, const char* name) {
     int index = hoc_table_lookup(name, pp->ctemplate->symtable)->u.rng.index;
     return ob2pntproc_0(pp)->prop->param[index];
 }
+void set_steered_property(Object* obj, const char* name, double value) {
+    auto sym = hoc_table_lookup(name, obj->ctemplate->symtable);
+    hoc_pushs(sym);
+    // put the pointer for the memory location on the stack 
+    obj->ctemplate->steer(obj->u.this_pointer);
+    double* prop_p = hoc_pxpop();
+    *prop_p = value;
+}
+double get_steered_property(Object* obj, const char* name) {
+    auto sym = hoc_table_lookup(name, obj->ctemplate->symtable);
+    hoc_pushs(sym);
+    // put the pointer for the memory location on the stack 
+    obj->ctemplate->steer(obj->u.this_pointer);
+    return *hoc_pxpop();
+}
+
 
 // Set Section dparams.
 double get_dparam(Section* sec, int ind) {
