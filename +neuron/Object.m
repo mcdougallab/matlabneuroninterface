@@ -33,7 +33,7 @@ classdef Object < dynamicprops
                     method = split(method_list(i), ":");
                     method_types = split(method(2), "-");
                     method_type = method_types(1);
-                    % method_subtype = method_types(2);
+                    method_subtype = method_types(2);
                     if (method_type == "263")  % steered property
                         self.attr_list = [self.attr_list method(1)];
                         p = self.addprop(method(1));
