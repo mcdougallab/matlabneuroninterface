@@ -34,11 +34,16 @@ classdef Object < dynamicprops
                     method_types = split(method(2), "-");
                     method_type = method_types(1);
                     % method_subtype = method_types(2);
-                    if (method_type == "310")
+                    if (method_type == "263")  % steered property
                         self.attr_list = [self.attr_list method(1)];
                         p = self.addprop(method(1));
-                        p.GetMethod = @(self)get_prop(self, method(1));
-                        p.SetMethod = @(self, value)set_prop(self, method(1), value);
+                        p.GetMethod = @(self)get_steered_prop(self, method(1));
+                        p.SetMethod = @(self, value)set_steered_prop(self, method(1), value);
+                    elseif (method_type == "310")  % point process property
+                        self.attr_list = [self.attr_list method(1)];
+                        p = self.addprop(method(1));
+                        p.GetMethod = @(self)get_pp_prop(self, method(1));
+                        p.SetMethod = @(self, value)set_pp_prop(self, method(1), value);
                     elseif (method_type == "270")
                         self.mt_double_list = [self.mt_double_list method(1)];
                     elseif (method_type == "328")
@@ -157,16 +162,28 @@ classdef Object < dynamicprops
             end
         end
 
-        function set_prop(self, propname, value)
+        function set_pp_prop(self, propname, value)
         % Set dynamic property.
         %   set_prop(propname)
             clib.neuron.set_pp_property(self.obj, propname, value);
         end
 
-        function value = get_prop(self, propname)
+        function value = get_pp_prop(self, propname)
         % Get dynamic property.
         %   value = get_prop(propname)
             value = clib.neuron.get_pp_property(self.obj, propname);
+        end
+
+        function set_steered_prop(self, propname, value)
+        % Set dynamic property.
+        %   set_prop(propname)
+            clib.neuron.set_steered_property(self.obj, propname, value);
+        end
+
+        function value = get_steered_prop(self, propname)
+        % Get dynamic property.
+        %   value = get_prop(propname)
+            value = clib.neuron.get_steered_property(self.obj, propname);
         end
     end
 end
