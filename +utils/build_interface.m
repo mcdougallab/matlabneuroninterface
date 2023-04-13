@@ -17,8 +17,13 @@ function build_interface()
     % Create definition file for NEURON library.
     HeaderFilePath = "source/nrnmatlab.h";
     SourceFilePath = "source/nrnmatlab.cpp";
-    StaticLibPath = "source/libnrniv.a";
-    LibMexPath = fullfile(matlabroot, "extern", "lib", "win64", "mingw64", "libmex.lib"); % For mexPrintf
+    if ispc
+        StaticLibPath = "source/libnrniv.a";
+        LibMexPath = fullfile(matlabroot, "extern", "lib", "win64", "mingw64", "libmex.lib"); % For mexPrintf
+    elseif isunix
+        StaticLibPath = "/home/kian.ohara/.conda/envs/neuron9/lib/python3.11/site-packages/neuron/.data/lib/libnrniv.so";
+        LibMexPath = fullfile(matlabroot, "bin", "glnxa64", "libmex.so"); % For mexPrintf
+    end
     HeadersIncludePath = "source";
     try
         clibgen.generateLibraryDefinition(HeaderFilePath, ...
@@ -28,7 +33,8 @@ function build_interface()
             IncludePath=HeadersIncludePath, ...
             PackageName="neuron", ...
             TreatObjectPointerAsScalar=true, ...
-            TreatConstCharPointerAsCString=true);
+            TreatConstCharPointerAsCString=true, ...
+            AdditionalCompilerFlags="-g");
     catch ME
         disp(ME);
         error("Error while running clibgen.generateLibraryDefinition(), please check if you have administrator rights.")
