@@ -61,6 +61,7 @@ void set_secondorder(int);
 int get_secondorder(void);
 
 // C++ Neuron functions directly accessible from MATLAB.
+#if _WIN32
 __declspec(dllimport) Node* node_exact(Section*, double);
 __declspec(dllimport) void nrn_pushsec(Section* sec);
 __declspec(dllimport) void hoc_obj_unref(Object*);
@@ -82,6 +83,27 @@ __declspec(dllimport) Section* nrn_sec_pop(void);
 __declspec(dllimport) void section_unref(Section*);
 __declspec(dllimport) void simpleconnectsection(void);
 __declspec(dllimport) char* secname(Section*);
+#else
+extern Node* node_exact(Section*, double);
+extern void nrn_pushsec(Section* sec);
+extern void hoc_obj_unref(Object*);
+extern double hoc_call_func(Symbol*, int);
+extern void hoc_call_ob_proc(Object*, Symbol*, int);
+extern Symbol* hoc_lookup(const char*);
+extern void hoc_pushx(double);
+extern Symbol* hoc_table_lookup(const char*, Symlist*);
+extern double hoc_xpop(void);
+extern int hoc_oc(const char*);
+extern void delete_section(void);
+extern Object* hoc_newobj1(Symbol*, int);
+extern void nrn_change_nseg(Section*, int);
+extern void nrn_length_change(Section*, double);
+extern void mech_insert1(Section*, int);
+extern Section* nrn_sec_pop(void);
+extern void section_unref(Section*);
+extern void simpleconnectsection(void);
+extern char* secname(Section*);
+#endif
 
 // Pointer class for MATLAB interface.
 class NrnRef { /* Holds a pointer to a double. */
