@@ -135,9 +135,6 @@ void matlab_hoc_pushstr(const char* strin) {
     strcpy(cptr, strin);
     hoc_pushstr(&cptr);
 }
-void matlab_hoc_pushobj(Object* ob) {
-    hoc_pushobj(&ob);
-}
 std::string matlab_hoc_strpop(void) {
     std::string str_out = std::string(*hoc_strpop());
     return str_out;
