@@ -28,6 +28,28 @@ classdef Vector < neuron.Object
 
         end
 
+        % See https://nl.mathworks.com/help/matlab/matlab_oop/code-patterns-for-subsref-and-subsasgn-methods.html
+        function self = subsasgn(self, S, varargin)
+            % Assigning a Vector element by index.
+            if (length(S) == 1 && S(1).type == "()")
+                element_id = S(1).subs{:};
+                self.call_method_hoc("set", "Object", element_id-1, varargin{:});
+            % Are we trying to directly access a class property?
+            elseif (isa(S(1).subs, "char") && length(S) == 1 && isprop(self, S(1).subs))
+                self.(S(1).subs) = varargin{:};
+            end
+        end
+
+        function varargout = subsref(self, S)
+            % Are we trying to access a Vector element?
+            if (length(S) == 1 && S(1).type == "()")
+                element_id = S(1).subs{:};
+                [varargout{1:nargout}] = self.data(element_id);
+            else
+                [varargout{1:nargout}] = subsref@neuron.Object(self, S);
+            end
+        end
+
         function vec = get_vec(self)
         % Access C++ Vector object.
         %   vec = get_vec()
