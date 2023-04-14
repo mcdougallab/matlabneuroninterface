@@ -34,7 +34,7 @@ classdef Object < dynamicprops
                     method_types = split(method(2), "-");
                     method_type = method_types(1);
                     % method_subtype = method_types(2);
-                    if (method_type == "263")  % steered property
+                    if (method_type == "263" && method(1) ~= 'x')  % steered property; we need to exclude Vector.x and Matrix.x to prevent errors.
                         self.attr_list = [self.attr_list method(1)];
                         p = self.addprop(method(1));
                         p.GetMethod = @(self)get_steered_prop(self, method(1));
