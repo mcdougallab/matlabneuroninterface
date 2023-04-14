@@ -1,0 +1,22 @@
+load_file("nrngui.hoc")
+
+create soma
+soma { insert hh }
+
+//ideal voltage clamp.
+objref c, g, y, b, model
+c = new Matrix(2,2,2) //sparse - no elements used
+g = new Matrix(2,2)
+y = new Vector(2) // y.x[1] is injected current
+b = new Vector(2)
+g.x[0][1] = -1
+g.x[1][0] = 1
+b.x[1] = 10 // voltage clamp level
+
+soma model = new LinearMechanism(c, g, y, b, .5)
+
+proc advance() {
+    printf("t=%g v=%g y.x[1]=%g\n", t, soma.v(.5), y.x[1])
+    fadvance()
+}
+run()
