@@ -27,6 +27,7 @@ _Z11hoc_obj_refP6Object
 _Z13hoc_obj_unrefP6Object
 _Z10hoc_objpopv
 _Z6hoc_ocPKc
+_Z15hoc_push_objectP6Object
 _Z11hoc_pushobjPP6Object
 _Z10hoc_pushpxPd
 _Z9hoc_pushsP6Symbol

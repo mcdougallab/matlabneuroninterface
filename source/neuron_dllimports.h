@@ -36,7 +36,7 @@ __declspec(dllimport) voptr_function hoc_obj_ref;
 __declspec(dllimport) voptr_function hoc_obj_unref;
 __declspec(dllimport) optrptrv_function hoc_objpop;
 __declspec(dllimport) icptr_function hoc_oc;
-__declspec(dllimport) voptrptr_function hoc_pushobj;
+__declspec(dllimport) voptr_function hoc_push_object;
 __declspec(dllimport) vdptr_function hoc_pushpx;
 __declspec(dllimport) vsptr_function hoc_pushs;
 __declspec(dllimport) vcptrptr_function hoc_pushstr;

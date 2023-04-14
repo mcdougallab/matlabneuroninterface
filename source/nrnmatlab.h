@@ -27,7 +27,6 @@ const double* get_vector_vec(Object* vec, int len);
 // Pushing/popping objects onto/from the stack.
 void matlab_hoc_pushpx(NrnRef* nrnref);
 void matlab_hoc_pushstr(const char* strin);
-void matlab_hoc_pushobj(Object* ob);
 std::string matlab_hoc_strpop(void);
 Object* matlab_hoc_objpop(void);
 
@@ -57,6 +56,7 @@ __declspec(dllimport) void hoc_obj_unref(Object*);
 __declspec(dllimport) double hoc_call_func(Symbol*, int);
 __declspec(dllimport) void hoc_call_ob_proc(Object*, Symbol*, int);
 __declspec(dllimport) Symbol* hoc_lookup(const char*);
+__declspec(dllimport) void hoc_push_object(Object*);
 __declspec(dllimport) void hoc_pushx(double);
 __declspec(dllimport) Symbol* hoc_table_lookup(const char*, Symlist*);
 __declspec(dllimport) double hoc_xpop(void);
