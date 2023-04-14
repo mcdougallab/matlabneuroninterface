@@ -162,16 +162,27 @@ classdef Neuron < dynamicprops
             clib.neuron.increase_try_catch_nest_depth();
             state = clib.neuron.SavedState();
             try
-                n = length(varargin);
-                for i=1:n
-                    neuron.hoc_push(varargin{i});
+                nargs = length(varargin);
+                nsecs = 0;
+                for i=1:length(varargin)
+                    arg = varargin{i};
+                    if (isa(arg, "neuron.Section"))
+                        nargs = nargs - 1;
+                        nsecs = nsecs + 1;
+                        clib.neuron.nrn_pushsec(arg.get_sec());
+                    else
+                        neuron.hoc_push(arg);
+                    end
                 end
                 sym = clib.neuron.hoc_lookup(func);
-                func_val = clib.neuron.hoc_call_func(sym, n);
+                func_val = clib.neuron.hoc_call_func(sym, nargs);
                 if (returntype=="double")
                     value = func_val;
                 else
                     value = neuron.hoc_pop(returntype);
+                end
+                for i=1:nsecs
+                    clib.neuron.nrn_sec_pop();
                 end
             catch  
                 value = NaN;
