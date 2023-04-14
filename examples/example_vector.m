@@ -37,6 +37,11 @@ disp("Size: " + length(v));
 disp(v.double());
 disp("----------");
 
+% Set/get vector elements directly.
+disp("Old value: " + v(3));
+v(3) = 42;
+disp("New value: " + v(3));
+
 % Get some properties using dynamically generated methods.
 % See also: v.list_methods();
 disp("mean: " + v.mean());
