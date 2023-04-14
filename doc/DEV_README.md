@@ -8,7 +8,7 @@ which is included in `source/`.
 Hence this version only works on Windows (for now) for MATLAB versions 
 R2022a and up; at this version support for .a static libraries was added. 
 
-To convert the `libnrniv.dll` file in the NEURON `bin` directory 
+To convert the `libnrniv.dll` file in the NEURON 9 `bin` directory 
 (default `C:\nrn\bin\libnrniv.dll`) to a static library we used the following
 steps:
 - We can see the libnrniv.dll contents with `objdump -x C:\nrn\bin\libnrniv.dll`, 
