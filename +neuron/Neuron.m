@@ -133,6 +133,7 @@ classdef Neuron < dynamicprops
             catch  
                 value = NaN;
                 warning("'"+string(func)+"': number or type of arguments incorrect.");
+                state.restore();
             end
             delete(state);
             clib.neuron.decrease_try_catch_nest_depth();
@@ -171,6 +172,7 @@ classdef Neuron < dynamicprops
             catch  
                 obj = NaN;
                 warning("'"+string(objtype)+"': number or type of arguments incorrect.");
+                state.restore();
             end
             delete(state);
             clib.neuron.decrease_try_catch_nest_depth();
