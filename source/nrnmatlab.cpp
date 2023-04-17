@@ -70,6 +70,9 @@ int decrease_try_catch_nest_depth() {
 hoc_Item* get_section_list() {
     return section_list;
 }
+hoc_Item* get_obj_u_this_pointer(Object* ob){
+    return (hoc_Item*) ob->u.this_pointer;
+}
 Section* get_hoc_item_element_sec(hoc_Item* hoc_item) {
     return hoc_item->element.sec;
 }
