@@ -19,7 +19,7 @@ n.topology();
 
 % Iterate over sections.
 all_sections = neuron.allsec();
-for i=1:width(all_sections)
+for i=1:numel(all_sections)
     disp(i + " " + all_sections{i}.name);
 end
 
