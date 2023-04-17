@@ -49,6 +49,9 @@ void set_node_diam(Node* node, double diam);
 int increase_try_catch_nest_depth();
 int decrease_try_catch_nest_depth();
 
+hoc_Item* get_section_list();
+Section* get_hoc_item_element_sec(hoc_Item*);
+
 // C++ Neuron functions directly accessible from MATLAB.
 __declspec(dllimport) Node* node_exact(Section*, double);
 __declspec(dllimport) void nrn_pushsec(Section* sec);
@@ -69,6 +72,7 @@ __declspec(dllimport) void mech_insert1(Section*, int);
 __declspec(dllimport) Section* nrn_sec_pop(void);
 __declspec(dllimport) void section_unref(Section*);
 __declspec(dllimport) void simpleconnectsection(void);
+__declspec(dllimport) char* secname(Section*);
 
 // Pointer class for MATLAB interface.
 class NrnRef { /* Holds a pointer to a double. */
