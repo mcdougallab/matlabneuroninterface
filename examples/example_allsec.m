@@ -33,3 +33,17 @@ axon1 = all_sections{3};
 axon2 = all_sections{4};
 disp("dend1 length: " + dend1.length);
 disp("axon2 length: " + axon2.length);
+
+% Put the sections in a section_list.
+sl = n.SectionList();
+sl.append(soma);
+sl.append(dend1);
+sl.append(axon1);
+
+% Remove a section; check that it does not show up in allsec(sl).
+delete(dend1);
+clear dend1;
+all_sections = neuron.allsec(sl);
+for i=1:width(all_sections)
+    disp(i + " " + all_sections{i}.name);
+end

@@ -51,6 +51,7 @@ int decrease_try_catch_nest_depth();
 
 hoc_Item* get_section_list();
 Section* get_hoc_item_element_sec(hoc_Item*);
+hoc_Item* get_obj_u_this_pointer(Object*);
 
 // C++ Neuron functions directly accessible from MATLAB.
 __declspec(dllimport) Node* node_exact(Section*, double);
@@ -64,6 +65,7 @@ __declspec(dllimport) void hoc_pushx(double);
 __declspec(dllimport) Symbol* hoc_table_lookup(const char*, Symlist*);
 __declspec(dllimport) double hoc_xpop(void);
 __declspec(dllimport) int hoc_oc(const char*);
+__declspec(dllimport) void hoc_l_delete(hoc_Item*);
 __declspec(dllimport) void delete_section(void);
 __declspec(dllimport) Object* hoc_newobj1(Symbol*, int);
 __declspec(dllimport) void nrn_change_nseg(Section*, int);
