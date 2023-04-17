@@ -68,13 +68,9 @@ classdef Neuron < dynamicprops
                 end
             end
         end
-        function varargout = subsref(self, S)
-        % If a function is called, but it is not listed as a Neuron class method, try to run it by calling self.call_func_hoc().
-        %   Available functions are displayed using Neuron.list_function().
-        %
-        %   Getting/setting direct top-level variables is possible using:
-        %   n = neuron.Neuron();
-        %   n.t, n.dt, n.GAMMA, n.PHI, etc.
+
+        function varargout = dynamic_call(self, S)
+        % Implementation of dynamic top-level variable and function calls.
 
             % S(1).subs is function name;
             % S(2).subs is a cell array containing arguments.
@@ -103,8 +99,26 @@ classdef Neuron < dynamicprops
             % Is this method present in the HOC lookup table, and does it return a string?
             elseif any(strcmp(self.fn_string_list, func))
                 [varargout{1:nargout}] = self.call_func_hoc(func, "string", S(2).subs{:});
+            % If none of the above, throw error.
             else
-                warning("'"+string(func)+"': not found; call Neuron.list_functions() to see all available methods and attributes.")
+                error("'"+string(func)+"': not found; call Neuron.list_functions() " + ...
+                      "to see all available methods and attributes.")
+            end
+
+        end
+
+        function varargout = subsref(self, S)
+        % Call a top-level variable or function.
+        %   Available functions are displayed using Neuron.list_function().
+        %
+        %   Getting/setting direct top-level variables is possible using:
+        %   n = neuron.Neuron();
+        %   n.t, n.dt, n.GAMMA, n.PHI, etc.
+            try
+                [varargout{1:nargout}] = self.dynamic_call(S);
+            catch  % Check again if var/func exists.
+                self.fill_dynamic_props();
+                [varargout{1:nargout}] = self.dynamic_call(S);
             end
         end
         function list_functions(self)
