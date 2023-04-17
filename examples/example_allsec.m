@@ -1,6 +1,3 @@
-% Proof of concept for running NEURON in MATLAB:
-% Generates a plot of an action potential.
-
 % Initialization.
 clear;
 setup;
