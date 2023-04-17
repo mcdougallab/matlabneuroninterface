@@ -10,16 +10,11 @@ dend.nseg = 100;
 dend.length = 6.28;
 
 % Set voltage; also set explicitly at start and end points.
-v_ref = dend.ref("v", 0);
-v_ref.set(sin(0 * dend.length))
-for i=0:dend.nseg-1
-    segment = (double(i) + 0.5) / double(dend.nseg);
-    v_ref = dend.ref("v", segment);
-    disp(segment * dend.length);
-    v_ref.set(sin(segment * dend.length));
+segments = dend.segment_locations(true);
+for i=1:numel(segments)
+    v_ref = dend.ref("v", segments(i));
+    v_ref.set(sin(segments(i) * dend.length));
 end
-v_ref = dend.ref("v", 1);
-v_ref.set(sin(1 * dend.length))
 
 % Plot result with RangeVarPlot.
 rvp = n.RangeVarPlot(dend, "v", 0, 1);
