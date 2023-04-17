@@ -30,6 +30,7 @@ __declspec(dllimport) dvptrint_function hoc_call_func;
 __declspec(dllimport) voptrsptri_function hoc_call_ob_proc;
 __declspec(dllimport) dsio_function hoc_call_objfunc;
 __declspec(dllimport) vsptr_function hoc_install_object_data_index;
+__declspec(dllimport) vitemptr_function hoc_l_delete;
 __declspec(dllimport) scptr_function hoc_lookup;
 __declspec(dllimport) optrsptri_function hoc_newobj1;
 __declspec(dllimport) voptr_function hoc_obj_ref;
