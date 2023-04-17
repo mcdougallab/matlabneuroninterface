@@ -21,6 +21,7 @@ _Z13hoc_call_funcP6Symboli
 _Z16hoc_call_ob_procP6ObjectP6Symboli
 _Z16hoc_call_objfuncP6SymboliP6Object
 _Z29hoc_install_object_data_indexP6Symbol
+_Z12hoc_l_deleteP8hoc_Item
 _Z10hoc_lookupPKc
 _Z11hoc_newobj1P6Symboli
 _Z11hoc_obj_refP6Object
