@@ -66,6 +66,7 @@ extern "C" __declspec(dllimport) int nrn_main_launch;
 extern "C" __declspec(dllimport) int nrn_nobanner_;
 extern "C" __declspec(dllimport) int nrn_try_catch_nest_depth;
 extern "C" __declspec(dllimport) vf2icif_function nrnpy_set_pr_etal;
+extern "C" __declspec(dllimport) hoc_Item* section_list;
 
 // Import functions for which name mangling goes awry.
 extern "C" __declspec(dllimport) code_ss _Z12oc_save_codePP4InstS1_RyPPN3nrn2oc5frameEPiS8_S1_S7_S2_PP7SymlistS1_S8_;

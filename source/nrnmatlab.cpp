@@ -67,6 +67,13 @@ int decrease_try_catch_nest_depth() {
     return nrn_try_catch_nest_depth;
 }
 
+hoc_Item* get_section_list() {
+    return section_list;
+}
+Section* get_hoc_item_element_sec(hoc_Item* hoc_item) {
+    return hoc_item->element.sec;
+}
+
 // Return all functions/methods/attributes as a string with separators ";"
 // between methods, and ":" between method name and method type.
 std::string str_symbol_table(Symlist* table) {
