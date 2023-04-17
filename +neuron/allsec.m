@@ -3,14 +3,14 @@ function all_sections = allsec()
 %   allsec()
     section_iter = clib.neuron.get_section_list().next;
     section = clib.neuron.get_hoc_item_element_sec(section_iter);
-    all_sections = {section};
+    all_sections = {neuron.Section(section)};
     while true
         section_iter = section_iter.next;
         section = clib.neuron.get_hoc_item_element_sec(section_iter);
         if clibIsNull(section)
             break;
         else
-            all_sections{end+1} = section;
+            all_sections{end+1} = neuron.Section(section);
         end
     end
 end
