@@ -10,10 +10,10 @@ dend.nseg = 100;
 dend.length = 6.28;
 
 % Set voltage; also set explicitly at start and end points.
-segments = dend.segment_locations(true);
+segments = dend.segments(true);
 for i=1:numel(segments)
-    v_ref = dend.ref("v", segments(i));
-    v_ref.set(sin(segments(i) * dend.length));
+    v_ref = dend.ref("v", segments{i}.x);
+    v_ref.set(sin(segments{i}.x * dend.length));
 end
 
 % Plot result with RangeVarPlot.
