@@ -216,6 +216,7 @@ classdef Neuron < dynamicprops
                         obj.append(vector_data(i));
                     end
                 else
+                    % Generic case: push arguments to stack and create Object.
                     [nsecs, nargs] = neuron.push_args(varargin{:});
                     sym = clib.neuron.hoc_lookup(objtype);
                     cppobj = clib.neuron.hoc_newobj1(sym, nargs);
