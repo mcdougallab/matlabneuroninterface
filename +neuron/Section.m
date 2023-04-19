@@ -13,25 +13,6 @@ classdef Section
         nseg        % Number of segments.
     end
     methods
-        function arr = segment_locations(self, endpoints)
-        % Return array of all section segment locations; set endpoints 
-        % (optional) to true to include endpoints 0 and 1.
-        %   arr = segments()
-        %   arr = segments(endpoints=true)
-            if (exist('endpoints', 'var') && (endpoints == true))
-                arr = zeros(1, self.nseg + 2);
-                arr(1) = 0;
-                arr(end) = 1;
-                offset = 1;
-            else
-                arr = zeros(1, self.nseg);
-                offset = 0;
-            end
-            for i=1:self.nseg
-                segment = (double(i-1) + 0.5) / double(self.nseg);
-                arr(offset + i) = segment;
-            end
-        end
         function self = Section(value)
         % Initialize a new Section by providing a name or Neuron section object.
         %   Section(name) 
@@ -85,6 +66,40 @@ classdef Section
                 clib.neuron.hoc_call_func(sym, 0);
                 % It looks like delete_section already pops the section off the stack.
                 % clib.neuron.nrn_sec_pop();
+            end
+        end
+        function arr = segment_locations(self, endpoints)
+        % Return array of all section segment locations; set endpoints 
+        % (optional) to true to include endpoints 0 and 1.
+        %   arr = segment_locations()
+        %   arr = segment_locations(true)
+            if (exist('endpoints', 'var') && (endpoints == true))
+                arr = zeros(1, self.nseg + 2);
+                arr(1) = 0;
+                arr(end) = 1;
+                offset = 1;
+            else
+                arr = zeros(1, self.nseg);
+                offset = 0;
+            end
+            for i=1:self.nseg
+                segment = (double(i-1) + 0.5) / double(self.nseg);
+                arr(offset + i) = segment;
+            end
+        end
+        function segs = segments(self, endpoints)
+        % Return cell array with all Segments; set endpoints 
+        % (optional) to true to include endpoints 0 and 1.
+        %   segs = segments()
+        %   segs = segments(true)
+            if (exist('endpoints', 'var') && (endpoints == true))
+                x_arr = self.segment_locations(endpoints);
+            else
+                x_arr = self.segment_locations();
+            end
+            segs = cell(size(x_arr));
+            for i=1:numel(x_arr)
+                segs{i} = neuron.Segment(self, x_arr(i));
             end
         end
         function insert_mechanism(self, mech_name)
