@@ -7,7 +7,10 @@ n.reset_sections();
 % Make section and vectors
 soma = n.Section("soma ");
 soma.insert_mechanism("hh");
-v = soma.ref("v", 0.5);
+seg = soma(0.5);
+v = seg.ref("v");  % Equivalent to: v = soma.ref("v", 0.5);
+% TODO: we cannot do soma(0.5).ref("v") directly, because of the way
+% Section.subsref works...
 v_vec = n.Vector();
 v_vec.record(v);
 t_vec = n.Vector();
@@ -23,7 +26,7 @@ ns.number = 10;
 disp(ns);
 
 % ExpSyn object
-syn = n.ExpSyn(soma, 0.5);
+syn = n.ExpSyn(soma(0.5));
 syn.tau = 3;
 syn.e = 0;
 disp(syn);

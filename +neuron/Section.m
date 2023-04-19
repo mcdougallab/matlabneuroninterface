@@ -68,6 +68,27 @@ classdef Section
                 % clib.neuron.nrn_sec_pop();
             end
         end
+
+        function varargout = subsref(self, S)
+        % Implement indexing, returning a Segment.
+
+            % S(1).subs is method (or property) name;
+            % S(2).subs is a cell array containing arguments.
+
+            % Is the provided method listed above?
+            if ismethod(self, S(1).subs)
+                [varargout{1:nargout}] = builtin('subsref', self, S);
+            % Are we trying to directly access a class property?
+            elseif (isa(S(1).subs, "char") && length(S) == 1 && isprop(self, S(1).subs))
+                [varargout{1:nargout}] = self.(S(1).subs);
+            % Are we trying to get a Segment by using ()-indexing?
+            elseif (length(S) == 1 && S(1).type == "()")
+                x = S(1).subs{:};
+                [varargout{1:nargout}] = neuron.Segment(self, x);
+            else
+                warning("Section."+string(S(1).subs)+" not found.")
+            end
+        end
         function arr = segment_locations(self, endpoints)
         % Return array of all section segment locations; set endpoints 
         % (optional) to true to include endpoints 0 and 1.
