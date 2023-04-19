@@ -48,3 +48,10 @@ disp("mean: " + v.mean());
 disp("stdev: " + v.stdev());
 disp("contains 0.0: " + v.contains(0.0));
 disp("contains 1.0: " + v.contains(1.0));
+disp("----------");
+
+% Make vector from list.
+v2 = n.Vector([0 1 2 3 4 5.3]);
+disp("Vector from list:");
+disp(v2.double());
+disp("----------");
