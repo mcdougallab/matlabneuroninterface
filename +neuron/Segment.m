@@ -24,7 +24,7 @@ classdef Segment < handle
                 % TODO: Does this go wrong if we push another Segment on
                 % the same Section?
                 clib.neuron.nrn_pushsec(self.parent_sec);
-                neuron.hoc_push(self.x);
+                neuron.stack.hoc_push(self.x);
                 self.on_stack = true;
                 value = self.on_stack;
             else

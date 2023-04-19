@@ -18,7 +18,7 @@ function [nsecs, nargs] = push_args(varargin)
         else
             % Push an argument to the NEURON stack.
             nargs = nargs + 1;
-            neuron.hoc_push(arg);
+            neuron.stack.hoc_push(arg);
         end
     end
 end

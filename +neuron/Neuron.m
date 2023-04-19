@@ -179,15 +179,15 @@ classdef Neuron < dynamicprops
             clib.neuron.increase_try_catch_nest_depth();
             state = clib.neuron.SavedState();
             try
-                [nsecs, nargs] = neuron.push_args(varargin{:});
+                [nsecs, nargs] = neuron.stack.push_args(varargin{:});
                 sym = clib.neuron.hoc_lookup(func);
                 func_val = clib.neuron.hoc_call_func(sym, nargs);
                 if (returntype=="double")
                     value = func_val;
                 else
-                    value = neuron.hoc_pop(returntype);
+                    value = neuron.stack.hoc_pop(returntype);
                 end
-                neuron.pop_sections(nsecs);
+                neuron.stack.pop_sections(nsecs);
             catch e
                 value = NaN;
                 warning(e.message);
@@ -207,7 +207,7 @@ classdef Neuron < dynamicprops
             state = clib.neuron.SavedState();
             try
                 if (objtype == "Vector") && (numel(varargin) == 1) && (numel(varargin{:}) > 1)
-                    % Special case: construct Vector from list
+                    % Special case: construct Vector from list.
                     sym = clib.neuron.hoc_lookup("Vector");
                     cppobj = clib.neuron.hoc_newobj1(sym, 0);
                     obj = neuron.Vector(cppobj);
@@ -217,7 +217,7 @@ classdef Neuron < dynamicprops
                     end
                 else
                     % Generic case: push arguments to stack and create Object.
-                    [nsecs, nargs] = neuron.push_args(varargin{:});
+                    [nsecs, nargs] = neuron.stack.push_args(varargin{:});
                     sym = clib.neuron.hoc_lookup(objtype);
                     cppobj = clib.neuron.hoc_newobj1(sym, nargs);
                     if (objtype == "Vector")
@@ -225,7 +225,7 @@ classdef Neuron < dynamicprops
                     else
                         obj = neuron.Object(objtype, cppobj);
                     end
-                    neuron.pop_sections(nsecs);
+                    neuron.stack.pop_sections(nsecs);
                 end
             catch e
                 obj = NaN;
