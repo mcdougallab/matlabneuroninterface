@@ -85,7 +85,10 @@ classdef Section
             elseif (S(1).type == "()")
                 x = S(1).subs{:};
                 seg = neuron.Segment(self, x);
-                if length(S) == 2
+                % TODO: fix the following in a less ugly way.
+                if length(S) == 1
+                    [varargout{1:nargout}] = seg;
+                elseif length(S) == 2
                     % Allow getting a Segment property directly after
                     % creating it.
                     [varargout{1:nargout}] = seg.(S(2).subs);
@@ -94,7 +97,7 @@ classdef Section
                     % creating it.
                     [varargout{1:nargout}] = seg.(S(2).subs)(S(3).subs{:});
                 else
-                    [varargout{1:nargout}] = seg;
+                    error("Arbitrarily deep chained method calls not (yet) possible.")
                 end
             else
                 warning("Section."+string(S(1).subs)+" not found.")
