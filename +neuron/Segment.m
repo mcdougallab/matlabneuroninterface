@@ -49,5 +49,32 @@ classdef Segment < handle
         function value = get.parent_name(self)
             value = self.parent_sec.name;
         end
+
+        function varargout = subsref(self, S)
+            % Is the provided method listed above?
+            if ismethod(self, S(1).subs)
+                [varargout{1:nargout}] = builtin('subsref', self, S);
+            % Are we trying to directly access a class property?
+            elseif (isa(S(1).subs, "char") && length(S) == 1 && isprop(self, S(1).subs))
+                [varargout{1:nargout}] = self.(S(1).subs);
+            % If not a class property, return a Section range ref
+            elseif (isa(S(1).subs, "char") && length(S) == 1)
+                ref = self.ref(S(1).subs);
+                [varargout{1:nargout}] = ref.get();
+            else
+                warning("Section."+string(S(1).subs)+" not found.")
+            end
+        end
+
+        function self = subsasgn(self, S, varargin)
+            % Are we trying to directly access a class property?
+            if (isa(S(1).subs, "char") && length(S) == 1 && isprop(self, S(1).subs))
+                self.(S(1).subs) = varargin{:};
+            elseif (isa(S(1).subs, "char") && length(S) == 1)
+                ref = self.ref(S(1).subs);
+                ref.set(varargin{:});
+            end
+        end
+
     end
 end
