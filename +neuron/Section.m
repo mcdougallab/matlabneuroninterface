@@ -82,9 +82,20 @@ classdef Section
             elseif (isa(S(1).subs, "char") && length(S) == 1 && isprop(self, S(1).subs))
                 [varargout{1:nargout}] = self.(S(1).subs);
             % Are we trying to get a Segment by using ()-indexing?
-            elseif (length(S) == 1 && S(1).type == "()")
+            elseif (S(1).type == "()")
                 x = S(1).subs{:};
-                [varargout{1:nargout}] = neuron.Segment(self, x);
+                seg = neuron.Segment(self, x);
+                if length(S) == 2
+                    % Allow getting a Segment property directly after
+                    % creating it.
+                    [varargout{1:nargout}] = seg.(S(2).subs);
+                elseif length(S) == 3
+                    % Allow calling a Segment method directly after
+                    % creating it.
+                    [varargout{1:nargout}] = seg.(S(2).subs)(S(3).subs{:});
+                else
+                    [varargout{1:nargout}] = seg;
+                end
             else
                 warning("Section."+string(S(1).subs)+" not found.")
             end
