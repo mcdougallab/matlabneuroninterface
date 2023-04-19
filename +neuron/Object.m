@@ -82,26 +82,14 @@ classdef Object < dynamicprops
             clib.neuron.increase_try_catch_nest_depth();
             state = clib.neuron.SavedState();
             try
-                nargs = length(varargin);
-                nsecs = 0;
-                for i=1:length(varargin)
-                    arg = varargin{i};
-                    if (isa(arg, "neuron.Section"))
-                        nargs = nargs - 1;
-                        nsecs = nsecs + 1;
-                        clib.neuron.nrn_pushsec(arg.get_sec());
-                    else
-                        neuron.hoc_push(arg);
-                    end
-                end
+                [nsecs, nargs] = neuron.push_args(varargin{:});
                 sym = clib.neuron.hoc_table_lookup(method, ...
                     self.obj.ctemplate.symtable);
                 clib.neuron.hoc_call_ob_proc(self.obj, sym, nargs);
                 value = neuron.hoc_pop(returntype);
-                for i=1:nsecs
-                    clib.neuron.nrn_sec_pop();
-                end
-            catch  
+                neuron.pop_sections(nsecs);
+            catch e
+                warning(e.message);
                 warning("'"+string(method)+"': number or type of arguments incorrect.");
                 value = NaN;
                 state.restore();
