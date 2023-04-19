@@ -69,6 +69,19 @@ classdef Section
             end
         end
 
+        function self = subsasgn(self, S, varargin)
+        % Implement indexing, returning a Segment.
+
+            % Are we trying to directly access a class property?
+            if (isa(S(1).subs, "char") && length(S) == 1 && isprop(self, S(1).subs))
+                self.(S(1).subs) = varargin{:};
+            elseif (S(1).type == "()" && length(S) == 2)
+                x = S(1).subs{:};
+                seg = neuron.Segment(self, x);
+                seg.(S(2).subs) = varargin{:};
+            end
+        end
+
         function varargout = subsref(self, S)
         % Implement indexing, returning a Segment.
 
