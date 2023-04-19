@@ -5,12 +5,9 @@ n = neuron.Neuron();
 n.reset_sections();
 
 % Make section and vectors
-soma = n.Section("soma ");
+soma = n.Section("soma");
 soma.insert_mechanism("hh");
-seg = soma(0.5);
-v = seg.ref("v");  % Equivalent to: v = soma.ref("v", 0.5);
-% TODO: we cannot do soma(0.5).ref("v") directly, because of the way
-% Section.subsref works...
+v = soma(0.5).ref("v");  % Equivalent to: v = soma.ref("v", 0.5);
 v_vec = n.Vector();
 v_vec.record(v);
 t_vec = n.Vector();
