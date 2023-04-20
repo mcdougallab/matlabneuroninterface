@@ -135,11 +135,11 @@ classdef Section
                 arr(offset + i) = segment;
             end
         end
-        function segs = segments(self, endpoints)
+        function segs = allseg(self, endpoints)
         % Return cell array with all Segments; set endpoints 
         % (optional) to true to include endpoints 0 and 1.
-        %   segs = segments()
-        %   segs = segments(true)
+        %   segs = allseg()
+        %   segs = allseg(true)
             if (exist('endpoints', 'var') && (endpoints == true))
                 x_arr = self.segment_locations(endpoints);
             else
