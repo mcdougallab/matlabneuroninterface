@@ -24,22 +24,29 @@ for i=1:numel(all_sections)
 end
 
 % Get all Sections back in the MATLAB workspace.
-soma = all_sections{1};
-dend1 = all_sections{2};
-axon1 = all_sections{3};
-axon2 = all_sections{4};
-disp("dend1 length: " + dend1.length);
-disp("axon2 length: " + axon2.length);
+soma_new = all_sections{1};
+dend1_new = all_sections{2};
+axon1_new = all_sections{3};
+axon2_new = all_sections{4};
+disp("dend1_new length: " + dend1_new.length);
+disp("axon2_new length: " + axon2_new.length);
+
+% Iterate over all segments of a section
+soma_new.nseg = 5;
+soma_segs = soma_new.allseg();
+for i=1:numel(soma_segs)
+    disp("Segment location: " + soma_segs{i}.x);
+end
 
 % Put the sections in a section_list.
 sl = n.SectionList();
-sl.append(soma);
-sl.append(dend1);
-sl.append(axon1);
+sl.append(soma_new);
+sl.append(dend1_new);
+sl.append(axon1_new);
 
 % Remove a section; check that it does not show up in allsec(sl).
-delete(dend1);
-clear dend1;
+delete(dend1_new);
+clear dend1_new;
 all_sections = neuron.allsec(sl);
 for i=1:width(all_sections)
     disp(i + " " + all_sections{i}.name);
