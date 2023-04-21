@@ -1,18 +1,16 @@
 classdef Segment < handle
-% Section Class for manipulating Neuron sections.
-    properties (Access=private)
-        parent_sec    % MATLAB section object.
-    end
+% Segment Class for manipulating parts of Sections.
     properties (SetAccess=protected, GetAccess=public)
-        x           % Number between 0 and 1: location on the Section.
+        parent_sec      % MATLAB section object.
+        x               % Number between 0 and 1: location on the Section.
     end
     properties (Dependent)
-        parent_name % String; name of parent section.
+        parent_name     % String; name of parent section.
     end
     methods
         function self = Segment(sec, x)
         % Initialize a new Segment by providing a Section and location value.
-        %   Section(sec, x) 
+        %   Segment(sec, x) 
             self.parent_sec = sec;
             self.x = x;
         end
@@ -23,13 +21,17 @@ classdef Segment < handle
             neuron.stack.hoc_push(self.x);
         end
         function nrnref = ref(self, rangevar)
+        % Get reference to range variable on segment.
+        %   nrnref = ref(rangevar)
             nrnref = self.parent_sec.ref(rangevar, self.x);
         end
         function value = get.parent_name(self)
+        % Get parent_name property.
             value = self.parent_sec.name;
         end
 
         function varargout = subsref(self, S)
+        % Call a class method or dynamic property.
             % Is the provided method listed above?
             if ismethod(self, S(1).subs)
                 [varargout{1:nargout}] = builtin('subsref', self, S);
@@ -46,6 +48,7 @@ classdef Segment < handle
         end
 
         function self = subsasgn(self, S, varargin)
+        % Assign a dynamic property value.
             % Are we trying to directly access a class property?
             if (isa(S(1).subs, "char") && length(S) == 1 && isprop(self, S(1).subs))
                 self.(S(1).subs) = varargin{:};
