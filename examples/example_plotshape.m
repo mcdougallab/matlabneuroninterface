@@ -20,10 +20,9 @@ branch3.length = 5;
 branch1.connect(0, main, 1);
 branch2.connect(0, main, 1);
 branch3.connect(0, main, 0.5);
-main.nseg = 2;
-n.define_shape();
 main.nseg = 5;
 n.topology();
+n.define_shape();
 
 % Make PlotShape of all Sections.
 ps_all = n.PlotShape(0);

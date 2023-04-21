@@ -11,17 +11,12 @@ classdef PlotShape < neuron.Object
         end
 
         function plot(self)
-            % TODO:
-            % - Interpolate 3D points (see
-            %   https://github.com/neuronsimulator/nrn/blob/master/share/lib/python/neuron/__init__.py,
-            %   line 1134 "def _get_3d_pt(segment):").
-            % - Use spi.varname() to select the right var to plot at
-            %   each Segment.
-            % - Make a 3D plot of spi.varname() at each Segment  
-            %   location, with lower bound spi_some.low() and upper 
-            %   bound spi_some.high(); also include all 3D points.
+        % Plot PlotShape data; make sure to call n.define_shape() before
+        % calling this.
+        %   plot()
 
-            % Call n.define_shape() first? 
+            % Call n.define_shape() first? We don't have the Neuron object,
+            % so we have to do:
             % sym = clib.neuron.hoc_lookup("define_shape");
             % clib.neuron.hoc_call_func(sym, 0);
 
