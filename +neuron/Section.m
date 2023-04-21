@@ -272,13 +272,4 @@ classdef Section
 
         end
     end
-    methods(Static)
-
-        function pop()
-        % Pop (any) section from stack.
-        %   pop()
-            clib.neuron.nrn_sec_pop;      
-        end
-
-    end
 end
