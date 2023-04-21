@@ -12,7 +12,9 @@ function all_sections = allsec(section_list)
     elseif isa(section_list, 'clib.neuron.Object') % Input is a C++ NEURON object
         if clibIsNull(section_list) % If NULL, get SectionList of all Sections.
             section_list = clib.neuron.get_section_list();
-        end % If not NULL, we already have the correct section_list.
+        else  % Input is a fair dinkum NEURON SectionList
+            section_list = clib.neuron.get_obj_u_this_pointer(section_list);
+        end
     end
 
     section_iter = section_list.next;
