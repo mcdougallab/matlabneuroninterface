@@ -48,7 +48,7 @@ classdef Segment < handle
         end
 
         function self = subsasgn(self, S, varargin)
-        % Assign a dynamic property value.
+        % Assign a (dynamic) property value.
             % Are we trying to directly access a class property?
             if (isa(S(1).subs, "char") && length(S) == 1 && isprop(self, S(1).subs))
                 self.(S(1).subs) = varargin{:};
@@ -58,5 +58,11 @@ classdef Segment < handle
             end
         end
 
+        function [x_lo, x_hi] = get_bounds(self)
+        % Get start and end bounds of Segment.
+            nseg = double(self.parent_sec.nseg);
+            x_lo = floor(nseg*self.x) / double(self.parent_sec.nseg);
+            x_hi = ceil(nseg*self.x) / double(self.parent_sec.nseg);
+        end
     end
 end
