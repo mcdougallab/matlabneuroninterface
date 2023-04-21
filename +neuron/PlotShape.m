@@ -52,14 +52,15 @@ classdef PlotShape < neuron.Object
 %                 end
 
                 % Get start, pt3ds and end point for each segment.
-                dx = double(s.length) / s.nseg;
+                dx = double(s.length);
                 arc3d = pt3d(4, :);
 
                 segments = s.segments();
                 for j=1:s.nseg
                     seg = segments{j};
-                    x_lo = double((j-1) * dx);
-                    x_hi = double(j * dx);
+                    [x_lo, x_hi] = seg.get_bounds();
+                    x_lo = x_lo * dx;
+                    x_hi = x_hi * dx;
                     seg_arc_arr = arc3d(arc3d(:) > x_lo & arc3d(:) < x_hi);
                     seg_arc_arr = [x_lo seg_arc_arr x_hi];
                     seg_x3d_arr = interp1_arr(pt3d(4, :), pt3d(1, :), seg_arc_arr);
