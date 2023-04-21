@@ -1,3 +1,5 @@
+// reference hoc example for LinearMechanism from the Neuron documentation
+// at https://nrn.readthedocs.io/en/8.2.2/hoc/modelspec/programmatic/linmod.html#LinearMechanism
 load_file("nrngui.hoc")
 
 create soma
