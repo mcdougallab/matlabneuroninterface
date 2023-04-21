@@ -271,12 +271,11 @@ classdef Section
             for i=1:npt3d
                 disp(self.sec.pt3d(i));
             end
+            segments = self.segments();
             for i=1:self.nseg
-                x = double((double(i) - 0.5) / double(self.nseg));
-                disp(self.name + "(" + x + ").v = " ...
-                    + self.ref("v", x).get());
-                disp(self.name + "(" + x + ").diam = " ...
-                    + self.ref("diam", x).get());
+                seg = segments{i};
+                disp(self.name + "(" + seg.x + ").v = " + seg.v);
+                disp(self.name + "(" + seg.x + ").diam = " + seg.diam);
             end
 
         end
