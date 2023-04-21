@@ -28,7 +28,7 @@ main.addpoint(1, 2, 3, 4);
 % Alternative way to add 3D point to main using dynamic top-level function.
 main.push();
 n.pt3dadd(201, 2, 3, 1);
-main.pop();
+neuron.stack.pop_sections(1);
 
 % Set abstract morphology info for branches.
 branch1.length = 100;

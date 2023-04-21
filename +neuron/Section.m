@@ -209,7 +209,7 @@ classdef Section
             clib.neuron.hoc_pushx(diam);
             sym = clib.neuron.hoc_lookup("pt3dadd");
             clib.neuron.hoc_call_func(sym, 4);
-            self.pop();
+            neuron.stack.pop_sections(1);
         end
         function self = set.length(self, val)
         % Set length of Section.
