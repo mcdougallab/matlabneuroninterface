@@ -24,6 +24,12 @@ classdef Neuron < dynamicprops
             call_list = arr(1:end-1);
             self.fn_void_list = string.empty;  % Empty, unless file is loaded.
 
+            % Reset dynamic method lists.
+            self.fn_double_list = [];
+            self.fn_void_list = [];
+            self.fn_string_list = [];
+            self.object_list = [];
+
             % Add dynamic properties.
             % See: doc/DEV_README.md#neuron-types
             for i=1:length(call_list)
@@ -31,40 +37,41 @@ classdef Neuron < dynamicprops
                 f_types = split(f(2), "-");
                 f_type = f_types(1);
                 f_subtype = f_types(2);
-                if (f_type == "263" && f_subtype == "1") % int variable
-                    if ~isprop(self, f(1))
-                        self.var_list = [self.var_list f(1)];
-                        p = self.addprop(f(1));
-                        p.GetMethod = @(self)get_prop(self, f(1));
-                        p.SetMethod = @(self, value)set_prop(self, f(1), value);
-                    end
-                elseif (f_type == "263" && f_subtype == "2") % double variable
-                    if ~isprop(self, f(1))
-                        self.var_list = [self.var_list f(1)];
-                        p = self.addprop(f(1));
-                        p.GetMethod = @(self)get_prop(self, f(1));
-                        p.SetMethod = @(self, value)set_prop(self, f(1), value);
-                    end
-                elseif (f_type == "270") % HOC function returning a double
-                    if ~any(strcmp(self.fn_double_list, f(1)))
+                % Depending on the NEURON type (f_type, f_subtype), we add
+                % the variable/function as a property (by adding it with 
+                % self.addprop) or as a method (by adding it to one of the 
+                % various self.*_list arrays).
+                switch f_type
+                    case "263"  % Properties with get/set functionality.
+                        if f_subtype == "1" % int variable
+                            if ~isprop(self, f(1))
+                                self.var_list = [self.var_list f(1)];
+                                p = self.addprop(f(1));
+                                p.GetMethod = @(self)get_prop(self, f(1));
+                                p.SetMethod = @(self, value)set_prop(self, f(1), value);
+                            end
+                        elseif f_subtype == "2" % double variable
+                            if ~isprop(self, f(1))
+                                self.var_list = [self.var_list f(1)];
+                                p = self.addprop(f(1));
+                                p.GetMethod = @(self)get_prop(self, f(1));
+                                p.SetMethod = @(self, value)set_prop(self, f(1), value);
+                            end
+                        end
+                    case "270" % HOC function returning a double
                         self.fn_double_list = [self.fn_double_list f(1)];
-                    end
-                elseif (f_type == "271") % HOC procedures (returning nothing)
-                    if ~any(strcmp(self.fn_void_list, f(1)))
+                    case "271" % HOC procedures (returning nothing)
                         self.fn_void_list = [self.fn_void_list f(1)];
-                    end
-                elseif (f_type == "280") % function returning a double
-                    if ~any(strcmp(self.fn_double_list, f(1)))
+                    case "280" % function returning a double
                         self.fn_double_list = [self.fn_double_list f(1)];
-                    end
-                elseif (f_type == "296") % function returning a string
-                    if ~any(strcmp(self.fn_string_list, f(1)))
+                    case "296" % function returning a string
                         self.fn_string_list = [self.fn_string_list f(1)];
-                    end
-                elseif (f_type == "324") % object
-                    if ~any(strcmp(self.object_list, f(1)))
+                    case "324" % object
                         self.object_list = [self.object_list f(1)];
-                    end
+                    otherwise
+                        % We ignore all other types; they will either be
+                        % implemented at a later point, or they are internal 
+                        % NEURON types that we do not need to interface with.
                 end
             end
         end
@@ -116,7 +123,9 @@ classdef Neuron < dynamicprops
         %   n.t, n.dt, n.GAMMA, n.PHI, etc.
             try
                 [varargout{1:nargout}] = self.dynamic_call(S);
-            catch  % Check again if var/func exists.
+            catch  
+                % Check again if var/func exists; available functions can
+                % change due to importing .hoc files, for example.
                 self.fill_dynamic_props();
                 [varargout{1:nargout}] = self.dynamic_call(S);
             end
@@ -158,12 +167,6 @@ classdef Neuron < dynamicprops
             % TODO: this method does not work as SetMethod if we move
             % it to methods(Static)... why?
             clib.neuron.ref(propname).set(value);
-        end
-        function value = load_file(self, filename)
-        % Load hoc file.
-        %   load_file(filename)
-            value = self.call_func_hoc("load_file", "double", filename);
-            self.fill_dynamic_props();
         end
 
     end
