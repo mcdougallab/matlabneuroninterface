@@ -10,7 +10,7 @@ dend.nseg = 100;
 dend.length = 6.28;
 
 % Set voltage; also set explicitly at start and end points.
-segments = dend.allseg(true);  % 'true' here gives segments with endpoints included.
+segments = dend.segments(true);  % 'true' here gives segments with endpoints included.
 for i=1:numel(segments)
     segments{i}.v = sin(segments{i}.x * dend.length);
 end
