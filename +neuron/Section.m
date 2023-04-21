@@ -68,11 +68,12 @@ classdef Section
         end
 
         function self = subsasgn(self, S, varargin)
-        % Implement indexing, returning a Segment.
+        % Implement assigning Section and Segment properties.
 
             % Are we trying to directly access a class property?
             if (isa(S(1).subs, "char") && length(S) == 1 && isprop(self, S(1).subs))
                 self.(S(1).subs) = varargin{:};
+            % Assign a segment property value.
             elseif (S(1).type == "()" && length(S) == 2)
                 x = S(1).subs{:};
                 seg = neuron.Segment(self, x);
