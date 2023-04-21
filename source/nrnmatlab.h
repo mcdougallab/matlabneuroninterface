@@ -53,6 +53,7 @@ int decrease_try_catch_nest_depth();
 hoc_Item* get_section_list();
 Section* get_hoc_item_element_sec(hoc_Item*);
 hoc_Item* get_obj_u_this_pointer(Object*);
+ShapePlotInterface* get_plotshape_interface(Object*);
 
 // C++ Neuron functions directly accessible from MATLAB.
 __declspec(dllimport) Node* node_exact(Section*, double);
