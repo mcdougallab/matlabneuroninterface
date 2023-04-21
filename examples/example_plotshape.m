@@ -1,3 +1,4 @@
+% Initialization.
 clear;
 setup;
 n = neuron.Neuron();
