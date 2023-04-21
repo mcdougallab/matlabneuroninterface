@@ -49,6 +49,7 @@ void set_node_diam(Node* node, double diam);
 int increase_try_catch_nest_depth();
 int decrease_try_catch_nest_depth();
 
+// Accessing sections & section lists.
 hoc_Item* get_section_list();
 Section* get_hoc_item_element_sec(hoc_Item*);
 hoc_Item* get_obj_u_this_pointer(Object*);
