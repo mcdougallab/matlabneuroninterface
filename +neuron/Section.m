@@ -136,7 +136,7 @@ classdef Section
             end
         end
         function segs = segments(self, endpoints)
-        % Return cell array with all Segments; set endpoints 
+        % Return cell array with Segments; set endpoints 
         % (optional) to true to include endpoints 0 and 1.
         %   segs = segments()
         %   segs = segments(true)
@@ -149,6 +149,12 @@ classdef Section
             for i=1:numel(x_arr)
                 segs{i} = neuron.Segment(self, x_arr(i));
             end
+        end
+        function segs = allseg(self)
+        % Return cell array with all Segments, including endpoints; alias 
+        % for segs = segments(true).
+        %   segs = allseg()
+            segs = self.segments(true);
         end
         function insert_mechanism(self, mech_name)
         % Insert a mechanism by providing a mechanism name.
