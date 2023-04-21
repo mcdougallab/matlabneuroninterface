@@ -184,6 +184,19 @@ union Datum { /* interpreter stack type */
     void* _pvoid; /* not used on stack, see nrnoc/point.cpp */
 };
 
+class ShapePlotInterface {
+  public:
+    virtual void scale(float min, float max) = 0;
+    virtual const char* varname() const = 0;
+    virtual void* varobj() const = 0;
+    virtual void varobj(void* obj) = 0;
+    virtual void variable(Symbol*) = 0;
+    virtual float low() = 0;
+    virtual float high() = 0;
+    virtual Object* neuron_section_list() = 0;
+    virtual bool has_iv_view() = 0;
+};
+
 /**********************************************************
  * The below is excerpted from:
  * https://github.com/neuronsimulator/nrn/blob/master/src/nrnoc/section.h

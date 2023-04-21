@@ -76,6 +76,12 @@ hoc_Item* get_obj_u_this_pointer(Object* ob){
 Section* get_hoc_item_element_sec(hoc_Item* hoc_item) {
     return hoc_item->element.sec;
 }
+ShapePlotInterface* get_plotshape_interface(Object* ps) {
+    ShapePlotInterface* spi;
+    hoc_Item** my_section_list;
+    spi = ((ShapePlotInterface*) ps->u.this_pointer);
+    return spi;
+}
 
 // Return all functions/methods/attributes as a string with separators ";"
 // between methods, and ":" between method name and method type.
