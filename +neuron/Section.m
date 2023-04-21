@@ -6,11 +6,11 @@ classdef Section
     properties (SetAccess=protected, GetAccess=public)
         mech_list   % List of allowed insertable mechanisms.
         range_list  % List of allowed range variables.
-        name        % Name of the section.
     end
     properties (Dependent)
         length      % Section length.
         nseg        % Number of segments.
+        name        % Name of the section.
     end
     methods
         function self = Section(value)
@@ -21,11 +21,9 @@ classdef Section
                 % Check if input is a section name (string/char)
                 if (isa(value, "string") || isa(value, "char"))
                     name = value;
-                    self.name = name;
                     self.sec = clib.neuron.new_section(name);
                 elseif isa(value, "clib.neuron.Section")
                     sec = value;
-                    self.name = clib.neuron.secname(sec);
                     self.sec = sec;
                 else
                     error("Invalid input for Section constructor.")
@@ -229,6 +227,10 @@ classdef Section
             % We cannot directly access self.sec.prop.dparam, because it
             % is a union, which Matlab does not understand.
             value = clib.neuron.get_dparam(self.sec, 2);
+        end
+        function value = get.name(self)
+        % Get Section name.
+            value = clib.neuron.secname(self.sec);
         end
         function self = set.nseg(self, val)
         % Set the number of segments in the Section.
