@@ -1,3 +1,5 @@
+// file containing continuerun procedure for example_loadfile.m
+// copied from the NEURON repository, at share/lib/hoc/stdrun.hoc
 objref cvode
 cvode = new CVode()
 {load_file("stdlib.hoc", "String")}
