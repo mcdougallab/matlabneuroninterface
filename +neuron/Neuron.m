@@ -87,7 +87,7 @@ classdef Neuron < dynamicprops
             if (isa(func, "char") && length(S) == 1 && isprop(self, func))
                 [varargout{1:nargout}] = self.(func);
             % Check for special type "Section";
-            % the special type "Vector" is checked in self.hoc_new_obj().
+            % the special types "Vector" and "PlotShape" are checked in self.hoc_new_obj().
             elseif (func == "Section")
                 name = S(2).subs{1};
                 [varargout{1:nargout}] = neuron.Section(name);
@@ -222,6 +222,8 @@ classdef Neuron < dynamicprops
                     cppobj = clib.neuron.hoc_newobj1(sym, nargs);
                     if (objtype == "Vector")
                         obj = neuron.Vector(cppobj);
+                    elseif (objtype == "PlotShape")
+                        obj = neuron.PlotShape(cppobj);
                     else
                         obj = neuron.Object(objtype, cppobj);
                     end
