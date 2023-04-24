@@ -162,7 +162,7 @@ classdef Section
                 sym = clib.neuron.hoc_lookup(mech_name);
                 clib.neuron.mech_insert1(self.sec, sym.subtype);
             else
-                warning("Insertable mechanism '"+mech_name+"' not found.");
+                error("Insertable mechanism '"+mech_name+"' not found.");
                 disp("Available insertable mechanisms:")
                 for i=1:self.mech_list.length()
                     disp("    "+self.mech_list(i));
