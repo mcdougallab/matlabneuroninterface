@@ -17,7 +17,4 @@ end
 
 % Plot result with RangeVarPlot.
 rvp = n.RangeVarPlot(dend, "v", 0, 1);
-x = n.Vector();
-y = n.Vector();
-rvp.to_vector(y, x);
-plot(x, y);
+rvp.plot();
