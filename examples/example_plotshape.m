@@ -9,9 +9,9 @@ main = n.Section("main");
 branch1 = n.Section("branch1");
 branch2 = n.Section("branch2");
 branch3 = n.Section("branch3");
-main.set_diameter(5);
+main.set_diameter(4);
 branch1.set_diameter(3);
-branch2.set_diameter(3);
+branch2.set_diameter(2);
 branch3.set_diameter(1);
 main.length = 30;
 branch1.length = 10;
@@ -21,13 +21,16 @@ branch1.connect(0, main, 1);
 branch2.connect(0, main, 1);
 branch3.connect(0, main, 0.5);
 main.nseg = 5;
+main(0.5).diam = 8;
+branch3.nseg = 2;
+branch3(1).diam = 3;
 n.topology();
 n.define_shape();
 
 % Make PlotShape of all Sections.
 ps_all = n.PlotShape(0);
 ps_all.variable("diam");
-ps_all.scale(-1, 6);
+ps_all.scale(0, 8);
 ps_all.plot();
 
 % Make PlotShape of some Sections.
