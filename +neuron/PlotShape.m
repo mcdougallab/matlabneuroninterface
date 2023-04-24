@@ -61,16 +61,23 @@ classdef PlotShape < neuron.Object
                     seg_x3d_arr = interp1_arr(pt3d(4, :), pt3d(1, :), seg_arc_arr);
                     seg_y3d_arr = interp1_arr(pt3d(4, :), pt3d(2, :), seg_arc_arr);
                     seg_z3d_arr = interp1_arr(pt3d(4, :), pt3d(3, :), seg_arc_arr);
-                    % seg_d3d_arr = interp1_arr(pt3d(4, :), pt3d(4, :), seg_arc_arr);
+                    seg_d3d_arr = interp1_arr(pt3d(4, :), pt3d(5, :), seg_arc_arr);
 
                     var = spi.varname();
                     seg_value = s.ref(var, seg.x).get();
                     seg_value_rel = seg_value - spi.low();
                     seg_value_rel = seg_value_rel  / (spi.high() - spi.low());
                     seg_value_rel = min(max(seg_value_rel, 0), 1);
-
-                    h = plot3(seg_x3d_arr, seg_y3d_arr, seg_z3d_arr);
-                    set(h, 'color', [seg_value_rel, 0, 1-seg_value_rel]);
+                    
+                    % Plot between pt3ds, one pair at a time.
+                    for k=1:numel(seg_arc_arr)-1
+                        x = [seg_x3d_arr(k) seg_x3d_arr(k+1)];
+                        y = [seg_y3d_arr(k) seg_y3d_arr(k+1)];
+                        z = [seg_z3d_arr(k) seg_z3d_arr(k+1)];
+                        h = plot3(x, y, z);
+                        h.LineWidth = (seg_d3d_arr(k) + seg_d3d_arr(k+1))/2;
+                        set(h, 'color', [seg_value_rel, 0, 1-seg_value_rel]);
+                    end
                 end
             end
             h = get(gca,'DataAspectRatio');
