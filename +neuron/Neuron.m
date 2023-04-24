@@ -224,6 +224,8 @@ classdef Neuron < dynamicprops
                         obj = neuron.Vector(cppobj);
                     elseif (objtype == "PlotShape")
                         obj = neuron.PlotShape(cppobj);
+                    elseif (objtype == "RangeVarPlot")
+                        obj = neuron.RangeVarPlot(cppobj);
                     else
                         obj = neuron.Object(objtype, cppobj);
                     end
