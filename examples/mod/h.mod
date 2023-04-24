@@ -75,23 +75,3 @@ PROCEDURE rate(v (mV)) { :callable from hoc
 :       linf = 1/(1+ alpl(v))
         taul = bett(v)/(qtl*qt*a0t*(1+a))
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
