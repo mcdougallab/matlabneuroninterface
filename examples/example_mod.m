@@ -3,9 +3,10 @@ clear;
 setup;
 n = neuron.Neuron();
 
-% Try to find 'hd' mechanism.
-% axon1 = n.Section("axon1");
-% axon1.insert_mechanism("hd");  % Error: Insertable mechanism 'hd' not found. 
+% If we try to find 'hd' mechanism here, we get:
+% Error: Insertable mechanism 'hd' not found. 
+% axon = n.Section("axon");
+% axon.insert_mechanism("hd");  % Error!
 
 % Compile mod file.
 examples_path = fileparts(mfilename('fullpath'));
@@ -18,6 +19,12 @@ movefile(output_path, dll_path);
 % Import dll into neuron.
 n.nrn_load_dll(strrep(dll_path, "\", "/"));
 
-% Try again to find 'hd' mechanism; now it should exist.
-axon = n.Section("axon2");
-axon.insert_mechanism("hd");  % No warning.
+% Try to find 'hd' mechanism; now it should exist.
+axon = n.Section("axon");
+axon.insert_mechanism("hd");  % No error!
+
+% Try to find NMDA object.
+syn = n.NMDA(axon(0.5));
+disp(syn);  % Displays: "Beta: 0.0066, e: 45, Alpha: 0.0720"
+syn.e = 42;
+disp(syn.e);  % Displays: 42
