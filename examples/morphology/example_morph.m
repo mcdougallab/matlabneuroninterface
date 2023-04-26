@@ -48,6 +48,7 @@ iclamp.amp = 1;
 
 % Run for 10 steps.
 n.finitialize(-65);
+n.t = 0;
 for i=1:10
     n.fadvance();
 end
