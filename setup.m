@@ -24,7 +24,13 @@ function setup()
     % Path to the generated interface library.
     addpath(fullfile(mlnrnpath, 'neuron'));
     
-    % Path to example scripts.
+    % Path to example scripts and tests.
     addpath(fullfile(mlnrnpath, 'examples'));
+    addpath(fullfile(mlnrnpath, 'examples', 'basic_functionality'));
+    addpath(fullfile(mlnrnpath, 'examples', 'input'));
+    addpath(fullfile(mlnrnpath, 'examples', 'morphology'));
+    addpath(fullfile(mlnrnpath, 'examples', 'plotting'));
+    addpath(fullfile(mlnrnpath, 'examples', 'simulation'));
+    addpath(fullfile(mlnrnpath, 'tests'));
 
 end
