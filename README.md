@@ -107,6 +107,15 @@ properties and methods with:
 v.list_methods();
 ```
 
+### Testing
+
+Run the tests with:
+
+```matlab
+addpath tests;
+runtests tests
+```
+
 ### Differences with Python NEURON interface
 
 A non-exhaustive list:
