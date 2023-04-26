@@ -112,7 +112,6 @@ v.list_methods();
 Run the tests with:
 
 ```matlab
-addpath tests;
 runtests tests
 ```
 
