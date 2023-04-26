@@ -71,6 +71,23 @@ classdef Vector < neuron.Object
         %   value = length()
             value = self.call_method_hoc('size', 'double');
         end
+        
+        function value = size(self)
+        % Get Vector size.
+        %   value = size()
+            value = [1 self.length()];
+        end
+
+        function ind = end(self, k, n)
+        % Get Vector end.
+        %   value = v(end);
+            sz = self.size();
+            if k < n
+                ind = sz(k);
+            else
+                ind = prod(sz(k:end));
+            end
+        end
 
         function arr = double(self, index)
         % Access Vector data as Matlab doubles.
