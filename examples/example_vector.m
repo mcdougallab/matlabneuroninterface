@@ -54,4 +54,5 @@ disp("----------");
 v2 = n.Vector([0 1 2 3 4 5.3]);
 disp("Vector from list:");
 disp(v2.double());
+disp(v2(end));
 disp("----------");
