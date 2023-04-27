@@ -18,7 +18,7 @@ axon2.length = 42;
 n.topology();
 
 % Iterate over sections.
-all_sections = neuron.allsec();
+all_sections = n.allsec();
 for i=1:numel(all_sections)
     disp(i + " " + all_sections{i}.name);
 end
@@ -47,7 +47,7 @@ sl.append(axon1_new);
 % Remove a section; check that it does not show up in allsec(sl).
 delete(dend1_new);
 clear dend1_new;
-all_sections = neuron.allsec(sl);
+all_sections = n.allsec(sl);
 for i=1:width(all_sections)
     disp(i + " " + all_sections{i}.name);
 end
