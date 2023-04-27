@@ -41,4 +41,3 @@ ps_some = n.PlotShape(sl_some);
 ps_some.variable("v");
 ps_some.scale(-1, 6);
 ps_some.plot();
-
