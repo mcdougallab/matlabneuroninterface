@@ -187,6 +187,11 @@ double get_pp_property(Object* pp, const char* name) {
     int index = hoc_table_lookup(name, pp->ctemplate->symtable)->u.rng.index;
     return ob2pntproc_0(pp)->prop->param[index];
 }
+NrnRef* ref_pp_property(Object* pp, const char* name) {
+    int index = hoc_table_lookup(name, pp->ctemplate->symtable)->u.rng.index;
+    NrnRef* ref = new NrnRef(ob2pntproc_0(pp)->prop->param + index);
+    return ref;
+}
 void set_steered_property(Object* obj, const char* name, double value) {
     auto sym = hoc_table_lookup(name, obj->ctemplate->symtable);
     hoc_pushs(sym);
