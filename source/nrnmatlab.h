@@ -36,6 +36,7 @@ Section* new_section(const char* name);
 // Set/get object property.
 void set_pp_property(Object* pp, const char* name, double value);
 double get_pp_property(Object* pp, const char* name);
+NrnRef* ref_pp_property(Object* pp, const char* name);
 void set_steered_property(Object* obj, const char* name, double value);
 double get_steered_property(Object* obj, const char* name);
 

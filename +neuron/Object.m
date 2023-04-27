@@ -178,5 +178,11 @@ classdef Object < dynamicprops
         %   value = get_prop(propname)
             value = clib.neuron.get_steered_property(self.obj, propname);
         end
+
+        function nrnref = ref(self, propname)
+        % Get reference to property.
+        %   nrnref = ref(propname)
+            nrnref = clib.neuron.ref_pp_property(self.obj, propname);
+        end
     end
 end
