@@ -31,38 +31,28 @@ classdef PlotShape < neuron.Object
                 % Get all 3D point information.
                 pt3d = s.get_pt3d();
 
-                % Interpolate to get segment 3d locations.
-%                 segments = s.segments();
-%                 for j=1:numel(segments)
-%                     seg = segments{j};
-%                     seg_l = seg.x * s.length;
-%                     seg_x3d = interp1(pt3d(4, :), pt3d(1, :), seg_l);
-%                     seg_y3d = interp1(pt3d(4, :), pt3d(2, :), seg_l);
-%                     seg_z3d = interp1(pt3d(4, :), pt3d(3, :), seg_l);
-% 
-%                     var = spi.varname();
-%                     disp("  - segment x: " + seg.x + ", " + ...
-%                          var + ": " + s.ref(var, seg.x).get() + ", " + ...
-%                          "[x, y, z]: [" + seg_x3d + ", " + seg_y3d + ", " + seg_z3d + "]");
-%                 end
-
-                % Get start, pt3ds and end point for each segment.
+                % Get total section length and arc points.
                 dx = double(s.length);
                 arc3d = pt3d(4, :);
 
+                % Iterate over segments.
                 segments = s.segments();
                 for j=1:s.nseg
+                    % Get start, pt3ds and end point for each segment.
                     seg = segments{j};
                     [x_lo, x_hi] = seg.get_bounds();
                     x_lo = x_lo * dx;
                     x_hi = x_hi * dx;
                     seg_arc_arr = arc3d(arc3d(:) > x_lo & arc3d(:) < x_hi);
                     seg_arc_arr = [x_lo seg_arc_arr x_hi];
+
+                    % Interpolate x,y,z,d for each point in seg_arc_arr.
                     seg_x3d_arr = interp1_arr(pt3d(4, :), pt3d(1, :), seg_arc_arr);
                     seg_y3d_arr = interp1_arr(pt3d(4, :), pt3d(2, :), seg_arc_arr);
                     seg_z3d_arr = interp1_arr(pt3d(4, :), pt3d(3, :), seg_arc_arr);
                     seg_d3d_arr = interp1_arr(pt3d(4, :), pt3d(5, :), seg_arc_arr);
 
+                    % Find value of selected quantity for this segment.
                     var = spi.varname();
                     seg_value = s.ref(var, seg.x).get();
                     seg_value_rel = seg_value - spi.low();
@@ -80,6 +70,8 @@ classdef PlotShape < neuron.Object
                     end
                 end
             end
+
+            % Equal aspect ration for x,y,z.
             h = get(gca,'DataAspectRatio');
             if h(3)==1
                 set(gca,'DataAspectRatio',[1 1 1/max(h(1:2))])
@@ -91,6 +83,7 @@ classdef PlotShape < neuron.Object
             zlabel('z');
             title('PlotShape: ' + spi.varname())
             view(3)
+
         end
 
     end
