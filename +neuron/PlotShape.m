@@ -15,10 +15,8 @@ classdef PlotShape < neuron.Object
         % calling this.
         %   plot()
 
-            % Call n.define_shape() first? We don't have the Neuron object,
-            % so we have to do:
-            % sym = clib.neuron.hoc_lookup("define_shape");
-            % clib.neuron.hoc_call_func(sym, 0);
+            % Call n.define_shape() first? Use:
+            % neuron.Neuron.call_func_hoc("define_shape", "double");
 
             spi = clib.neuron.get_plotshape_interface(self.obj);
             sl = spi.neuron_section_list();
