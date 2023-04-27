@@ -22,7 +22,8 @@ classdef PlotShape < neuron.Object
             sl = spi.neuron_section_list();
             secs = neuron.allsec(sl);
 
-            figure;hold on
+            figure;
+            hold on;
             for i=1:numel(secs)
                 s = secs{i};
 
@@ -79,8 +80,9 @@ classdef PlotShape < neuron.Object
             xlabel('x');
             ylabel('y');
             zlabel('z');
-            title('PlotShape: ' + spi.varname())
-            view(3)
+            title('PlotShape: ' + spi.varname());
+            view(3);
+            hold off;
 
         end
 
