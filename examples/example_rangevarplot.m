@@ -18,3 +18,5 @@ end
 % Plot result with RangeVarPlot.
 rvp = n.RangeVarPlot(dend, "v", 0, 1);
 rvp.plot();
+xlabel('x');
+ylabel('v');
