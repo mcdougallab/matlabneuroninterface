@@ -24,6 +24,7 @@ c1.amp = 0.3;
 c2.dur1 = 1;
 c2.rs = 0.01;
 % c3.dur(0) = 1;  % Throws error... c3.dur is a scalar, according to MATLAB.
+% c3.dur(2) = 17;  % Throws error... c3.dur is a scalar, according to MATLAB.
 c3.dur = 1;
 c3.amp = 0;
 
@@ -36,7 +37,7 @@ while n.t < 1
     n.fadvance();
 end
 
-% apc = neuron.Vector(ap.c());  % Problem: this gives a 1xNaN Vector.
+% apc = neuron.Vector(ap.c());  % Problem: this gives a 1xNaN Vector with null apc.obj.cTemplate.
 
 ap.play_remove();
 ap.play(c2.ref("amp1"), n.dt);
@@ -46,7 +47,7 @@ n.secondorder = 0;
 
 n.finitialize(-65);
 n.fadvance();
-disp(c2.i);
+disp(c2.i);  % These results are correct.
 disp(c3.i);
 disp(s2(0.5).v);
 disp(s3(0.5).v);
@@ -55,7 +56,7 @@ n.secondorder = 2;
 
 n.finitialize(-65);
 n.fadvance();
-disp(c2.i);
-disp(c3.i);  % Problem: same result as for n.secondorder = 0.
+disp(c2.i);  % Problem: same results here as for n.secondorder = 0.
+disp(c3.i);
 disp(s2(0.5).v);
 disp(s3(0.5).v);
