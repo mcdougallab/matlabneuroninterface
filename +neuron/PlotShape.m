@@ -11,12 +11,11 @@ classdef PlotShape < neuron.Object
         end
 
         function plot(self)
-        % Plot PlotShape data; make sure to call n.define_shape() before
-        % calling this.
+        % Plot PlotShape data.
         %   plot()
 
-            % Call n.define_shape() first? Use:
-            % neuron.Neuron.call_func_hoc("define_shape", "double");
+            % Call n.define_shape() first
+            neuron.Neuron.call_func_hoc("define_shape", "double");
 
             spi = clib.neuron.get_plotshape_interface(self.obj);
             sl = spi.neuron_section_list();
@@ -89,9 +88,11 @@ classdef PlotShape < neuron.Object
     end
 end
 
-function arr = interp1_arr(x_arr, v_arr, x_new_arr)
-    arr = zeros(1, numel(x_new_arr));
+function y_new_arr = interp1_arr(x_arr, y_arr, x_new_arr)
+% Linearly interpolate array of values (x_new_arr), based on xy-data pairs
+% given by arrays x_arr, y_arr.
+    y_new_arr = zeros(1, numel(x_new_arr));
     for i=1:numel(x_new_arr)
-        arr(i) = interp1(x_arr, v_arr, x_new_arr(i));
+        y_new_arr(i) = interp1(x_arr, y_arr, x_new_arr(i));
     end
 end

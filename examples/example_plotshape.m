@@ -25,7 +25,6 @@ main(0.5).diam = 8;
 branch3.nseg = 2;
 branch3(1).diam = 3;
 n.topology();
-n.define_shape();
 
 % Make PlotShape of all Sections.
 ps_all = n.PlotShape(false);
