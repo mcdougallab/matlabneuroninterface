@@ -15,9 +15,7 @@ for i=1:numel(sections)
 end
 
 c1 = n.IClamp(s1(0.5));
-disp('---');
 c2 = n.SEClamp(s2(0.5));
-disp('---');
 c3 = n.VClamp(s3(0.5));
 c1.dur = 0.1;
 c1.amp = 0.3;

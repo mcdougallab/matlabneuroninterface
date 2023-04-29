@@ -5,6 +5,8 @@ classdef Object < dynamicprops
         objtype         % Neuron Object type
         obj             % C++ Neuron Object.
         attr_list       % List of attributes of the C++ object.
+        attr_array_list % List of array attributes of the C++ object.
+        attr_array_sizes% List of array attribute sizes of the C++ object.
         mt_double_list  % List of methods of the C++ object, returning a double.
         mt_object_list  % List of methods of the C++ object, returning an object.
         mt_string_list  % List of methods of the C++ object, returning a string.
@@ -40,10 +42,20 @@ classdef Object < dynamicprops
                         p.GetMethod = @(self)get_steered_prop(self, method(1));
                         p.SetMethod = @(self, value)set_steered_prop(self, method(1), value);
                     elseif (method_type == "310")  % point process property
-                        self.attr_list = [self.attr_list method(1)];
-                        p = self.addprop(method(1));
-                        p.GetMethod = @(self)get_pp_prop(self, method(1));
-                        p.SetMethod = @(self, value)set_pp_prop(self, method(1), value);
+                        sym = clib.neuron.hoc_table_lookup(method(1), self.obj.ctemplate.symtable);
+                        if clibIsNull(sym.arayinfo)  % True for scalars.
+                            self.attr_list = [self.attr_list method(1)];
+                            p = self.addprop(method(1));
+                            p.GetMethod = @(self)get_pp_prop(self, method(1));
+                            p.SetMethod = @(self, value)set_pp_prop(self, method(1), value);
+                        else
+                            n = sym.arayinfo.sub.double();
+                            self.attr_array_list = [self.attr_array_list method(1)];
+                            self.attr_array_sizes = [self.attr_array_sizes n];
+                            p = self.addprop(method(1));
+                            p.GetMethod = @(self)get_pp_prop(self, method(1));
+                            p.SetMethod = @(self, value)set_pp_prop(self, method(1), value);
+                        end
                     elseif (method_type == "270")
                         self.mt_double_list = [self.mt_double_list method(1)];
                     elseif (method_type == "328")
