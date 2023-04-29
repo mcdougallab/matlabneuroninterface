@@ -13,6 +13,8 @@ function hoc_push(value)
         clib.neuron.hoc_push_object(value);  
     elseif isa(value, "clib.neuron.NrnRef")
         clib.neuron.matlab_hoc_pushpx(value);
+    elseif isa(value, "clib.type.nullptr")
+        clib.neuron.hoc_push_object(clib.type.nullptr);
     else
         error("Input of type "+class(value)+" not allowed.");
     end

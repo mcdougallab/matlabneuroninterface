@@ -7,6 +7,7 @@ classdef Neuron < dynamicprops
         fn_string_list  % List of top-level Neuron functions returning a string.
         fn_void_list    % List of top-level Neuron functions returning nothing.
         object_list     % List of Neuron Objects.
+        null            % clib.type.nullptr
     end
 
     methods
@@ -16,6 +17,7 @@ classdef Neuron < dynamicprops
             self = self@dynamicprops;
             clib.neuron.initialize();
             self.fill_dynamic_props();
+            self.null = clib.type.nullptr;
         end
         function fill_dynamic_props(self)
         % Fill var_list, fn_double_list, fn_string_list, object_list with dynamic variables, functions and objects.
