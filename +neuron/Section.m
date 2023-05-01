@@ -169,6 +169,10 @@ classdef Section
                 end
             end
         end
+        function insert(self, mech_name)
+        % Alias for insert_mechanism.
+            self.insert_mechanism(mech_name);
+        end
         function nrnref = ref(self, rangevar, loc)
         % Return an NrnRef to a range variable (rangeref) at a location 
         % along the segment (loc) between 0 and 1.
