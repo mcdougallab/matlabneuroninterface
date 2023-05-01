@@ -63,6 +63,7 @@ __declspec(dllimport) void hoc_obj_unref(Object*);
 __declspec(dllimport) double hoc_call_func(Symbol*, int);
 __declspec(dllimport) void hoc_call_ob_proc(Object*, Symbol*, int);
 __declspec(dllimport) Symbol* hoc_lookup(const char*);
+__declspec(dllimport) Object* hoc_pop_object(void);
 __declspec(dllimport) void hoc_push_object(Object*);
 __declspec(dllimport) void hoc_pushx(double);
 __declspec(dllimport) Symbol* hoc_table_lookup(const char*, Symlist*);
