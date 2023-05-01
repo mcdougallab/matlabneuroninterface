@@ -35,7 +35,7 @@ n.finitialize(-65);
 n.continuerun(10);
 
 disp(length(t_spikes));  % 1
-disp(t_spikes(1));  % 6.1000 (on first run only)
+disp(t_spikes(1));  % 6.1000
 
 % Variable step.
 cv = n.CVode();
@@ -57,3 +57,4 @@ disp(length(t_spikes));  % 0
 % Revert back to non-variable step for next run.
 cv.active(0);
 n.dt = 0.025;
+n.celsius = 6.3;
