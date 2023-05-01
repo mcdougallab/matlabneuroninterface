@@ -6,7 +6,7 @@ n.reset_sections();
 
 n.celsius = 6.3;
 soma = n.Section(name="soma");
-soma.insert_mechanism("hh");
+soma.insert("hh");
 soma.nseg = 11;
 
 syn1 = n.Exp2Syn(soma(0.25));
