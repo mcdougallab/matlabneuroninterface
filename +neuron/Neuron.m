@@ -196,7 +196,7 @@ classdef Neuron < dynamicprops
                 warning("'"+string(objtype)+"': number or type of arguments incorrect.");
                 state.restore();
             end
-            delete(state);
+            clibRelease(state);
             clib.neuron.decrease_try_catch_nest_depth();
 
         end
@@ -215,7 +215,8 @@ classdef Neuron < dynamicprops
                     obj = neuron.Vector(cppobj);
                     vector_data = varargin{:};
                     for i=1:numel(vector_data)
-                        obj.append(vector_data(i));
+                        temp = obj.append(vector_data(i));
+                        clear temp;
                     end
                 else
                     % Generic case: push arguments to stack and create Object.
@@ -239,7 +240,7 @@ classdef Neuron < dynamicprops
                 warning("'"+string(objtype)+"': number or type of arguments incorrect.");
                 state.restore();
             end
-            delete(state);
+            clibRelease(state);
             clib.neuron.decrease_try_catch_nest_depth();
 
         end

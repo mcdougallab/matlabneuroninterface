@@ -11,7 +11,7 @@ dend1.length = 37;
 clear dend1;  % Remove MATLAB object from workspace; still exists in NEURON.
 n.hoc_oc("create axon1");
 dend2 = n.Section("dend2");
-delete(dend2);  % Remove NEURON C++ object.
+delete_nrn_obj(dend2);  % Remove NEURON C++ object.
 clear dend2;  % Remove MATLAB object from workspace.
 axon2 = n.Section("axon2");
 axon2.length = 42;
@@ -45,7 +45,7 @@ sl.append(dend1_new);
 sl.append(axon1_new);
 
 % Remove a section; check that it does not show up in allsec(sl).
-delete(dend1_new);
+delete_nrn_obj(dend1_new);
 clear dend1_new;
 all_sections = n.allsec(sl);
 for i=1:width(all_sections)
