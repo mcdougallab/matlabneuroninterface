@@ -10,9 +10,9 @@ pc.set_gid2node(0, pc.id());
 pc.cell(0, n.NetCon(cell, n.null));
 
 % This does not work:
-% ncobj = pc.gid_connect(0, cell);
-% nc = neuron.Object("NetCon", ncobj);  % Crash.
-% Is there an issue with neuron.stack.hoc_pop("Object")?
+nc = pc.gid_connect(0, cell);  % Warning: obj.cTemplate is null.
+% Probably issue with neuron.stack.hoc_pop("Object") for methods returning
+% a new object.
 
 % nclist = {};
 % for i=0:3
