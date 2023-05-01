@@ -52,9 +52,9 @@ classdef Section
                 error("Initialize a Neuron session before making a Section.");
             end
         end
-        function delete(self)
+        function delete_nrn_obj(self)
         % Destroy the Section object.
-        %   delete()
+        %   delete_nrn_obj()
             if (class(self.sec) == "clib.neuron.Section")
                 % clib.neuron.section_unref(self.sec);  % TODO: is this needed?
                 % self.sec.refcount = 0;
