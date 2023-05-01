@@ -101,10 +101,7 @@ function build_interface()
         'from', '%    "Description", "<MLTYPE>    Data member of C++ class Symbol."); % Modify help description values as needed.', ...
         'to', '    "Description", "string Data member of C++ class Symbol."); % Modify help description values as needed.');
 
-%addProperty(SymbolDefinition, "name", <MLTYPE>, <SHAPE>, ... % <MLTYPE> can be "clib.array.neuron.Char","int8","string", or "char"
-%    "Description", "<MLTYPE>    Data member of C++ class Symbol."); % Modify help description values as needed.
-
-
+    % Do string replacements
     func_replace_strings("defineneuron.m", "defineneuron.m", change_lines);
 
     % Build the library interface.
