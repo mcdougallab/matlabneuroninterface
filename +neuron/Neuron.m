@@ -45,7 +45,7 @@ classdef Neuron < dynamicprops
                 % various self.*_list arrays).
                 switch f_type
                     case "263"  % Properties with get/set functionality.
-                        if f(1) == "secondorder"
+                        if f(1) == "secondorder" % special case secondorder
                             if ~isprop(self, f(1))
                                 self.var_list = [self.var_list f(1)];
                                 p = self.addprop(f(1));
