@@ -1,6 +1,4 @@
 % Minimal Exp3Syn/CVode/n.celcius example.
-clear;
-setup;
 n = neuron.Neuron();
 n.load_file('stdrun.hoc');
 n.reset_sections();

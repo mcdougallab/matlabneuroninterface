@@ -1,6 +1,4 @@
 % Initialization.
-clear;
-setup;
 n = neuron.Neuron();
 
 % If we try to find 'hd' mechanism here, we get:
@@ -18,6 +16,7 @@ try
     movefile(output_path, dll_path, 'f');
 catch
     warning("Could not move DLL; does the file already exist?");
+    delete(output_path);
 end
 
 % Import dll into neuron.

@@ -2,8 +2,6 @@
 % Creating and editing a morphology.
 
 % Initialization.
-clear;
-setup;
 n = neuron.Neuron();
 n.reset_sections();
 

@@ -1,6 +1,4 @@
 % Init neuron.
-clear;
-setup;
 n = neuron.Neuron();
 n.reset_sections();
 

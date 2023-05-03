@@ -5,8 +5,6 @@
 % how much extra current they need to stabilize and how close the
 % voltage gets
 
-clear;
-setup;
 n = neuron.Neuron();
 
 % setup for three simulations

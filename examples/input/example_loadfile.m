@@ -1,6 +1,4 @@
 % Initialization.
-clear;
-setup;
 n = neuron.Neuron();
 
 % Load stdrun.hoc; run n.continuerun
