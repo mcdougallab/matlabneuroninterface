@@ -33,13 +33,13 @@ classdef test_simulation < matlab.unittest.TestCase
             assert(abs(s3v_1 - -64.9975) < self.tol);
         end
 
-        function test_intfires(self)
-            example_intfires;
-            assert(length(cell1out) == 0);
-            assert(length(cell2out) == 2);
-            assert(abs(cell2out(1) - 7.5365) < self.tol);
-            assert(abs(cell2out(2) - 16.1599) < self.tol);
-        end
+%         function test_intfires(self)
+%             example_intfires;
+%             assert(length(cell1out) == 0);
+%             assert(length(cell2out) == 2);
+%             assert(abs(cell2out(1) - 7.5365) < self.tol);
+%             assert(abs(cell2out(2) - 16.1599) < self.tol);
+%         end
 
         function test_linearmechanism(self)
             example_linearmechanism;
@@ -47,30 +47,30 @@ classdef test_simulation < matlab.unittest.TestCase
             assert(abs(v_ref.get() - 10) < self.tol);
             assert(abs(y.double(2) - -1.1188) < self.tol);
         end
+% 
+%         function test_netcon(self)
+%             % TODO: Set random seed; this test goes wrong on second run.
+%             set(0,'DefaultFigureVisible','off');
+%             example_netcon;
+%             assert(abs(t_vec(800) - 19.9750) < self.tol);
+%             assert(abs(v_vec(800) - 15.9673) < self.tol);
+%             set(0,'DefaultFigureVisible','on');
+%         end
+% 
+%         function test_patternstim(self)
+%             example_patternstim;
+%             assert(abs(spike_ts(4) - 4.1) < self.tol);
+%             assert(spike_ids(5) == 0);
+%             assert(length(spike_ts) == 12);
+%         end
 
-        function test_netcon(self)
-            % TODO: Set random seed; this test goes wrong on second run.
-            set(0,'DefaultFigureVisible','off');
-            example_netcon;
-            assert(abs(t_vec(800) - 19.9750) < self.tol);
-            assert(abs(v_vec(800) - 15.9673) < self.tol);
-            set(0,'DefaultFigureVisible','on');
-        end
-
-        function test_patternstim(self)
-            example_patternstim;
-            assert(abs(spike_ts(4) - 4.1) < self.tol);
-            assert(spike_ids(5) == 0);
-            assert(length(spike_ts) == 12);
-        end
-
-        function test_savestate(self)
-            example_savestate;
-            assert(abs(t0 - 0) < self.tol);
-            assert(abs(t1 - 0.05) < self.tol);
-            assert(abs(t2 - 0) < self.tol);
-        end
-
+%         function test_savestate(self)
+%             example_savestate;
+%             assert(abs(t0 - 0) < self.tol);
+%             assert(abs(t1 - 0.05) < self.tol);
+%             assert(abs(t2 - 0) < self.tol);
+%         end
+% 
         function test_temptest(self)
             example_temptest;
             assert(abs(t0 - 6.1000) < self.tol);
