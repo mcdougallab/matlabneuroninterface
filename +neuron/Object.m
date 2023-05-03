@@ -87,7 +87,7 @@ classdef Object < dynamicprops
         end
 
         function delete(self)
-        % Destroy the MATLAB Object.
+        % Destroy the NEURON Object if the MATLAB Object is its owner.
         %   delete()
 
             % Only destroy the C++ object if MATLAB object owns it.
