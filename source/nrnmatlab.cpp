@@ -233,6 +233,13 @@ void set_node_diam(Node* node, double diam) {
     }
 }
 
+// Special case: set/get n.secondorder.
+void set_secondorder(int val) {
+    secondorder = val;
+}
+int get_secondorder(void) {
+    return secondorder;
+}
 
 // adapted from ocjump.cpp
 SavedState::SavedState() {

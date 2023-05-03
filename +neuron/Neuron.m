@@ -45,7 +45,14 @@ classdef Neuron < dynamicprops
                 % various self.*_list arrays).
                 switch f_type
                     case "263"  % Properties with get/set functionality.
-                        if f_subtype == "1" % int variable
+                        if f(1) == "secondorder"
+                            if ~isprop(self, f(1))
+                                self.var_list = [self.var_list f(1)];
+                                p = self.addprop(f(1));
+                                p.GetMethod = @(self)get_secondorder(self);
+                                p.SetMethod = @(self, value)set_secondorder(self, value);
+                            end
+                        elseif f_subtype == "1" % int variable
                             if ~isprop(self, f(1))
                                 self.var_list = [self.var_list f(1)];
                                 p = self.addprop(f(1));
@@ -169,6 +176,16 @@ classdef Neuron < dynamicprops
             % TODO: this method does not work as SetMethod if we move
             % it to methods(Static)... why?
             clib.neuron.ref(propname).set(value);
+        end
+        function value = get_secondorder(~)
+        % Get property secondorder.
+        %   get_secondorder(propname)
+            value = clib.neuron.get_secondorder();
+        end
+        function set_secondorder(~, value)
+        % Set property secondorder.
+        %   set_secondorder(propname, value)
+            clib.neuron.set_secondorder(value);
         end
 
     end

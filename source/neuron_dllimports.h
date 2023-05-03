@@ -58,6 +58,7 @@ __declspec(dllimport) cabcode_ss oc_restore_cabcode;
 
 // Import non-name mangled functions and parameters.
 extern "C" __declspec(dllimport) int diam_changed;
+extern "C" __declspec(dllimport) int secondorder;
 extern "C" __declspec(dllimport) Symlist* hoc_built_in_symlist;
 extern "C" __declspec(dllimport) Objectdata* hoc_objectdata;
 extern "C" __declspec(dllimport) Objectdata* hoc_top_level_data;
