@@ -10,13 +10,18 @@ classdef RangeVarPlot < neuron.Object
             self = self@neuron.Object(obj);
         end
 
-        function plot(self)
-        % Plot RangeVarPlot data.
-        %   plot()
-            
+        function [x, y] = get_xy_data(self)
+        % Get x, y data to plot.
+        %   [x, y] = get_xy_data()
             x = neuron.Neuron.hoc_new_obj("Vector");
             y = neuron.Neuron.hoc_new_obj("Vector");
             self.call_method_hoc("to_vector", "double", y, x);
+        end
+
+        function plot(self)
+        % Plot RangeVarPlot data.
+        %   plot()
+            [x, y] = self.get_xy_data();
             plot(x, y);
         end
 
