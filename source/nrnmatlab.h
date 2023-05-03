@@ -56,6 +56,10 @@ Section* get_hoc_item_element_sec(hoc_Item*);
 hoc_Item* get_obj_u_this_pointer(Object*);
 ShapePlotInterface* get_plotshape_interface(Object*);
 
+// Special case: set/get n.secondorder.
+void set_secondorder(int);
+int get_secondorder(void);
+
 // C++ Neuron functions directly accessible from MATLAB.
 __declspec(dllimport) Node* node_exact(Section*, double);
 __declspec(dllimport) void nrn_pushsec(Section* sec);

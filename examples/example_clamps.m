@@ -32,7 +32,7 @@ while n.t < 1
     n.fadvance();
 end
 
-apc = ap.c();  % Problem: this gives a 1xNaN Vector with null apc.obj.cTemplate.
+apc = ap.c(); 
 
 ap.play_remove();
 ap.play(c2.ref("amp1"), n.dt);
@@ -42,16 +42,16 @@ n.secondorder = 0;
 
 n.finitialize(-65);
 n.fadvance();
-disp(c2.i);  % These results are correct.
-disp(c3.i);
-disp(s2(0.5).v);
-disp(s3(0.5).v);
+disp(c2.i);  % -8.5728e-06
+disp(c3.i);  % 6.0899e-06
+disp(s2(0.5).v);  % -65.0000
+disp(s3(0.5).v);  % -64.9987
 
 n.secondorder = 2;
 
 n.finitialize(-65);
 n.fadvance();
-disp(c2.i);  % Problem: same results here as for n.secondorder = 0.
-disp(c3.i);
-disp(s2(0.5).v);
-disp(s3(0.5).v);
+disp(c2.i);  % -1.7144e-05
+disp(c3.i);  % -65.0000
+disp(s2(0.5).v);  % -65.0000
+disp(s3(0.5).v);  % -64.9975
