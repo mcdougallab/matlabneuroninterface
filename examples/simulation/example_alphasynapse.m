@@ -1,6 +1,4 @@
 % Minimal AlphaSynapse example.
-clear;
-setup;
 n = neuron.Neuron();
 
 n.load_file('stdrun.hoc');

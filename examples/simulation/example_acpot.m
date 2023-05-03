@@ -2,8 +2,6 @@
 % Generates a plot of an action potential.
 
 % Initialization.
-clear;
-setup;
 n = neuron.Neuron();
 n.reset_sections();
 

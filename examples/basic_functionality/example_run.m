@@ -2,8 +2,6 @@
 % Initialize a neuron session and call some functions.
 
 % Initialization.
-clear;
-setup;
 n = neuron.Neuron();
 n.reset_sections();
 

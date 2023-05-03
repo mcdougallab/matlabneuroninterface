@@ -1,7 +1,5 @@
 % Minimal ParallelContext/IntFire1 example.
 % From from https://nrn.readthedocs.io/en/8.2.2/python/modelspec/programmatic/mechanisms/mech.html#PatternStim
-clear;
-setup;
 n = neuron.Neuron();
 % n.reset_sections();
 
