@@ -10,14 +10,11 @@ pc.set_gid2node(0, pc.id());
 pc.cell(0, n.NetCon(cell, n.null));
 
 nclist = {};
-% This does not work:
 for i=0:3
-    nclist{end+1} = pc.gid_connect(i, cell); % Warning: returned obj.cTemplate is null.
-    nclist{end+1}.weight = 2;
-    nclist{end+1}.delay = 1 + 0.1*i;
+    nclist{end+1} = pc.gid_connect(i, cell);
+    nclist{end}.weight = 2;
+    nclist{end}.delay = 1 + 0.1*i;
 end 
-% Probably issue with neuron.stack.hoc_pop("Object") for methods returning
-% a new object.
 
 spike_ts = n.Vector();
 spike_ids = n.Vector();
@@ -35,9 +32,12 @@ n.finitialize(-65);
 pc.psolve(7);
 
 for i=1:length(spike_ts)
-    disp(spike_ts(i), spike_ids(i));
+    disp('--------');
+    disp(i);
+    disp(spike_ts(i))
+    disp(spike_ids(i));
 end
 
-disp(spike_ts(4));
-disp(spike_ids(5));
-disp(length(spike_ts));
+disp(spike_ts(4));  % 4.1
+disp(spike_ids(5));  % 0
+disp(length(spike_ts));  % 12

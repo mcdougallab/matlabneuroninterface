@@ -27,14 +27,12 @@ c3.amp = [0, 0, 0];
 
 ap = n.Vector();
 ap.record(s1(0.5).ref("v"));
-apc = n.Vector();  % This can be removed once ap.c() is fixed.
-apc.record(s1(0.5).ref("v"));  % This can be removed once ap.c() is fixed.
 n.finitialize(-65);
 while n.t < 1
     n.fadvance();
 end
 
-% apc = ap.c();  % Problem: this gives a 1xNaN Vector with null apc.obj.cTemplate.
+apc = ap.c();  % Problem: this gives a 1xNaN Vector with null apc.obj.cTemplate.
 
 ap.play_remove();
 ap.play(c2.ref("amp1"), n.dt);

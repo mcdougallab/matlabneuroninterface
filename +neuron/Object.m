@@ -157,7 +157,6 @@ classdef Object < dynamicprops
             elseif (isa(S(1).subs, "char") && length(S) == 2 && isprop(self, S(1).subs))
                 new_arr = self.(S(1).subs)(:);
                 new_arr(S(2).subs{:}) = varargin{:};
-                disp(new_arr);
                 self.(S(1).subs) = new_arr;
             end
         end
