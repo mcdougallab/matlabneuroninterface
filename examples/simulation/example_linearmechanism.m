@@ -19,12 +19,13 @@ linmech = n.LinearMechanism(soma, c, g, y, b, 0.5);
 % Run simulation.
 n.finitialize(-65);
 v_ref = soma.ref("v", 0.5);
-n.t = 0;
 disp(n.t + " " + y.double(1) + " " + y.double(2));
-for i=1:20
+for i=1:19
     n.fadvance();
     disp(n.t + " " + v_ref.get() + " " + y.double(2));
 end
 
 % Compare.
-n.load_file("examples/simulation/test_lm.hoc");
+this_dir = fileparts(mfilename('fullpath'));
+hoc_path = strrep(fullfile(this_dir, "test_lm.hoc"), '\', '/');
+n.load_file(hoc_path);

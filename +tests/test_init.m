@@ -1,13 +1,9 @@
 classdef test_init < matlab.unittest.TestCase
-
-    properties
-        tol = 1e-4;
-    end
     
     methods(Test)
         % Test methods
         
-        function test_neuron_initialization(self)
+        function test_neuron_initialization(~)
             % Initialize Neuron.
             n = neuron.Neuron();
             % Check Neuron interface object.

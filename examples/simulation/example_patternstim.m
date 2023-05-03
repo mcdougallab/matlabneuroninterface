@@ -28,8 +28,11 @@ tvec = n.Vector([0 1 2 3 4 5 6 7 8 9]);
 gidvec = n.Vector([0 1 2 3 4 5 6 7 8 9]);
 ps = n.PatternStim();
 ps.play(tvec, gidvec);
-delete_nrn_obj(tvec); clear tvec;
-delete_nrn_obj(gidvec); clear gidvec;
+
+% Causes a crash if this example is run twice, and then example_savestate
+% is run:
+% delete(tvec); clear tvec;  
+% delete(gidvec); clear gidvec;
 
 % Run
 pc.set_maxstep(10.);

@@ -49,6 +49,13 @@ n.secondorder = 0;
 
 n.finitialize(-65);
 n.fadvance();
+
+% For testing...
+c2i_0 = c2.i;
+c3i_0 = c3.i;
+s2v_0 = s2(0.5).v;
+s3v_0 = s3(0.5).v;
+
 disp(c2.i);  % -8.5728e-06
 disp(c3.i);  % 6.0899e-06
 disp(s2(0.5).v);  % -65.0000
@@ -61,6 +68,13 @@ n.secondorder = 2;
 
 n.finitialize(-65);
 n.fadvance();
+
+% For testing...
+c2i_1 = c2.i;
+c3i_1 = c3.i;
+s2v_1 = s2(0.5).v;
+s3v_1 = s3(0.5).v;
+
 disp(c2.i);  % -1.7144e-05
 disp(c3.i);  % -65.0000, NOTE: very different from first order (stiffness issue)
 disp(s2(0.5).v);  % -65.0000

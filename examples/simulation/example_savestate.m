@@ -5,14 +5,17 @@ n.finitialize(-65);
 
 % Save initial state.
 state = n.SaveState();
-disp("t = " + n.t);
+t0 = n.t;
+disp("t = " + t0);
 state.save();
 
 % Advance a few times.
 n.fadvance();
 n.fadvance();
-disp("t = " + n.t);
+t1 = n.t;
+disp("t = " + t1);
 
 % Restore state.
 state.restore();
-disp("t = " + n.t);
+t2 = n.t;
+disp("t = " + t2);
