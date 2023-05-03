@@ -67,3 +67,6 @@ disp(c2.i);  % -1.7144e-05
 disp(c3.i);  % -65.0000, NOTE: very different from first order (stiffness issue)
 disp(s2(0.5).v);  % -65.0000
 disp(s3(0.5).v);  % -64.9975
+
+% Reset.
+n.secondorder = 0;
