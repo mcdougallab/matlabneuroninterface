@@ -34,8 +34,10 @@ nc_recorder.record(t_spikes);
 n.finitialize(-65);
 n.continuerun(10);
 
-disp(length(t_spikes));  % 1
-disp(t_spikes(1));  % 6.1000
+l0 = length(t_spikes);
+t0 = t_spikes(1);
+disp(l0);  % 1
+disp(t0);  % 6.1000
 
 % now let's try changing to variable step
 cv = n.CVode();
@@ -44,8 +46,10 @@ cv.active(1);
 n.finitialize(-65);
 n.continuerun(10);
 
-disp(length(t_spikes));  % 1
-disp(t_spikes(1));  % 6.0676
+l1 = length(t_spikes);
+t1 = t_spikes(1);
+disp(l1);  % 1
+disp(t1);  % 6.0676
 
 % mammals like it warmer
 n.celsius = 37;
@@ -53,7 +57,8 @@ n.finitialize(-65);
 n.continuerun(10);
 
 % the cell should not spike for that input when it's this warm
-disp(length(t_spikes));  % 0
+l2 = length(t_spikes);
+disp(l2);  % 0
 
 
 % Revert back to non-variable step for next run.

@@ -17,8 +17,8 @@ syn.gmax = 1;
 syn.onset = 0.2;
 syn.e = 42;
 
-i = n.Vector();
-i.record(syn.ref("i"));
+ivec = n.Vector();
+ivec.record(syn.ref("i"));
 t = n.Vector();
 t.record(n.ref("t"));
 v = n.Vector();
@@ -27,5 +27,5 @@ v.record(soma(0.5).ref("v"));
 n.finitialize(-65);
 n.continuerun(10);
 
-disp(i(43));  % -1.9125
+disp(ivec(43));  % -1.9125
 disp(v(101));  % 28.7358
