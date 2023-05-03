@@ -32,7 +32,7 @@ vec = n.Vector();
 nc.record(vec);
 nc.weight = 0.5;
 nc.delay = 0;
-disp(ns);
+disp(nc);
 
 % Run simulation.
 n.finitialize(-65);

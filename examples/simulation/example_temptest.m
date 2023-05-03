@@ -1,11 +1,11 @@
 % Minimal Exp3Syn/CVode/n.celcius example.
 n = neuron.Neuron();
-n.load_file('stdrun.hoc');
 n.reset_sections();
+n.load_file('stdrun.hoc');
 
 % squid like it cold
 n.celsius = 6.3;
-soma = n.Section(name="soma");
+soma = n.Section("soma");
 soma.insert("hh");
 soma.nseg = 11;
 
