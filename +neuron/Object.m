@@ -44,12 +44,12 @@ classdef Object < dynamicprops
                         p.SetMethod = @(self, value)set_steered_prop(self, method(1), value);
                     elseif (method_type == "310")  % point process property
                         sym = clib.neuron.hoc_table_lookup(method(1), self.obj.ctemplate.symtable);
-                        if clibIsNull(sym.arayinfo)  % True for scalars.
+                        if clibIsNull(sym.arayinfo)  % scalar property
                             self.attr_list = [self.attr_list method(1)];
                             p = self.addprop(method(1));
                             p.GetMethod = @(self)get_pp_prop(self, method(1));
                             p.SetMethod = @(self, value)set_pp_prop(self, method(1), value);
-                        else
+                        else  % array property
                             n = sym.arayinfo.sub.double();
                             self.attr_array_map(method(1)) = n;
                             p = self.addprop(method(1));
@@ -155,9 +155,7 @@ classdef Object < dynamicprops
                 self.(S(1).subs) = varargin{:};
             % Are we trying to directly assign a class property array?
             elseif (isa(S(1).subs, "char") && length(S) == 2 && isprop(self, S(1).subs))
-                new_arr = self.(S(1).subs)(:);
-                new_arr(S(2).subs{:}) = varargin{:};
-                self.(S(1).subs) = new_arr;
+                self.set_pp_arr_element(S(1).subs, varargin{:}, S(2).subs{:});
             end
         end
 
@@ -193,7 +191,7 @@ classdef Object < dynamicprops
 
         function set_pp_prop(self, propname, value)
         % Set dynamic property.
-        %   set_pp_prop(propname)
+        %   set_pp_prop(propname, value)
             clib.neuron.set_pp_property(self.obj, propname, value);
         end
 
@@ -215,17 +213,23 @@ classdef Object < dynamicprops
 
         function set_pp_arr(self, propname, value)
         % Set dynamic property array.
-        %   set_pp_arr(propname)
+        %   set_pp_arr(propname, value)
             n = self.attr_array_map(propname);
             assert(length(value) == n);
             for i=1:n
-                clib.neuron.set_pp_property(self.obj, propname, value(i), i-1);
+                self.set_pp_arr_element(propname, value(i), i);
             end
+        end
+
+        function set_pp_arr_element(self, propname, value, i)
+        % Set dynamic property array element.
+        %   set_pp_arr_element(propname, value, index)
+            clib.neuron.set_pp_property(self.obj, propname, value, i-1);
         end
 
         function set_steered_prop(self, propname, value)
         % Set dynamic property.
-        %   set_prop(propname)
+        %   set_prop(propname, value)
             clib.neuron.set_steered_property(self.obj, propname, value);
         end
 
@@ -235,10 +239,15 @@ classdef Object < dynamicprops
             value = clib.neuron.get_steered_property(self.obj, propname);
         end
 
-        function nrnref = ref(self, propname)
-        % Get reference to property.
-        %   nrnref = ref(propname)
-            nrnref = clib.neuron.ref_pp_property(self.obj, propname);
+        function nrnref = ref(self, propname, index)
+        % Get reference to property or property array element.
+        %   nrnref = ref(prop_name)
+        %   nrnref = ref(prop_arr_name, index)
+            if ~exist('index', 'var')
+                nrnref = clib.neuron.ref_pp_property(self.obj, propname);
+            else
+                nrnref = clib.neuron.ref_pp_property(self.obj, propname, index-1);
+            end
         end
     end
 end
