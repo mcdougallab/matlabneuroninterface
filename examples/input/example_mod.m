@@ -14,10 +14,18 @@ mod_path = fullfile(examples_path, 'mod');
 system("nrnivmodl " + mod_path);
 output_path = fullfile(pwd, 'nrnmech.dll');
 dll_path = fullfile(mod_path, 'nrnmech.dll');
-movefile(output_path, dll_path);
+try
+    movefile(output_path, dll_path, 'f');
+catch
+    warning("Could not move DLL; does the file already exist?");
+end
 
 % Import dll into neuron.
-n.nrn_load_dll(strrep(dll_path, "\", "/"));
+try
+    n.nrn_load_dll(strrep(dll_path, "\", "/"));
+catch
+    warning("Could not load DLL; is it already loaded?");
+end
 
 % Try to find 'hd' mechanism; now it should exist.
 axon = n.Section("axon");
