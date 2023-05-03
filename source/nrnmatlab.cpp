@@ -158,6 +158,7 @@ std::string matlab_hoc_strpop(void) {
 Object* matlab_hoc_objpop(void) {
     Object** obptr = hoc_objpop();
     Object* ob = *obptr;
+    ob->refcount++;
     hoc_tobj_unref(obptr);
     return ob;
 }
