@@ -6,6 +6,7 @@
 % voltage gets
 
 n = neuron.Neuron();
+n.reset_sections();
 
 % setup for three simulations
 s1 = n.Section("s1");
