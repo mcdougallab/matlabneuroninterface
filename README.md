@@ -112,7 +112,7 @@ v.list_methods();
 Run the tests with:
 
 ```matlab
-runtests tests
+runtests +tests
 ```
 
 ### Differences with Python NEURON interface

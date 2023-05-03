@@ -31,6 +31,5 @@ function setup()
     addpath(fullfile(mlnrnpath, 'examples', 'morphology'));
     addpath(fullfile(mlnrnpath, 'examples', 'plotting'));
     addpath(fullfile(mlnrnpath, 'examples', 'simulation'));
-    addpath(fullfile(mlnrnpath, 'tests'));
 
 end
