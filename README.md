@@ -106,3 +106,16 @@ properties and methods with:
 ```matlab
 v.list_methods();
 ```
+
+### Differences with Python NEURON interface
+
+A non-exhaustive list:
+- `size(vector)` returns  an array `[1 N]` with `N == length(vector)`, 
+  as is customary in MATLAB. In Python, `size(vector)` is a scalar.
+- When iterating over segments we use `section.segments()`, which returns
+  a cell array with Segment objects. In Python, we can simply write 
+  `for segment in section`.
+- Call chaining is not (yet) always available in MATLAB. As such, we cannot
+  use `t = n.Vector().record(ref);`; instead we have to write
+  `t = n.Vector(); t.record(ref);`. This is due to the way dynamic function
+  calls are setup with `subsref`.
