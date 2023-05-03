@@ -329,7 +329,6 @@ typedef double (dsio_function) (Symbol*, int, Object*);
 typedef Symbol* (scptrslptr_function) (const char*, Symlist*);
 typedef Object* (optrsptri_function) (Symbol*, int);
 typedef Object* (optri_function) (int);
-typedef Object* (optrv_function) (void);
 typedef void (voptr_function) (Object*);
 typedef void (voptrptr_function) (Object**);
 typedef void (vf2icif_function)(int (*)(int, char*), int(*)());
