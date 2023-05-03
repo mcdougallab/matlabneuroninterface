@@ -1,0 +1,8 @@
+# Ignore everything...
+*
+
+# ...except .mod files...
+!*.mod
+
+# ...and myself.
+!.gitignore
