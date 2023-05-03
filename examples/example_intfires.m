@@ -1,3 +1,4 @@
+% Minimal Intfire2/IntFire4/NetStim/NetCon example.
 clear;
 setup;
 n = neuron.Neuron();

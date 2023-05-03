@@ -1,4 +1,4 @@
-% Initialization.
+% Minimal AlphaSynapse example.
 clear;
 setup;
 n = neuron.Neuron();
@@ -11,6 +11,8 @@ soma.nseg = 11;
 soma.set_diameter(11);
 soma.length = 11;
 
+% Note: AlphaSynapse defines an alpha function conductance
+% at a pre-chosen time; it does not work with NetCon objects.
 syn = n.AlphaSynapse(soma(0.25));
 syn.tau = 1;
 syn.gmax = 1;
@@ -27,5 +29,5 @@ v.record(soma(0.5).ref("v"));
 n.finitialize(-65);
 n.continuerun(10);
 
-disp(i(43));
-disp(v(101));
+disp(i(43));  % -1.9125
+disp(v(101));  % 28.7358

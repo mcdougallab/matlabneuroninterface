@@ -1,9 +1,11 @@
+% Minimal Exp3Syn/CVode/n.celcius example.
 clear;
 setup;
 n = neuron.Neuron();
 n.load_file('stdrun.hoc');
 n.reset_sections();
 
+% squid like it cold
 n.celsius = 6.3;
 soma = n.Section(name="soma");
 soma.insert("hh");
@@ -37,7 +39,7 @@ n.continuerun(10);
 disp(length(t_spikes));  % 1
 disp(t_spikes(1));  % 6.1000
 
-% Variable step.
+% now let's try changing to variable step
 cv = n.CVode();
 cv.active(1);
 
@@ -47,10 +49,12 @@ n.continuerun(10);
 disp(length(t_spikes));  % 1
 disp(t_spikes(1));  % 6.0676
 
+% mammals like it warmer
 n.celsius = 37;
 n.finitialize(-65);
 n.continuerun(10);
 
+% the cell should not spike for that input when it's this warm
 disp(length(t_spikes));  % 0
 
 
