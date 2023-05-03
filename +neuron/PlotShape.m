@@ -10,19 +10,18 @@ classdef PlotShape < neuron.Object
             self = self@neuron.Object(obj);
         end
 
-        function plot(self)
-        % Plot PlotShape data.
-        %   plot()
+        function data = get_plot_data(self)
+        % Get PlotShape data; a cell array of structs with data to plot.
+        %   data = get_plot_data()
 
             % Call n.define_shape() first
             neuron.Neuron.call_func_hoc("define_shape", "double");
+            data = {};
 
             spi = clib.neuron.get_plotshape_interface(self.obj);
             sl = spi.neuron_section_list();
             secs = neuron.Neuron.allsec(sl);
 
-            figure;
-            hold on;
             for i=1:numel(secs)
                 s = secs{i};
 
@@ -62,11 +61,35 @@ classdef PlotShape < neuron.Object
                         x = [seg_x3d_arr(k) seg_x3d_arr(k+1)];
                         y = [seg_y3d_arr(k) seg_y3d_arr(k+1)];
                         z = [seg_z3d_arr(k) seg_z3d_arr(k+1)];
-                        h = plot3(x, y, z);
-                        h.LineWidth = (seg_d3d_arr(k) + seg_d3d_arr(k+1))/2;
-                        set(h, 'color', [seg_value_rel, 0, 1-seg_value_rel]);
+                        plot_struct = struct;
+                        plot_struct.x = x;
+                        plot_struct.y = y;
+                        plot_struct.z = z;
+                        plot_struct.line_width = (seg_d3d_arr(k) + seg_d3d_arr(k+1))/2;
+                        plot_struct.color = [seg_value_rel, 0, 1-seg_value_rel];
+                        data{end+1} = plot_struct;
                     end
                 end
+            end
+
+        end
+
+        function plot(self)
+        % Plot PlotShape data.
+        %   plot()
+
+            % Get data.
+            data = self.get_plot_data();
+            spi = clib.neuron.get_plotshape_interface(self.obj);
+
+            % Plot segments between 3d points.
+            figure;
+            hold on;
+            for i=1:numel(data)
+                seg = data{i};
+                h = plot3(seg.x, seg.y, seg.z);
+                h.LineWidth = seg.line_width;
+                set(h, 'color', seg.color);
             end
 
             % Equal aspect ration for x,y,z.
