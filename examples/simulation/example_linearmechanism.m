@@ -29,4 +29,4 @@ for i=1:20
 end
 
 % Compare.
-n.load_file("examples/test_lm.hoc");
+n.load_file("examples/simulation/test_lm.hoc");
