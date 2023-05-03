@@ -19,7 +19,7 @@ classdef PlotShape < neuron.Object
 
             spi = clib.neuron.get_plotshape_interface(self.obj);
             sl = spi.neuron_section_list();
-            secs = neuron.allsec(sl);
+            secs = neuron.Neuron.allsec(sl);
 
             figure;
             hold on;

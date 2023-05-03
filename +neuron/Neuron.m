@@ -210,7 +210,7 @@ classdef Neuron < dynamicprops
             catch e
                 value = NaN;
                 warning(e.message);
-                warning("'"+string(objtype)+"': number or type of arguments incorrect.");
+                warning("'"+string(func)+"': number or type of arguments incorrect.");
                 state.restore();
             end
             clibRelease(state);
@@ -281,12 +281,20 @@ classdef Neuron < dynamicprops
         % SectionList section_list (optional).
         %   allsec()
         %   allsec(section_list)
-            if ~exist('section_list', 'var')
-                % Get SectionList of all Sections.
+
+            % Deal with input.
+            if ~exist('section_list', 'var') % No input: get SectionList of all Sections.
                 section_list = clib.neuron.get_section_list();
-            else
+            elseif isa(section_list, 'neuron.Object') % Input is a 'n.SectionList'
                 section_list = clib.neuron.get_obj_u_this_pointer(section_list.obj);
+            elseif isa(section_list, 'clib.neuron.Object') % Input is a C++ NEURON object
+                if clibIsNull(section_list) % If NULL, get SectionList of all Sections.
+                    section_list = clib.neuron.get_section_list();
+                else  % Input is a fair dinkum NEURON SectionList
+                    section_list = clib.neuron.get_obj_u_this_pointer(section_list);
+                end
             end
+
             section_iter = section_list.next;
             section = clib.neuron.get_hoc_item_element_sec(section_iter);
             all_sections = {neuron.Section(section)};
