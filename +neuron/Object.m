@@ -5,8 +5,8 @@ classdef Object < dynamicprops
         objtype         % Neuron Object type
         obj             % C++ Neuron Object.
         attr_list       % List of attributes of the C++ object.
-        attr_array_list % List of array attributes of the C++ object.
-        attr_array_sizes% List of array attribute sizes of the C++ object.
+        attr_array_map  % Map of array attributes of the C++ object.
+                        % Keys are property names, values are array lengths.
         mt_double_list  % List of methods of the C++ object, returning a double.
         mt_object_list  % List of methods of the C++ object, returning an object.
         mt_string_list  % List of methods of the C++ object, returning a string.
@@ -20,6 +20,7 @@ classdef Object < dynamicprops
         %   Object obj of type objtype
 
             self = self@dynamicprops;
+            self.attr_array_map = containers.Map;
             if clib.neuron.isinitialized()
                 self.objtype = objtype;
                 self.obj = obj;
@@ -50,11 +51,10 @@ classdef Object < dynamicprops
                             p.SetMethod = @(self, value)set_pp_prop(self, method(1), value);
                         else
                             n = sym.arayinfo.sub.double();
-                            self.attr_array_list = [self.attr_array_list method(1)];
-                            self.attr_array_sizes = [self.attr_array_sizes n];
+                            self.attr_array_map(method(1)) = n;
                             p = self.addprop(method(1));
-                            p.GetMethod = @(self)get_pp_prop(self, method(1));
-                            p.SetMethod = @(self, value)set_pp_prop(self, method(1), value);
+                            p.GetMethod = @(self)get_pp_arr(self, method(1));
+                            p.SetMethod = @(self, value)set_pp_arr(self, method(1), value);
                         end
                     elseif (method_type == "270")
                         self.mt_double_list = [self.mt_double_list method(1)];
@@ -148,6 +148,20 @@ classdef Object < dynamicprops
             end
         end
 
+        function self = subsasgn(self, S, varargin)
+        % Assign a (dynamic) property value.
+            % Are we trying to directly assign a class property?
+            if (isa(S(1).subs, "char") && length(S) == 1 && isprop(self, S(1).subs))
+                self.(S(1).subs) = varargin{:};
+            % Are we trying to directly assign a class property array?
+            elseif (isa(S(1).subs, "char") && length(S) == 2 && isprop(self, S(1).subs))
+                new_arr = self.(S(1).subs)(:);
+                new_arr(S(2).subs{:}) = varargin{:};
+                disp(new_arr);
+                self.(S(1).subs) = new_arr;
+            end
+        end
+
         function varargout = subsref(self, S)
         % If a method is called, but it is not listed above, try to run it by calling self.call_method_hoc().
 
@@ -161,6 +175,9 @@ classdef Object < dynamicprops
             % Are we trying to directly access a class property?
             elseif (isa(method, "char") && length(S) == 1 && isprop(self, method))
                 [varargout{1:nargout}] = self.(method);
+            % Are we trying to directly access a class property array?
+            elseif (isa(method, "char") && length(S) == 2 && isprop(self, method))
+                [varargout{1:nargout}] = self.(method)(S(2).subs{:});
             % Is this method present in the HOC lookup table, and does it return a double?
             elseif any(strcmp(self.mt_double_list, method))
                 [varargout{1:nargout}] = call_method_hoc(self, method, "double", S(2).subs{:});
@@ -177,14 +194,34 @@ classdef Object < dynamicprops
 
         function set_pp_prop(self, propname, value)
         % Set dynamic property.
-        %   set_prop(propname)
+        %   set_pp_prop(propname)
             clib.neuron.set_pp_property(self.obj, propname, value);
         end
 
         function value = get_pp_prop(self, propname)
         % Get dynamic property.
-        %   value = get_prop(propname)
+        %   value = get_pp_prop(propname)
             value = clib.neuron.get_pp_property(self.obj, propname);
+        end
+
+        function value = get_pp_arr(self, propname)
+        % Get dynamic property array.
+        %   value = get_pp_arr(propname)
+            n = self.attr_array_map(propname);
+            value = zeros(1, n);
+            for i=1:n
+                value(i) = clib.neuron.get_pp_property(self.obj, propname, i-1);
+            end
+        end
+
+        function set_pp_arr(self, propname, value)
+        % Set dynamic property array.
+        %   set_pp_arr(propname)
+            n = self.attr_array_map(propname);
+            assert(length(value) == n);
+            for i=1:n
+                clib.neuron.set_pp_property(self.obj, propname, value(i), i-1);
+            end
         end
 
         function set_steered_prop(self, propname, value)

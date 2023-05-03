@@ -21,21 +21,20 @@ c1.dur = 0.1;
 c1.amp = 0.3;
 c2.dur1 = 1;
 c2.rs = 0.01;
-% c3.dur(0) = 1;  % Throws error... c3.dur is a scalar, according to MATLAB.
-% c3.dur(2) = 17;  % Throws error... c3.dur is a scalar, according to MATLAB.
-c3.dur = 1;
-c3.amp = 0;
+c3.dur(1) = 1;
+c3.dur(3) = 17;
+c3.amp = [0, 0, 0];
 
 ap = n.Vector();
 ap.record(s1(0.5).ref("v"));
-apc = n.Vector();  % This needs to be removed once ap.c() is fixed.
-apc.record(s1(0.5).ref("v"));  % This needs to be removed once ap.c() is fixed.
+apc = n.Vector();  % This can be removed once ap.c() is fixed.
+apc.record(s1(0.5).ref("v"));  % This can be removed once ap.c() is fixed.
 n.finitialize(-65);
 while n.t < 1
     n.fadvance();
 end
 
-% apc = neuron.Vector(ap.c());  % Problem: this gives a 1xNaN Vector with null apc.obj.cTemplate.
+% apc = ap.c();  % Problem: this gives a 1xNaN Vector with null apc.obj.cTemplate.
 
 ap.play_remove();
 ap.play(c2.ref("amp1"), n.dt);

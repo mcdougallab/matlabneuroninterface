@@ -179,17 +179,17 @@ Section* new_section(const char* name) {
 }
 
 // Set/get object property.
-void set_pp_property(Object* pp, const char* name, double value) {
+void set_pp_property(Object* pp, const char* name, double value, int element) {
     int index = hoc_table_lookup(name, pp->ctemplate->symtable)->u.rng.index;
-    ob2pntproc_0(pp)->prop->param[index] = value;
+    ob2pntproc_0(pp)->prop->param[index + element] = value;
 }
-double get_pp_property(Object* pp, const char* name) {
+double get_pp_property(Object* pp, const char* name, int element) {
     int index = hoc_table_lookup(name, pp->ctemplate->symtable)->u.rng.index;
-    return ob2pntproc_0(pp)->prop->param[index];
+    return ob2pntproc_0(pp)->prop->param[index + element];
 }
-NrnRef* ref_pp_property(Object* pp, const char* name) {
+NrnRef* ref_pp_property(Object* pp, const char* name, int element) {
     int index = hoc_table_lookup(name, pp->ctemplate->symtable)->u.rng.index;
-    NrnRef* ref = new NrnRef(ob2pntproc_0(pp)->prop->param + index);
+    NrnRef* ref = new NrnRef(ob2pntproc_0(pp)->prop->param + index + element);
     return ref;
 }
 void set_steered_property(Object* obj, const char* name, double value) {
