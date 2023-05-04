@@ -96,6 +96,10 @@ classdef Object < dynamicprops
             end
         end
 
+        function make_owner(self)
+            self.objowner = true;
+        end
+
         function obj = get_obj(self)
         % Access C++ Object.
         %   obj = get_obj()
@@ -115,6 +119,13 @@ classdef Object < dynamicprops
                     self.obj.ctemplate.symtable);
                 clib.neuron.hoc_call_ob_proc(self.obj, sym, nargs);
                 value = neuron.stack.hoc_pop(returntype);
+                if returntype == "Object"
+                    if self.obj.index ~= value.obj.index
+                        value.make_owner();
+                    else
+                        self.obj.refcount = self.obj.refcount - 1;
+                    end
+                end
                 neuron.stack.pop_sections(nsecs);
             catch e
                 warning(e.message);
