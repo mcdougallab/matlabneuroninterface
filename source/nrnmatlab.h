@@ -83,7 +83,7 @@ __declspec(dllimport) Section* nrn_sec_pop(void);
 __declspec(dllimport) void section_unref(Section*);
 __declspec(dllimport) void simpleconnectsection(void);
 __declspec(dllimport) char* secname(Section*);
-#else
+#elif __APPLE__ || __linux__
 extern Node* node_exact(Section*, double);
 extern void nrn_pushsec(Section* sec);
 extern void hoc_obj_unref(Object*);
@@ -103,6 +103,8 @@ extern Section* nrn_sec_pop(void);
 extern void section_unref(Section*);
 extern void simpleconnectsection(void);
 extern char* secname(Section*);
+#else
+#   error "Unknown compiler"
 #endif
 
 // Pointer class for MATLAB interface.
