@@ -78,7 +78,8 @@ extern "C" __declspec(dllimport) input_info_ss _Z18oc_save_input_infoPPKcPiS2_PP
 const auto oc_save_input_info = _Z18oc_save_input_infoPPKcPiS2_PP6_iobuf;
 extern "C" __declspec(dllimport) input_info_rs _Z21oc_restore_input_infoPKciiP6_iobuf;
 const auto oc_restore_input_info = _Z21oc_restore_input_infoPKciiP6_iobuf;
-#else
+#elif __APPLE__ || __linux__
+//maybe change to #elif __linux__
 // Import C++ name mangled functions.
 extern vv_function delete_section;
 extern initer_function ivocmain_session;
@@ -141,6 +142,18 @@ extern "C" int nrn_nobanner_;
 extern "C" int nrn_try_catch_nest_depth;
 extern "C" vf2icif_function nrnpy_set_pr_etal;
 
+//maybe needs __linux__ or __APPLE__ variations
+#if __APPLE__
+// Import functions for which name mangling goes awry.
+extern "C" code_ss _Z12oc_save_codePP4InstS1_RmPPN3nrn2oc5frameEPiS8_S1_S7_S2_PP7SymlistS1_S8_;
+const auto oc_save_code = _Z12oc_save_codePP4InstS1_RmPPN3nrn2oc5frameEPiS8_S1_S7_S2_PP7SymlistS1_S8_;
+extern "C" code_ss _Z15oc_restore_codePP4InstS1_RmPPN3nrn2oc5frameEPiS8_S1_S7_S2_PP7SymlistS1_S8_;
+const auto oc_restore_code = _Z15oc_restore_codePP4InstS1_RmPPN3nrn2oc5frameEPiS8_S1_S7_S2_PP7SymlistS1_S8_;
+extern "C" input_info_ss _Z18oc_save_input_infoPPKcPiS2_PP7__sFILE;
+const auto oc_save_input_info = _Z18oc_save_input_infoPPKcPiS2_PP7__sFILE;
+extern "C" input_info_rs _Z21oc_restore_input_infoPKciiP7__sFILE;
+const auto oc_restore_input_info = _Z21oc_restore_input_infoPKciiP7__sFILE;
+#elif __linux__
 // Import functions for which name mangling goes awry.
 extern "C" code_ss _Z12oc_save_codePP4InstS1_RmPPN3nrn2oc5frameEPiS8_S1_S7_S2_PP7SymlistS1_S8_;
 const auto oc_save_code = _Z12oc_save_codePP4InstS1_RmPPN3nrn2oc5frameEPiS8_S1_S7_S2_PP7SymlistS1_S8_;
@@ -150,6 +163,9 @@ extern "C" input_info_ss _Z18oc_save_input_infoPPKcPiS2_PP8_IO_FILE;
 const auto oc_save_input_info = _Z18oc_save_input_infoPPKcPiS2_PP8_IO_FILE;
 extern "C" input_info_rs _Z21oc_restore_input_infoPKciiP8_IO_FILE;
 const auto oc_restore_input_info = _Z21oc_restore_input_infoPKciiP8_IO_FILE;
+#else
+#   error "Unknown compiler"
 #endif
 
+#endif
 #endif
