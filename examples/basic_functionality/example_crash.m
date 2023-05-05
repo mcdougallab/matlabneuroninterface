@@ -1,6 +1,10 @@
 % Try to cause a crash while running NEURON in MATLAB
-clearvars -except test;  % Make sure testing params are not cleared.
+% Fixed for nrn9!
+clear;
+setup;
 n = neuron.Neuron();
 n.reset_sections();
-as = n.allsec();
-disp(as{1});
+v = n.Vector(10);
+
+disp(v.contains());  
+disp(n.L);
