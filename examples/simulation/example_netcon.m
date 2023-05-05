@@ -14,6 +14,7 @@ t_vec.record(t);
 
 % NetStim object
 ns = n.NetStim();
+ns.seed(42);
 ns.start = 5;
 ns.noise = 1;
 ns.interval = 5;
