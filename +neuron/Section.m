@@ -57,13 +57,15 @@ classdef Section
         %   delete_nrn_obj()
             if (class(self.sec) == "clib.neuron.Section")
                 % clib.neuron.section_unref(self.sec);  % TODO: is this needed?
-                % self.sec.refcount = 0;
-                clib.neuron.nrn_pushsec(self.sec);
-                clibRelease(self.sec);
-                sym = clib.neuron.hoc_lookup("delete_section");
-                clib.neuron.hoc_call_func(sym, 0);
-                % It looks like delete_section already pops the section off the stack.
-                % clib.neuron.nrn_sec_pop();
+                self.sec.refcount = self.sec.refcount - 1;
+                if self.sec.refcount == 0
+                    clib.neuron.nrn_pushsec(self.sec);
+                    clibRelease(self.sec);
+                    sym = clib.neuron.hoc_lookup("delete_section");
+                    clib.neuron.hoc_call_func(sym, 0);
+                    % It looks like delete_section already pops the section off the stack.
+                    % clib.neuron.nrn_sec_pop();
+                end
             end
         end
 

@@ -7,7 +7,7 @@ classdef PlotShape < neuron.Object
         % Initialize PlotShape
         %   PlotShape(obj) constructs a Matlab wrapper for a Neuron
         %   PlotShape.
-            self = self@neuron.Object("PlotShape", obj);
+            self = self@neuron.Object(obj);
         end
 
         function plot(self)

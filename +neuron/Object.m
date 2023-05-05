@@ -2,9 +2,8 @@ classdef Object < dynamicprops
 % Neuron Object Class
 
     properties (SetAccess=protected, GetAccess=public)
-        objtype         % Neuron Object type
         obj             % C++ Neuron Object.
-        objowner        % Bool: does the MATLAB obj own the NEURON obj?
+        objtype         % Neuron Object type
         attr_list       % List of attributes of the C++ object.
         attr_array_map  % Map of array attributes of the C++ object.
                         % Keys are property names, values are array lengths.
@@ -15,20 +14,14 @@ classdef Object < dynamicprops
     
     methods
 
-        function self = Object(objtype, obj, objowner)
+        function self = Object(obj)
         % Initialize Object
-        %   Object(objtype, obj) constructs a Matlab wrapper for Neuron 
-        %   Object obj of type objtype
+        %   Object(obj) constructs a Matlab wrapper for Neuron Object obj
 
             self = self@dynamicprops;
             self.attr_array_map = containers.Map;
-            if ~exist('objowner', 'var')
-                self.objowner = true;
-            else
-                self.objowner = objowner;
-            end
             if clib.neuron.isinitialized()
-                self.objtype = objtype;
+                self.objtype = obj.ctemplate.sym.name;
                 self.obj = obj;
 
                 % Get method list.
@@ -75,29 +68,18 @@ classdef Object < dynamicprops
             end
         end
 
-        function delete_nrn_obj(self)
-        % Destroy the NEURON Object.
-        %   delete_nrn_obj()
-        
-            % Release self.obj C++ object.
-            if (class(self.obj) == "clib.neuron.Object")
-                clib.neuron.hoc_obj_unref(self.obj);
-                clibRelease(self.obj);
-            end
-        end
-
         function delete(self)
         % Destroy the NEURON Object if the MATLAB Object is its owner.
         %   delete()
 
-            % Only destroy the C++ object if MATLAB object owns it.
-            if self.objowner
-                self.delete_nrn_obj();
-            end
-        end
+            self.obj.refcount = self.obj.refcount - 1;
 
-        function make_owner(self)
-            self.objowner = true;
+            % We need to do this, or else we get crashing.
+            if self.obj.refcount == 0
+                clib.neuron.hoc_obj_unref(self.obj);
+                clibRelease(self.obj);
+            end
+
         end
 
         function obj = get_obj(self)
@@ -119,13 +101,6 @@ classdef Object < dynamicprops
                     self.obj.ctemplate.symtable);
                 clib.neuron.hoc_call_ob_proc(self.obj, sym, nargs);
                 value = neuron.stack.hoc_pop(returntype);
-                if returntype == "Object"
-                    if self.obj.index ~= value.obj.index
-                        value.make_owner();
-                    else
-                        self.obj.refcount = self.obj.refcount - 1;
-                    end
-                end
                 neuron.stack.pop_sections(nsecs);
             catch e
                 warning(e.message);

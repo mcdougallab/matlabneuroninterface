@@ -247,7 +247,7 @@ classdef Neuron < dynamicprops
                     elseif (objtype == "RangeVarPlot")
                         obj = neuron.RangeVarPlot(cppobj);
                     else
-                        obj = neuron.Object(objtype, cppobj);
+                        obj = neuron.Object(cppobj);
                     end
                     neuron.stack.pop_sections(nsecs);
                 end
@@ -297,23 +297,27 @@ classdef Neuron < dynamicprops
 
             section_iter = section_list.next;
             section = clib.neuron.get_hoc_item_element_sec(section_iter);
-            all_sections = {neuron.Section(section)};
-        
-            % Iterate using section_iter.next.
-            while true
-                section_iter = section_iter.next;
-                section = clib.neuron.get_hoc_item_element_sec(section_iter);
-                if clibIsNull(section)
-                    % End of the section chain.
-                    break;
-                else
-                    if clibIsNull(section.prop)
-                        % Invalidated section: do not append, delete and unref.
-                        clib.neuron.hoc_l_delete(section_iter);
-                        clib.neuron.section_unref(section);
+            if clibIsNull(section)
+                all_sections = {};
+            else
+                all_sections = {neuron.Section(section)};
+            
+                % Iterate using section_iter.next.
+                while true
+                    section_iter = section_iter.next;
+                    section = clib.neuron.get_hoc_item_element_sec(section_iter);
+                    if clibIsNull(section)
+                        % End of the section chain.
+                        break;
                     else
-                        % Valid section: append.
-                        all_sections{end+1} = neuron.Section(section);
+                        if clibIsNull(section.prop)
+                            % Invalidated section: do not append, delete and unref.
+                            clib.neuron.hoc_l_delete(section_iter);
+                            clib.neuron.section_unref(section);
+                        else
+                            % Valid section: append.
+                            all_sections{end+1} = neuron.Section(section);
+                        end
                     end
                 end
             end

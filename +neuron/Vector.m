@@ -11,7 +11,7 @@ classdef Vector < neuron.Object
         % Initialize Vector
         %   Vector(obj) constructs a Matlab wrapper for a Neuron vector
         %   (obj).
-            self = self@neuron.Object("Vector", obj);
+            self = self@neuron.Object(obj);
 
             self.apply_func_list = [];
             arr = split(clib.neuron.get_nrn_functions(), ";");
