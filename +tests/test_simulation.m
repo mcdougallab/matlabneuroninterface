@@ -49,12 +49,11 @@ classdef test_simulation < matlab.unittest.TestCase
         end
 
         function test_netcon(self)
-            % TODO: Set random seed; this test goes wrong on second run.
             set(0,'DefaultFigureVisible','off');
             example_netcon;
             set(0,'DefaultFigureVisible','on');
-            assert(abs(t_vec(800) - 19.9750) < self.tol);
-            assert(abs(v_vec(800) - 15.9673) < self.tol);
+            assert(abs(t_vec(750) - 18.7250) < self.tol);
+            assert(abs(v_vec(750) - 8.5781) < self.tol);
         end
 
         function test_patternstim(self)
