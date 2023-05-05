@@ -1,5 +1,7 @@
 % Initialization.
 n = neuron.Neuron();
+% n.reset_sections();
+n.finitialize(-65);
 
 % Save initial state.
 state = n.SaveState();

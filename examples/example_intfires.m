@@ -2,6 +2,7 @@
 clear;
 setup;
 n = neuron.Neuron();
+% n.reset_sections();
 
 n.load_file('stdrun.hoc');
 
