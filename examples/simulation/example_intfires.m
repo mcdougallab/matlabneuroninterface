@@ -1,6 +1,7 @@
 % Minimal Intfire2/IntFire4/NetStim/NetCon example.
 n = neuron.Neuron();
-% n.reset_sections();
+n.reset_sections();
+soma = n.Section("soma");
 
 n.load_file('stdrun.hoc');
 
