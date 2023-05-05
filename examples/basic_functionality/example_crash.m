@@ -1,8 +1,5 @@
 % Try to cause a crash while running NEURON in MATLAB
-% Fixed for nrn9!
 n = neuron.Neuron();
 n.reset_sections();
-v = n.Vector(10);
-
-disp(v.contains());  
-disp(n.L);
+as = n.allsec();
+disp(as{1});
