@@ -1,5 +1,6 @@
 % Initialization.
 n = neuron.Neuron();
+n.reset_sections();
 
 % If we try to find 'hd' mechanism here, we get:
 % Error: Insertable mechanism 'hd' not found. 
