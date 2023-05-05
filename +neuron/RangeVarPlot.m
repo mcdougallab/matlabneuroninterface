@@ -7,7 +7,7 @@ classdef RangeVarPlot < neuron.Object
         % Initialize RangeVarPlot
         %   RangeVarPlot(obj) constructs a Matlab wrapper for a Neuron
         %   RangeVarPlot.
-            self = self@neuron.Object("RangeVarPlot", obj);
+            self = self@neuron.Object(obj);
         end
 
         function plot(self)
