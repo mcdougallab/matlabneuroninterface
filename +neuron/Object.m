@@ -72,11 +72,10 @@ classdef Object < dynamicprops
         % Decrease refcount by 1; if refcount is 0, release the C++ Object.
         %   delete()
 
-            self.obj.refcount = self.obj.refcount - 1;
+            clib.neuron.hoc_obj_unref(self.obj);
 
             % We need to do this, or else we get crashes.
             if self.obj.refcount == 0
-                clib.neuron.hoc_obj_unref(self.obj);
                 clibRelease(self.obj);
             end
 
