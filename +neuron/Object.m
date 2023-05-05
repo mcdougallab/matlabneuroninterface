@@ -69,12 +69,12 @@ classdef Object < dynamicprops
         end
 
         function delete(self)
-        % Destroy the NEURON Object if the MATLAB Object is its owner.
+        % Decrease refcount by 1; if refcount is 0, release the C++ Object.
         %   delete()
 
             self.obj.refcount = self.obj.refcount - 1;
 
-            % We need to do this, or else we get crashing.
+            % We need to do this, or else we get crashes.
             if self.obj.refcount == 0
                 clib.neuron.hoc_obj_unref(self.obj);
                 clibRelease(self.obj);
