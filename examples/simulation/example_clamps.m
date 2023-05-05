@@ -5,6 +5,7 @@
 % how much extra current they need to stabilize and how close the
 % voltage gets
 
+clearvars -except test;  % Make sure testing params are not cleared.
 n = neuron.Neuron();
 n.reset_sections();
 

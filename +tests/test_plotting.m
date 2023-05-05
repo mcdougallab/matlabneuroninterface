@@ -18,13 +18,13 @@ classdef test_plotting < matlab.unittest.TestCase
             set(0,'DefaultFigureVisible','on');
         end
         
-        function test_rangevarplot(self)
+        function test_rangevarplot(test)
             set(0,'DefaultFigureVisible','off');
             example_rangevarplot;
             [x, y] = rvp.get_xy_data();
-            assert(abs(x(2) - 0.0314) < self.tol);
-            assert(abs(x(end) - 6.28) < self.tol);
-            assert(abs(y(50) - 0.0956) < self.tol);
+            assert(abs(x(2) - 0.0314) < test.tol);
+            assert(abs(x(end) - 6.28) < test.tol);
+            assert(abs(y(50) - 0.0956) < test.tol);
             set(0,'DefaultFigureVisible','on');
         end
 

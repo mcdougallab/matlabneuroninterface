@@ -2,6 +2,7 @@
 % Generates a plot of an action potential.
 
 % Initialization.
+clearvars -except test;  % Make sure testing params are not cleared.
 n = neuron.Neuron();
 n.reset_sections();
 
