@@ -20,20 +20,20 @@ function build_interface()
     HeaderFilePath = "source/nrnmatlab.h";
     SourceFilePath = "source/nrnmatlab.cpp";
     if ismac
-        StaticLibPath = string(getenv('CONDA_PREFIX')) + "/lib/python3.11/site-packages/neuron/.data/lib/libnrniv.dylib"; % Check?
+        NrnLibPath = "<path-to-neuron-libaries>/libnrniv.dylib";
         LibMexPath = fullfile(matlabroot, "bin", "maci64", "libmex.dylib"); % For mexPrintf
     elseif ispc
-        StaticLibPath = "source/libnrniv.a";
+        NrnLibPath = "source/libnrniv.a";
         LibMexPath = fullfile(matlabroot, "extern", "lib", "win64", "mingw64", "libmex.lib"); % For mexPrintf
     elseif isunix
-        StaticLibPath = string(getenv('CONDA_PREFIX')) + "/lib/python3.11/site-packages/neuron/.data/lib/libnrniv.so";
+        NrnLibPath = "<path-to-neuron-libaries>/libnrniv.so";
         LibMexPath = fullfile(matlabroot, "bin", "glnxa64", "libmex.so"); % For mexPrintf
     end
     HeadersIncludePath = "source";
     try
         clibgen.generateLibraryDefinition(HeaderFilePath, ...
             SupportingSourceFiles=SourceFilePath, ...
-            Libraries=[StaticLibPath, LibMexPath], ...
+            Libraries=[NrnLibPath, LibMexPath], ...
             OverwriteExistingDefinitionFiles=true, ...
             IncludePath=HeadersIncludePath, ...
             PackageName="neuron", ...
@@ -42,8 +42,11 @@ function build_interface()
             AdditionalCompilerFlags="-g", ...
             Verbose=true);
     catch ME
-        disp(ME);
-        error("Error while running clibgen.generateLibraryDefinition(), please check if you have administrator rights.")
+        if ispc
+            error("Error while running clibgen.generateLibraryDefinition(), please check if you have administrator rights.")
+        else
+            rethrow(ME);
+        end
     end
 
     % We want to use the generated .m file, not the .mlx file, because we
