@@ -6,29 +6,31 @@ function setup()
     if ismac
         % Here just check if it is in DYLD_LIBRARY_PATH, you can't set it on
         % runtime in matlab.
-        NeuronInstallationDirectory = getenv('CONDA_PREFIX'); % equivalent to '/home/kian.ohara/.conda/envs/neuron9/';
+        NeuronInstallationDirectory = getenv('/Applications/nrn');
+
         % Check if NEURON directory is correct.
-        filename = fullfile(NeuronInstallationDirectory, 'bin', 'nrniv');
+        filename = fullfile(NeuronInstallationDirectory, 'lib', 'libnrniv.dylib');
 
-        assert(exist(filename, 'file') == 2, 'macOS needs to be started from a shell where the neuron binary (nrniv) declared in the DYLD_LIBRARY_PATH');
+        assert(exist(filename, 'file') == 2, 'macOS needs to be started from a shell where the neuron library (libnrniv.dylib) declared in the DYLD_LIBRARY_PATH');
         % All dependencies of the generated interface library must be findable.
-        % LINUX: Put them on the DYLD_LIBRARY_PATH
-        OSsyspathenv = 'DYLD_LIBRARY_PATH';
-
+        % MacOS: Put them on the DYLD_LIBRARY_PATH
+        assert((contains(fullfile(matlabroot, "bin", "maci64"), getenv(DYLD_LIBRARY_PATH))
+             && contains(fullfile(NeuronInstallationDirectory, "lib"), getenv(DYLD_LIBRARY_PATH))) == 2,
+             "The mex library and neuron installation directory are not on the DYLD_LIBRARY_PATH")
     elseif isunix
         % Here just check if it is in LD_LIBRARY_PATH, you can't set it on
         % runtime in matlab.
-        NeuronInstallationDirectory = getenv('CONDA_PREFIX'); % equivalent to '/home/kian.ohara/.conda/envs/neuron9/';
+        NeuronInstallationDirectory = getenv('/opt/nrn');
         % Check if NEURON directory is correct.
-        filename = fullfile(NeuronInstallationDirectory, 'bin', 'nrniv');
+        filename = fullfile(NeuronInstallationDirectory, 'lib', 'libnrniv.so');
 
-        assert(exist(filename, 'file') == 2, 'Linux needs to be started from a shell where the neuron binary (nrniv) declared in the LD_LIBRARY_PATH');
+        assert(exist(filename, 'file') == 2, 'Linux needs to be started from a shell where the neuron library (libnrniv.so) declared in the LD_LIBRARY_PATH');
         % All dependencies of the generated interface library must be findable.
         % LINUX: Put them on the LD_LIBRARY_PATH
-        OSsyspathenv = 'LD_LIBRARY_PATH';
+        assert((contains(fullfile(matlabroot, "bin", "glnxa64"), getenv(LD_LIBRARY_PATH))
+             && contains(fullfile(NeuronInstallationDirectory, "lib"), getenv(LD_LIBRARY_PATH))) == 2,
+             "The mex library and neuron installation directory are not on the LD_LIBRARY_PATH")
     elseif ispc
-        % Here just check if it is in LD_LIBRARY_PATH, you can't set it on
-        % runtime in matlab.
         NeuronInstallationDirectory = 'C:\nrn';
 
         % Check if NEURON directory is correct.

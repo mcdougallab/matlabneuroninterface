@@ -50,16 +50,16 @@ icllist = n.List("IClamp");
 disp("Number of Vectors: " + veclist.count());
 disp("Number of IClamps: " + icllist.count());
 
-% % Plot results.
-% fig = figure;
-% ax = axes(fig);
-% hold on;
-% % Providing a Vector as an input to plot() calls Vector.double() 
-% % in the background.
-% plot(ax, t_vec, v1_vec, "DisplayName", "Center of axon");
-% plot(ax, t_vec, v2_vec, "DisplayName", "End of branch");
-% hold off;
-% legend(ax);
-% title(ax, "Action potential");
-% xlabel(ax, "t (ms)");
-% ylabel(ax, "voltage (mV)");
+% Plot results.
+fig = figure;
+ax = axes(fig);
+hold on;
+% Providing a Vector as an input to plot() calls Vector.double()
+% in the background.
+plot(ax, t_vec, v1_vec, "DisplayName", "Center of axon");
+plot(ax, t_vec, v2_vec, "DisplayName", "End of branch");
+hold off;
+legend(ax);
+title(ax, "Action potential");
+xlabel(ax, "t (ms)");
+ylabel(ax, "voltage (mV)");
