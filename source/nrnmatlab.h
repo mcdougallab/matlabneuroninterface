@@ -61,51 +61,37 @@ void set_secondorder(int);
 int get_secondorder(void);
 
 // C++ Neuron functions directly accessible from MATLAB.
-#if _WIN32
-__declspec(dllimport) Node* node_exact(Section*, double);
-__declspec(dllimport) void nrn_pushsec(Section* sec);
-__declspec(dllimport) void hoc_obj_unref(Object*);
-__declspec(dllimport) double hoc_call_func(Symbol*, int);
-__declspec(dllimport) void hoc_call_ob_proc(Object*, Symbol*, int);
-__declspec(dllimport) Symbol* hoc_lookup(const char*);
-__declspec(dllimport) void hoc_push_object(Object*);
-__declspec(dllimport) void hoc_pushx(double);
-__declspec(dllimport) Symbol* hoc_table_lookup(const char*, Symlist*);
-__declspec(dllimport) double hoc_xpop(void);
-__declspec(dllimport) int hoc_oc(const char*);
-__declspec(dllimport) void hoc_l_delete(hoc_Item*);
-__declspec(dllimport) void delete_section(void);
-__declspec(dllimport) Object* hoc_newobj1(Symbol*, int);
-__declspec(dllimport) void nrn_change_nseg(Section*, int);
-__declspec(dllimport) void nrn_length_change(Section*, double);
-__declspec(dllimport) void mech_insert1(Section*, int);
-__declspec(dllimport) Section* nrn_sec_pop(void);
-__declspec(dllimport) void section_unref(Section*);
-__declspec(dllimport) void simpleconnectsection(void);
-__declspec(dllimport) char* secname(Section*);
+#ifdef _WIN32
+#define MANGLED __declspec(dllimport)
+#define NON_MANGLED extern "C" __declspec(dllimport)
 #elif __APPLE__ || __linux__
-extern Node* node_exact(Section*, double);
-extern void nrn_pushsec(Section* sec);
-extern void hoc_obj_unref(Object*);
-extern double hoc_call_func(Symbol*, int);
-extern void hoc_call_ob_proc(Object*, Symbol*, int);
-extern Symbol* hoc_lookup(const char*);
-extern void hoc_pushx(double);
-extern Symbol* hoc_table_lookup(const char*, Symlist*);
-extern double hoc_xpop(void);
-extern int hoc_oc(const char*);
-extern void delete_section(void);
-extern Object* hoc_newobj1(Symbol*, int);
-extern void nrn_change_nseg(Section*, int);
-extern void nrn_length_change(Section*, double);
-extern void mech_insert1(Section*, int);
-extern Section* nrn_sec_pop(void);
-extern void section_unref(Section*);
-extern void simpleconnectsection(void);
-extern char* secname(Section*);
+#define MANGLED extern
+#define NON_MANGLED extern "C"
 #else
-#   error "Unknown compiler"
+#   error "Unknown compiler / OS"
 #endif
+
+MANGLED Node* node_exact(Section*, double);
+MANGLED void nrn_pushsec(Section* sec);
+MANGLED void hoc_obj_unref(Object*);
+MANGLED double hoc_call_func(Symbol*, int);
+MANGLED void hoc_call_ob_proc(Object*, Symbol*, int);
+MANGLED Symbol* hoc_lookup(const char*);
+MANGLED void hoc_push_object(Object*);
+MANGLED void hoc_pushx(double);
+MANGLED Symbol* hoc_table_lookup(const char*, Symlist*);
+MANGLED double hoc_xpop(void);
+MANGLED int hoc_oc(const char*);
+MANGLED void hoc_l_delete(hoc_Item*);
+MANGLED void delete_section(void);
+MANGLED Object* hoc_newobj1(Symbol*, int);
+MANGLED void nrn_change_nseg(Section*, int);
+MANGLED void nrn_length_change(Section*, double);
+MANGLED void mech_insert1(Section*, int);
+MANGLED Section* nrn_sec_pop(void);
+MANGLED void section_unref(Section*);
+MANGLED void simpleconnectsection(void);
+MANGLED char* secname(Section*);
 
 // Pointer class for MATLAB interface.
 class NrnRef { /* Holds a pointer to a double. */
