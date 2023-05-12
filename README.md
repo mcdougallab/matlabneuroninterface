@@ -1,9 +1,9 @@
 # NEURON Toolbox for MATLAB
 
-> :warning:
-* only Windows with MinGW is supported.
-* only Linux with GCC & Matlab 2023a
-* [Under Development: only Mac with Intel CPU is supported.]
+> :warning: This toolbox has specific requirements depending on operating system
+> * Windows: Matlab R2022a or higher, MinGW compiler, and Administrator rights
+> * Linux: Matlab R2023a or higher and GCC compiler
+> * Mac: [Under Development] Matlab R2023a or higher, Intel Macs only and Clang compiler
 
 The NEURON Toolbox provides a MATLAB API to NEURON, using the MATLAB
 provided clibgen and clib packages to connect MATLAB and NEURON.
@@ -42,30 +42,12 @@ For more detailed technical information about e.g. code structure, see [doc/DEV_
 ## Usage
 
 ### Setup
-#### One time setup Actions
-0. make sure NEURON is installed (see http://neuron.yale.edu/).
-1. make sure to setup your MEX C++ compiler; for more information about this, run `mex -setup cpp` in MATLAB.
 
-   [ **Windows** Ensure MinGW-w64 is set as your MEX C++ compiler.]
+Before using the toolbox for the first time, go through the [first time only](#first-time) steps. On Windows, these steps need to be run from a Matlab session with Administrator rights.
 
-To get the toolbox working on your machine:
+Linux and Mac: To be able to use the toolbox, Matlab always needs to be started from an environment with specific environment variables, see [first time only](#first-time) for details. Also, output printed from within NEURON itself will show in the shell from which Matlab is started, instead of the Matlab command window.
 
-**bash** Add the Neuron libraries to your run-time path before running Matlab.
-  - **Linux** Set your LD_LIBRARY_PATH
-  - **MacOS** Set your DYLD_LIBRARY_PATH
-  - **Windows** (Automatically set within matlab)
-
-run the MATLAB scripts in the following order:
-- **setup**
-    - add the appropriate directories to your path (you might need to change the hardcoded NEURON installation directory)
-    - **this script needs to be run every time a new MATLAB session is started**
-- **utils.build_interface**
-    - to add the appropriate directories to your path (you might need to change the hardcoded NEURON Library directory)
-    - to build the library interface (neuron/neuronInterface.dll)
-    - **this script needs to be run only once to generate the library interface**,
-      it only needs to be re-run if the interface changes (for example when using a newer Neuron version)
-    - please note: you need administrator rights (always? or just windows?) to run build_interface
-      (i.e. you need to run MATLAB as administrator (always? or just windows?))
+In each Matlab session where you want to use the toolbox, run the script **setup.m**. Alternatively, add a call to this setup.m [in your startup.m file](https://www.mathworks.com/help/matlab/ref/startup.html).
 
 ### Example scripts
 
@@ -139,3 +121,28 @@ A non-exhaustive list:
   use `t = n.Vector().record(ref);`; instead we have to write
   `t = n.Vector(); t.record(ref);`. This is due to the way dynamic function
   calls are setup with `subsref`.
+
+<a id="first-time"></a>
+## First time only
+
+Here the steps are given that need to be done only once to be able to use the toolbox.
+
+1. Make sure NEURON is installed (see http://neuron.yale.edu/).
+2. Linux and Mac: start Matlab from a bash shell with the correct PATH, HOC_LIBRARY_PATH and on Linux LD_LIBRARY_PATH, on Mac DYLD_LIBRARY_PATH. Matlab always needs to be started from such a shell, not just the first time only.
+   - Get the directory where libnrniv is installed, within the NEURON installation folder
+   - Get the directory where this toolbox is installed
+   - Determine the value of matlabroot (https://nl.mathworks.com/help/matlab/ref/matlabroot.html)
+   - Use these values to set the PATH, HOC_LIBRARY_PATH and LD_LIBRARY_PATH / DYLD_LIBRARY_PATH starting Matlab. Example shell scripts are available for [Linux](doc/example_startup_scripts/linux_matlab.sh) and [Mac](doc/example_startup_scripts/linux_matlab.sh). Within these scripts, replace `<..matlabroot..>`, `<..neuron-directory..>` and `<..matlabneuroninterface..>` with the correct directory paths.
+3. Make sure to setup your MEX C++ compiler; for more information about this, run `mex -setup cpp` in MATLAB.
+   - Windows: MinGW-w64
+   - Linux: gcc
+   - Mac: clang
+4. Update neuron_lib_directory in +utils/Paths.m if needed.
+5. Run the MATLAB scripts in the following order:
+   - **setup**
+      - This script needs to be run every time a new MATLAB session is started
+      - It adds the appropriate directories to your path 
+   - **utils.build_interface**
+      - This script needs to be run once to generate the library interface, and only needs to be re-run if the interface changes (for example when using a newer Neuron version)
+      - It builds the library interface (neuron/neuronInterface.*)
+      - Please note: on Windows you need administrator rights to run build_interface
