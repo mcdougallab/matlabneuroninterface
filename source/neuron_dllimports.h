@@ -2,170 +2,115 @@
 #define NRNDLLIMP_H
 
 #include "neuron_api_headers.h"
+
 #ifdef _WIN32
-// Import C++ name mangled functions.
-__declspec(dllimport) vv_function delete_section;
-__declspec(dllimport) initer_function ivocmain_session;
-__declspec(dllimport) vsecptri_function mech_insert1;
-__declspec(dllimport) voptrsptritemptrptri_function new_sections;
-__declspec(dllimport) nptrsecptrd_function node_exact;
-__declspec(dllimport) vv_function nrnmpi_stubs;
-__declspec(dllimport) ppoptr_function ob2pntproc_0;
-__declspec(dllimport) cptrsecptr_function secname;
-__declspec(dllimport) vsecptr_function section_unref;
-__declspec(dllimport) vv_function simpleconnectsection;
-__declspec(dllimport) ivptr_function vector_capacity;
-__declspec(dllimport) dptrvptr_function vector_vec;
-
-// C++ name mangled nrn_* functions.
-__declspec(dllimport) dptrsecptrsptrd_function nrn_rangepointer;
-__declspec(dllimport) vsecptri_function nrn_change_nseg;
-__declspec(dllimport) vsecptrd_function nrn_length_change;
-__declspec(dllimport) vv_function nrn_popsec;
-__declspec(dllimport) vsecptr_function nrn_pushsec;
-__declspec(dllimport) secptrv_function nrn_sec_pop;
-
-// C++ name mangled hoc_* functions.
-__declspec(dllimport) dvptrint_function hoc_call_func;
-__declspec(dllimport) voptrsptri_function hoc_call_ob_proc;
-__declspec(dllimport) dsio_function hoc_call_objfunc;
-__declspec(dllimport) vsptr_function hoc_install_object_data_index;
-__declspec(dllimport) vitemptr_function hoc_l_delete;
-__declspec(dllimport) scptr_function hoc_lookup;
-__declspec(dllimport) optrsptri_function hoc_newobj1;
-__declspec(dllimport) voptr_function hoc_obj_ref;
-__declspec(dllimport) voptr_function hoc_obj_unref;
-__declspec(dllimport) optrptrv_function hoc_objpop;
-__declspec(dllimport) icptr_function hoc_oc;
-__declspec(dllimport) voptr_function hoc_push_object;
-__declspec(dllimport) vdptr_function hoc_pushpx;
-__declspec(dllimport) vsptr_function hoc_pushs;
-__declspec(dllimport) vcptrptr_function hoc_pushstr;
-__declspec(dllimport) vd_function hoc_pushx;
-__declspec(dllimport) dptrv_function hoc_pxpop;
-__declspec(dllimport) vv_function hoc_ret;
-__declspec(dllimport) cptrptrv_function hoc_strpop;
-__declspec(dllimport) scptrslptr_function hoc_table_lookup;
-__declspec(dllimport) voptrptr_function hoc_tobj_unref;
-__declspec(dllimport) dv_function hoc_xpop;
-
-// C++ name mangled oc_* functions.
-__declspec(dllimport) hoc_oop_ss oc_save_hoc_oop;
-__declspec(dllimport) hoc_oop_ss oc_restore_hoc_oop;
-__declspec(dllimport) cabcode_ss oc_save_cabcode;
-__declspec(dllimport) cabcode_ss oc_restore_cabcode;
-
-// Import non-name mangled functions and parameters.
-extern "C" __declspec(dllimport) int diam_changed;
-extern "C" __declspec(dllimport) int secondorder;
-extern "C" __declspec(dllimport) Symlist* hoc_built_in_symlist;
-extern "C" __declspec(dllimport) Objectdata* hoc_objectdata;
-extern "C" __declspec(dllimport) Objectdata* hoc_top_level_data;
-extern "C" __declspec(dllimport) Symlist* hoc_top_level_symlist;
-extern "C" __declspec(dllimport) int nrn_is_python_extension;
-extern "C" __declspec(dllimport) int nrn_main_launch;
-extern "C" __declspec(dllimport) int nrn_nobanner_;
-extern "C" __declspec(dllimport) int nrn_try_catch_nest_depth;
-extern "C" __declspec(dllimport) vf2icif_function nrnpy_set_pr_etal;
-extern "C" __declspec(dllimport) hoc_Item* section_list;
-
-// Import functions for which name mangling goes awry.
-extern "C" __declspec(dllimport) code_ss _Z12oc_save_codePP4InstS1_RyPPN3nrn2oc5frameEPiS8_S1_S7_S2_PP7SymlistS1_S8_;
-const auto oc_save_code = _Z12oc_save_codePP4InstS1_RyPPN3nrn2oc5frameEPiS8_S1_S7_S2_PP7SymlistS1_S8_;
-extern "C" __declspec(dllimport) code_ss _Z15oc_restore_codePP4InstS1_RyPPN3nrn2oc5frameEPiS8_S1_S7_S2_PP7SymlistS1_S8_;
-const auto oc_restore_code = _Z15oc_restore_codePP4InstS1_RyPPN3nrn2oc5frameEPiS8_S1_S7_S2_PP7SymlistS1_S8_;
-extern "C" __declspec(dllimport) input_info_ss _Z18oc_save_input_infoPPKcPiS2_PP6_iobuf;
-const auto oc_save_input_info = _Z18oc_save_input_infoPPKcPiS2_PP6_iobuf;
-extern "C" __declspec(dllimport) input_info_rs _Z21oc_restore_input_infoPKciiP6_iobuf;
-const auto oc_restore_input_info = _Z21oc_restore_input_infoPKciiP6_iobuf;
+#define MANGLED __declspec(dllimport)
+#define NON_MANGLED extern "C" __declspec(dllimport)
 #elif __APPLE__ || __linux__
-//maybe change to #elif __linux__
+#define MANGLED extern
+#define NON_MANGLED extern "C"
+#else
+#   error "Unknown compiler / OS"
+#endif
+
 // Import C++ name mangled functions.
-extern vv_function delete_section;
-extern initer_function ivocmain_session;
-extern vsecptri_function mech_insert1;
-extern voptrsptritemptrptri_function new_sections;
-extern nptrsecptrd_function node_exact;
-extern vv_function nrnmpi_stubs;
-extern ppoptr_function ob2pntproc_0;
-extern cptrsecptr_function secname;
-extern vsecptr_function section_unref;
-extern vv_function simpleconnectsection;
-extern ivptr_function vector_capacity;
-extern dptrvptr_function vector_vec;
+MANGLED vv_function delete_section;
+MANGLED initer_function ivocmain_session;
+MANGLED vsecptri_function mech_insert1;
+MANGLED voptrsptritemptrptri_function new_sections;
+MANGLED nptrsecptrd_function node_exact;
+MANGLED vv_function nrnmpi_stubs;
+MANGLED ppoptr_function ob2pntproc_0;
+MANGLED cptrsecptr_function secname;
+MANGLED vsecptr_function section_unref;
+MANGLED vv_function simpleconnectsection;
+MANGLED ivptr_function vector_capacity;
+MANGLED dptrvptr_function vector_vec;
 
 // C++ name mangled nrn_* functions.
-extern dptrsecptrsptrd_function nrn_rangepointer;
-extern vsecptri_function nrn_change_nseg;
-extern vsecptrd_function nrn_length_change;
-extern vv_function nrn_popsec;
-extern vsecptr_function nrn_pushsec;
-extern secptrv_function nrn_sec_pop;
+MANGLED dptrsecptrsptrd_function nrn_rangepointer;
+MANGLED vsecptri_function nrn_change_nseg;
+MANGLED vsecptrd_function nrn_length_change;
+MANGLED vv_function nrn_popsec;
+MANGLED vsecptr_function nrn_pushsec;
+MANGLED secptrv_function nrn_sec_pop;
 
 // C++ name mangled hoc_* functions.
-extern dvptrint_function hoc_call_func;
-extern voptrsptri_function hoc_call_ob_proc;
-extern dsio_function hoc_call_objfunc;
-extern vsptr_function hoc_install_object_data_index;
-extern scptr_function hoc_lookup;
-extern optrsptri_function hoc_newobj1;
-extern voptr_function hoc_obj_ref;
-extern voptr_function hoc_obj_unref;
-extern optrptrv_function hoc_objpop;
-extern icptr_function hoc_oc;
-extern voptrptr_function hoc_pushobj;
-extern vdptr_function hoc_pushpx;
-extern vcptrptr_function hoc_pushstr;
-extern vd_function hoc_pushx;
-extern vv_function hoc_ret;
-extern cptrptrv_function hoc_strpop;
-extern scptrslptr_function hoc_table_lookup;
-extern voptrptr_function hoc_tobj_unref;
-extern dv_function hoc_xpop;
+MANGLED dvptrint_function hoc_call_func;
+MANGLED voptrsptri_function hoc_call_ob_proc;
+MANGLED dsio_function hoc_call_objfunc;
+MANGLED vsptr_function hoc_install_object_data_index;
+MANGLED vitemptr_function hoc_l_delete;
+MANGLED scptr_function hoc_lookup;
+MANGLED optrsptri_function hoc_newobj1;
+MANGLED voptr_function hoc_obj_ref;
+MANGLED voptr_function hoc_obj_unref;
+MANGLED optrptrv_function hoc_objpop;
+MANGLED icptr_function hoc_oc;
+MANGLED voptr_function hoc_push_object;
+MANGLED vdptr_function hoc_pushpx;
+MANGLED vsptr_function hoc_pushs;
+MANGLED vcptrptr_function hoc_pushstr;
+MANGLED vd_function hoc_pushx;
+MANGLED dptrv_function hoc_pxpop;
+MANGLED vv_function hoc_ret;
+MANGLED cptrptrv_function hoc_strpop;
+MANGLED scptrslptr_function hoc_table_lookup;
+MANGLED voptrptr_function hoc_tobj_unref;
+MANGLED dv_function hoc_xpop;
 
 // C++ name mangled oc_* functions.
-extern hoc_oop_ss oc_save_hoc_oop;
-extern hoc_oop_ss oc_restore_hoc_oop;
-extern cabcode_ss oc_save_cabcode;
-extern cabcode_ss oc_restore_cabcode;
+MANGLED hoc_oop_ss oc_save_hoc_oop;
+MANGLED hoc_oop_ss oc_restore_hoc_oop;
+MANGLED cabcode_ss oc_save_cabcode;
+MANGLED cabcode_ss oc_restore_cabcode;
 
 // Import non-name mangled functions and parameters.
-extern "C" void modl_reg(){};
-extern "C" int diam_changed;
-extern "C" Symlist* hoc_built_in_symlist;
-extern "C" Objectdata* hoc_objectdata;
-extern "C" Objectdata* hoc_top_level_data;
-extern "C" Symlist* hoc_top_level_symlist;
-extern "C" int nrn_is_python_extension;
-extern "C" int nrn_main_launch;
-extern "C" int nrn_nobanner_;
-extern "C" int nrn_try_catch_nest_depth;
-extern "C" vf2icif_function nrnpy_set_pr_etal;
+NON_MANGLED int diam_changed;
+NON_MANGLED int secondorder;
+NON_MANGLED Symlist* hoc_built_in_symlist;
+NON_MANGLED Objectdata* hoc_objectdata;
+NON_MANGLED Objectdata* hoc_top_level_data;
+NON_MANGLED Symlist* hoc_top_level_symlist;
+NON_MANGLED int nrn_is_python_extension;
+NON_MANGLED int nrn_main_launch;
+NON_MANGLED int nrn_nobanner_;
+NON_MANGLED int nrn_try_catch_nest_depth;
+NON_MANGLED vf2icif_function nrnpy_set_pr_etal;
+NON_MANGLED hoc_Item* section_list;
 
-//maybe needs __linux__ or __APPLE__ variations
-#if __APPLE__
+#ifdef _WIN32
 // Import functions for which name mangling goes awry.
-extern "C" code_ss _Z12oc_save_codePP4InstS1_RmPPN3nrn2oc5frameEPiS8_S1_S7_S2_PP7SymlistS1_S8_;
+NON_MANGLED code_ss _Z12oc_save_codePP4InstS1_RyPPN3nrn2oc5frameEPiS8_S1_S7_S2_PP7SymlistS1_S8_;
+const auto oc_save_code = _Z12oc_save_codePP4InstS1_RyPPN3nrn2oc5frameEPiS8_S1_S7_S2_PP7SymlistS1_S8_;
+NON_MANGLED code_ss _Z15oc_restore_codePP4InstS1_RyPPN3nrn2oc5frameEPiS8_S1_S7_S2_PP7SymlistS1_S8_;
+const auto oc_restore_code = _Z15oc_restore_codePP4InstS1_RyPPN3nrn2oc5frameEPiS8_S1_S7_S2_PP7SymlistS1_S8_;
+NON_MANGLED input_info_ss _Z18oc_save_input_infoPPKcPiS2_PP6_iobuf;
+const auto oc_save_input_info = _Z18oc_save_input_infoPPKcPiS2_PP6_iobuf;
+NON_MANGLED input_info_rs _Z21oc_restore_input_infoPKciiP6_iobuf;
+const auto oc_restore_input_info = _Z21oc_restore_input_infoPKciiP6_iobuf;
+#elif __APPLE__
+extern "C" void modl_reg(){};
+// Import functions for which name mangling goes awry.
+NON_MANGLED code_ss _Z12oc_save_codePP4InstS1_RmPPN3nrn2oc5frameEPiS8_S1_S7_S2_PP7SymlistS1_S8_;
 const auto oc_save_code = _Z12oc_save_codePP4InstS1_RmPPN3nrn2oc5frameEPiS8_S1_S7_S2_PP7SymlistS1_S8_;
-extern "C" code_ss _Z15oc_restore_codePP4InstS1_RmPPN3nrn2oc5frameEPiS8_S1_S7_S2_PP7SymlistS1_S8_;
+NON_MANGLED code_ss _Z15oc_restore_codePP4InstS1_RmPPN3nrn2oc5frameEPiS8_S1_S7_S2_PP7SymlistS1_S8_;
 const auto oc_restore_code = _Z15oc_restore_codePP4InstS1_RmPPN3nrn2oc5frameEPiS8_S1_S7_S2_PP7SymlistS1_S8_;
-extern "C" input_info_ss _Z18oc_save_input_infoPPKcPiS2_PP7__sFILE;
+NON_MANGLED input_info_ss _Z18oc_save_input_infoPPKcPiS2_PP7__sFILE;
 const auto oc_save_input_info = _Z18oc_save_input_infoPPKcPiS2_PP7__sFILE;
-extern "C" input_info_rs _Z21oc_restore_input_infoPKciiP7__sFILE;
+NON_MANGLED input_info_rs _Z21oc_restore_input_infoPKciiP7__sFILE;
 const auto oc_restore_input_info = _Z21oc_restore_input_infoPKciiP7__sFILE;
 #elif __linux__
+extern "C" void modl_reg(){};
 // Import functions for which name mangling goes awry.
-extern "C" code_ss _Z12oc_save_codePP4InstS1_RmPPN3nrn2oc5frameEPiS8_S1_S7_S2_PP7SymlistS1_S8_;
+NON_MANGLED code_ss _Z12oc_save_codePP4InstS1_RmPPN3nrn2oc5frameEPiS8_S1_S7_S2_PP7SymlistS1_S8_;
 const auto oc_save_code = _Z12oc_save_codePP4InstS1_RmPPN3nrn2oc5frameEPiS8_S1_S7_S2_PP7SymlistS1_S8_;
-extern "C" code_ss _Z15oc_restore_codePP4InstS1_RmPPN3nrn2oc5frameEPiS8_S1_S7_S2_PP7SymlistS1_S8_;
+NON_MANGLED code_ss _Z15oc_restore_codePP4InstS1_RmPPN3nrn2oc5frameEPiS8_S1_S7_S2_PP7SymlistS1_S8_;
 const auto oc_restore_code = _Z15oc_restore_codePP4InstS1_RmPPN3nrn2oc5frameEPiS8_S1_S7_S2_PP7SymlistS1_S8_;
-extern "C" input_info_ss _Z18oc_save_input_infoPPKcPiS2_PP8_IO_FILE;
+NON_MANGLED input_info_ss _Z18oc_save_input_infoPPKcPiS2_PP8_IO_FILE;
 const auto oc_save_input_info = _Z18oc_save_input_infoPPKcPiS2_PP8_IO_FILE;
-extern "C" input_info_rs _Z21oc_restore_input_infoPKciiP8_IO_FILE;
+NON_MANGLED input_info_rs _Z21oc_restore_input_infoPKciiP8_IO_FILE;
 const auto oc_restore_input_info = _Z21oc_restore_input_infoPKciiP8_IO_FILE;
-#else
-#   error "Unknown compiler"
 #endif
 
-#endif
 #endif
