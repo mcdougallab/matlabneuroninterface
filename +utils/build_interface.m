@@ -7,9 +7,11 @@
 %   source/libnrniv.a (to generate it yourself, see doc/DEV_README.md)
 function build_interface()
 
+    our_clib_package_name = "neuron"; % Do not change, will need much more changes than just this variable.
+
     % Check if there is a C++ compiler.
     if ~check_compiler('C++')
-        error("No C++ compiler found.");
+        error("No C++ compiler found, run 'mex -setup cpp'");
     elseif ispc && ~check_compiler('C++', 'mingw64-g++')
         error("On windows the C++ compiler must be mingw64")
     % elseif ismac || isunix
@@ -17,32 +19,31 @@ function build_interface()
     end
 
     % Create definition file for NEURON library.
-    HeaderFilePath = "source/nrnmatlab.h";
-    SourceFilePath = "source/nrnmatlab.cpp";
-    if ismac
-        NrnLibPath = "<path-to-neuron-libaries>/libnrniv.dylib";
-        LibMexPath = fullfile(matlabroot, "bin", "maci64", "libmex.dylib"); % For mexPrintf
+    source_directory = fullfile(utils.Paths.toolbox_directory(), 'source');
+    HeaderFilePath = fullfile(source_directory, "nrnmatlab.h");
+    SourceFilePath = fullfile(source_directory, "nrnmatlab.cpp");
+    LibMexPath = utils.Paths.libmex_file();  % For mexPrintf
+    if ismac || isunix
+        NrnLibPath = utils.Paths.libnrniv_file();
     elseif ispc
-        NrnLibPath = "source/libnrniv.a";
-        LibMexPath = fullfile(matlabroot, "extern", "lib", "win64", "mingw64", "libmex.lib"); % For mexPrintf
-    elseif isunix
-        NrnLibPath = "<path-to-neuron-libaries>/libnrniv.so";
-        LibMexPath = fullfile(matlabroot, "bin", "glnxa64", "libmex.so"); % For mexPrintf
+        % Need to use the .a file provided in this toolbox, instead of the
+        % dll from neuron.
+        NrnLibPath = fullfile(source_directory, "libnrniv.a");
     end
-    HeadersIncludePath = "source";
+    HeadersIncludePath = source_directory;
     try
         clibgen.generateLibraryDefinition(HeaderFilePath, ...
             SupportingSourceFiles=SourceFilePath, ...
             Libraries=[NrnLibPath, LibMexPath], ...
             OverwriteExistingDefinitionFiles=true, ...
             IncludePath=HeadersIncludePath, ...
-            PackageName="neuron", ...
+            PackageName=our_clib_package_name, ...
             TreatObjectPointerAsScalar=true, ...
             TreatConstCharPointerAsCString=true, ...
-            AdditionalCompilerFlags="-g", ...
             Verbose=true);
     catch ME
         if ispc
+            disp(ME)
             error("Error while running clibgen.generateLibraryDefinition(), please check if you have administrator rights.")
         else
             rethrow(ME);
@@ -51,6 +52,8 @@ function build_interface()
 
     % We want to use the generated .m file, not the .mlx file, because we
     % will be making some automated changes to the contents of the file.
+    % Should only be needed up to R2023a, as of then the .mlx should no
+    % longer be generated at all.
     if isfile('defineneuron.mlx')
         delete defineneuron.mlx
     end
@@ -121,6 +124,22 @@ function build_interface()
 
     % Build the library interface.
     build(defineneuron);
+
+    if ismac || isunix
+        % Use outofprocess execution, to avoid segmentation faults due to
+        % conflicts between the neuron shared libraries and matlabs shared
+        % libraries (mainly the libjvm that comes with matlab)
+        % Note: when Matlab's new javascript based desktop becomes the
+        % default, might be able to do inprocess also for Linux and Mac
+        configObj = clibConfiguration(our_clib_package_name, ExecutionMode="outofprocess");
+        % The call to build(defineneuron) will display a message in the command
+        % window on the executionmode. On a very first run, this will say that
+        % the executionmode is inprocess. To avoid incorrect assumptions,
+        % display the result of our setting the executionmode to outofprocess.
+        disp('The ExecutionMode has been updated to')
+        disp(configObj.ExecutionMode)
+    end
+
 end
 
 function [] = func_replace_strings(InputFile, OutputFile, ChangeStrings)
