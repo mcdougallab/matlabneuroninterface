@@ -1,82 +1,82 @@
 classdef test_simulation < matlab.unittest.TestCase
 
     properties
-        tol = 1e-4;
+        tol = 1e-10;
     end
     
     methods(Test)
         
-        function test_acpot(test)
+        function test_acpot(testCase)
             set(0,'DefaultFigureVisible','off');
             example_acpot;
             set(0,'DefaultFigureVisible','on');
-            assert(abs(v2_vec(100) - 8.8916) < test.tol);
-            assert(abs(v1_vec(100) - 3.7727) < test.tol);
-            assert(abs(t_vec(100) - 2.4750) < test.tol);
+            testCase.verifyEqual(v2_vec(100), 8.8916, "RelTol", testCase.tol);
+            testCase.verifyEqual(v1_vec(100), 3.7727, "RelTol", testCase.tol);
+            testCase.verifyEqual(t_vec(100), 2.4750, "RelTol", testCase.tol);
         end
 
-        function test_alphasynapse(test)
+        function test_alphasynapse(testCase)
             example_alphasynapse;
-            assert(abs(ivec(43) - -1.9125) < test.tol);
-            assert(abs(v(101) - 28.7358) < test.tol);
+            testCase.verifyEqual(ivec(43), -1.9125, "RelTol", testCase.tol);
+            testCase.verifyEqual(v(101), 28.7358, "RelTol", testCase.tol);
         end
 
-        function test_clamps(test)
+        function test_clamps(testCase)
             example_clamps;
-            assert(abs(c2i_0 - -8.5728e-06) < test.tol);
-            assert(abs(c3i_0 - 6.0899e-06) < test.tol);
-            assert(abs(s2v_0 - -65.0000) < test.tol);
-            assert(abs(s3v_0 - -64.9987) < test.tol);
-            assert(abs(c2i_1 - -1.7144e-05) < test.tol);
-            assert(abs(c3i_1 - -65.0000) < test.tol);
-            assert(abs(s2v_1 - -65.0000) < test.tol);
-            assert(abs(s3v_1 - -64.9975) < test.tol);
+            testCase.verifyEqual(c2i_0, -8.5728e-06, "RelTol", testCase.tol);
+            testCase.verifyEqual(c3i_0, 6.0899e-06, "RelTol", testCase.tol);
+            testCase.verifyEqual(s2v_0, -65.0000, "RelTol", testCase.tol);
+            testCase.verifyEqual(s3v_0, -64.9987, "RelTol", testCase.tol);
+            testCase.verifyEqual(c2i_1, -1.7144e-05, "RelTol", testCase.tol);
+            testCase.verifyEqual(c3i_1, -65.0000, "RelTol", testCase.tol);
+            testCase.verifyEqual(s2v_1, -65.0000, "RelTol", testCase.tol);
+            testCase.verifyEqual(s3v_1, -64.9975, "RelTol", testCase.tol);
         end
 
-        function test_intfires(test)
+        function test_intfires(testCase)
             example_intfires;
-            assert(length(cell1out) == 0);
-            assert(length(cell2out) == 2);
-            assert(abs(cell2out(1) - 7.5365) < test.tol);
-            assert(abs(cell2out(2) - 16.1599) < test.tol);
+            testCase.verifyEqual(length(cell1out), 0);
+            testCase.verifyEqual(length(cell2out), 2);
+            testCase.verifyEqual(cell2out(1), 7.5365, "RelTol", testCase.tol);
+            testCase.verifyEqual(cell2out(2), 16.1599, "RelTol", testCase.tol);
         end
 
-        function test_linearmechanism(test)
+        function test_linearmechanism(testCase)
             example_linearmechanism;
-            assert(abs(n.t - 0.475) < test.tol);
-            assert(abs(v_ref.get() - 10) < test.tol);
-            assert(abs(y.double(2) - -1.1188) < test.tol);
+            testCase.verifyEqual(n.t, 0.475, "RelTol", testCase.tol);
+            testCase.verifyEqual(v_ref.get(), 10, "RelTol", testCase.tol);
+            testCase.verifyEqual(y.double(2), -1.1188, "RelTol", testCase.tol);
         end
 
-        function test_netcon(test)
+        function test_netcon(testCase)
             set(0,'DefaultFigureVisible','off');
             example_netcon;
             set(0,'DefaultFigureVisible','on');
-            assert(abs(t_vec(750) - 18.7250) < test.tol);
-            assert(abs(v_vec(750) - 8.5781) < test.tol);
+            testCase.verifyEqual(t_vec(750), 18.7250, "RelTol", testCase.tol);
+            testCase.verifyEqual(v_vec(750), 8.5781, "RelTol", testCase.tol);
         end
 
-        function test_patternstim(test)
+        function test_patternstim(testCase)
             example_patternstim;
-            assert(abs(spike_ts(4) - 4.1) < test.tol);
-            assert(spike_ids(5) == 0);
-            assert(length(spike_ts) == 12);
+            testCase.verifyEqual(spike_ts(4), 4.1, "RelTol", testCase.tol);
+            testCase.verifyEqual(spike_ids(5), 0);
+            testCase.verifyEqual(length(spike_ts), 12);
         end
 
-        function test_savestate(test)
+        function test_savestate(testCase)
             example_savestate;
-            assert(abs(t0 - 0) < test.tol);
-            assert(abs(t1 - 0.05) < test.tol);
-            assert(abs(t2 - 0) < test.tol);
+            testCase.verifyEqual(t0, 0);
+            testCase.verifyEqual(t1, 0.05, "RelTol", testCase.tol);
+            testCase.verifyEqual(t2, 0);
         end
 
-        function test_temptest(test)
+        function test_temptest(testCase)
             example_temptest;
-            assert(abs(t0 - 6.1000) < test.tol);
-            assert(abs(t1 - 6.0676) < test.tol);
-            assert(l0 == 1);
-            assert(l1 == 1);
-            assert(l2 == 0);
+            testCase.verifyEqual(t0, 6.1000, "RelTol", testCase.tol);
+            testCase.verifyEqual(t1, 6.0676, "RelTol", testCase.tol);
+            testCase.verifyEqual(l0, 1);
+            testCase.verifyEqual(l1, 1);
+            testCase.verifyEqual(l2, 0);
         end
 
     end
