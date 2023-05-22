@@ -132,7 +132,8 @@ Here the steps are given that need to be done only once to be able to use the to
    - Get the directory where libnrniv is installed, within the NEURON installation folder
    - Get the directory where this toolbox is installed
    - Determine the value of matlabroot (https://nl.mathworks.com/help/matlab/ref/matlabroot.html)
-   - Use these values to set the PATH, HOC_LIBRARY_PATH and LD_LIBRARY_PATH / DYLD_LIBRARY_PATH starting Matlab. Example shell scripts are available for [Linux](doc/example_startup_scripts/linux_matlab.sh) and [Mac](doc/example_startup_scripts/linux_matlab.sh). Within these scripts, replace `<..matlabroot..>`, `<..neuron-directory..>` and `<..matlabneuroninterface..>` with the correct directory paths.
+   - Use these values to set the HOC_LIBRARY_PATH and LD_LIBRARY_PATH / DYLD_LIBRARY_PATH. Example shell scripts are available for [Linux](doc/example_startup_scripts/linux_matlab.sh) and [Mac](doc/example_startup_scripts/linux_matlab.sh). Within these scripts, replace `<..matlabroot..>`, `<..neuron-directory..>` and `<..matlabneuroninterface..>` with the correct directory paths.
+   - Depending on how Neuron was installed, it may be that also the PATH variable needs to be updated. See item 6 'Check it works'.
 3. Make sure to setup your MEX C++ compiler; for more information about this, run `mex -setup cpp` in MATLAB.
    - Windows: MinGW-w64
    - Linux: gcc
@@ -146,3 +147,8 @@ Here the steps are given that need to be done only once to be able to use the to
       - This script needs to be run once to generate the library interface, and only needs to be re-run if the interface changes (for example when using a newer Neuron version)
       - It builds the library interface (neuron/neuronInterface.*)
       - Please note: on Windows you need administrator rights to run build_interface
+6. Check it works:
+   - With the previous steps completed, run the matlab scripts **example_run** and **example_acpot** to check that the matlabneuroninterface works.
+   - Linux and Mac, additionally: 
+      - Run **example_loadfile** to check that the HOC_LIBRARY_PATH has been set correctly.
+      - Run **example_mod** to check that the PATH is correct. If this example fails, update the PATH per the instructions in the example startup script.
