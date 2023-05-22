@@ -2,7 +2,7 @@
 % Initialize a neuron session and call some functions.
 
 % Initialization.
-clearvars -except test;  % Make sure testing params are not cleared.
+clearvars -except testCase;  % Make sure testing params are not cleared.
 n = neuron.Neuron();
 n.reset_sections();
 
