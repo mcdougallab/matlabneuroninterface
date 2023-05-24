@@ -24,13 +24,12 @@ classdef Neuron < dynamicprops
         %   fill_dynamic_props()
             arr = split(clib.neuron.get_nrn_functions(), ";");
             call_list = arr(1:end-1);
-            self.fn_void_list = string.empty;  % Empty, unless file is loaded.
 
             % Reset dynamic method lists.
-            self.fn_double_list = [];
-            self.fn_void_list = [];
-            self.fn_string_list = [];
-            self.object_list = [];
+            self.fn_double_list = string.empty;
+            self.fn_void_list = string.empty;
+            self.fn_string_list = string.empty;
+            self.object_list = string.empty;
 
             % Add dynamic properties.
             % See: doc/DEV_README.md#neuron-types
