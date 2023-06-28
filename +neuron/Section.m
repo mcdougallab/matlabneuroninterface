@@ -194,9 +194,19 @@ classdef Section
         %   sec = get_sec() 
             sec = self.sec;
         end
-        function connect(self, loc, parent_sec, parent_loc)
-        % Connect this section at loc to another section (parent_sec) at parent_loc.
-        %   connect(loc, parent_sec, parent_loc)
+        function connect(self, loc, varargin)
+            % Connect this section at loc to another section (parent_sec) at parent_loc.
+            %   connect(loc, parent_sec, parent_loc)
+            %   connect(parent_sec)  % connects the 0 location to the 1 of
+            %   the parent
+            if nargin > 2
+                parent_sec = varargin{1};
+                parent_loc = varargin{2};
+            else
+                parent_sec = loc;
+                loc = 0;
+                parent_loc = 1;
+            end
             clib.neuron.nrn_pushsec(self.sec);
             clib.neuron.hoc_pushx(loc);
             clib.neuron.nrn_pushsec(parent_sec.get_sec());
