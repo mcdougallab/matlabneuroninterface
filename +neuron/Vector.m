@@ -98,13 +98,14 @@ classdef Vector < neuron.Object
         %   arr = double()
         %   element = double(index)
             vec_len = self.length();
-            arr = zeros(1, vec_len);
             vec_data = self.data();
-            for i=1:vec_len
-                arr(i) = vec_data(i);
-            end
             if nargin == 2
-                arr = arr(index);
+                arr = vec_data(index);
+            else
+                arr = zeros(1, vec_len);
+                for i=1:vec_len
+                    arr(i) = vec_data(i);
+                end
             end
         end
 
