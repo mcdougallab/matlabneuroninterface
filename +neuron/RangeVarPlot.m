@@ -18,11 +18,11 @@ classdef RangeVarPlot < neuron.Object
             self.call_method_hoc("to_vector", "double", y, x);
         end
 
-        function plot(self)
+        function plot(self, varargin)
         % Plot RangeVarPlot data.
         %   plot()
             [x, y] = self.get_xy_data();
-            plot(x, y);
+            plot(x, y, varargin{:});
         end
 
     end
