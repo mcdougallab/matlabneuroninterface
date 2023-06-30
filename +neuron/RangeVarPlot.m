@@ -22,7 +22,7 @@ classdef RangeVarPlot < neuron.Object
         % Plot RangeVarPlot data.
         %   plot()
             [x, y] = self.get_xy_data();
-            plot(x, y, varargin{:});
+            plot(x.data(), y.data(), varargin{:});
         end
 
     end
