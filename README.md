@@ -1,4 +1,5 @@
 # NEURON Toolbox for MATLAB
+[![View NEURON toolbox for MATLAB on File Exchange](https://www.mathworks.com/matlabcentral/images/matlab-file-exchange.svg)](https://www.mathworks.com/matlabcentral/fileexchange/135842-neuron-toolbox-for-matlab)
 
 > :warning: This toolbox has specific requirements depending on operating system
 > * Windows: Matlab R2022a or higher, MinGW compiler, and Administrator rights
