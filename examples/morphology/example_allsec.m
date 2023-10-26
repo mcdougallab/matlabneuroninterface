@@ -10,6 +10,7 @@ dend1.length = 37;
 clear dend1;  % Remove section.
 axon1 = n.Section("axon1");
 axon2 = n.Section("axon2");
+axon2 = n.Section("axon2");  % Overwrites previous section.
 axon2.length = 42;
 n.topology();
 

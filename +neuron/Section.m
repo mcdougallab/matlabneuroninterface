@@ -73,10 +73,12 @@ classdef Section < handle
         function delete(self)
         % Destroy the Section object.
         %   delete()
-            if ~clibIsNull(self.sec.prop) && self.owner
-                self.delete_nrn_sec();
-            elseif clibIsNull(self.sec.prop)
-                warning('Attempting to delete Section that was already deleted (' + self.name + ')');
+            if self.owner
+                if ~clibIsNull(self.sec.prop)
+                    self.delete_nrn_sec();
+                else
+                    warning('Attempting to delete Section that was already deleted (' + self.name + ')');
+                end
             end
         end
 
