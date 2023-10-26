@@ -6,7 +6,9 @@ classdef Section < handle
     properties (SetAccess=protected, GetAccess=public)
         mech_list   % List of allowed insertable mechanisms.
         range_list  % List of allowed range variables.
-        owner       % Set to false if Matlab section does not own Neuron section.
+        owner       % Set to false if Matlab section does not own Neuron section, 
+                    % i.e., if destroying the Matlab object should not
+                    % trigger C++ object destruction.
     end
     properties (Dependent)
         length      % Section length.
@@ -59,18 +61,22 @@ classdef Section < handle
             end
         end
         
+        function delete_nrn_sec(self)
+        % Destroy the Neuron Section.
+        %   delete_nrn_sec()
+            % clib.neuron.section_unref(self.sec);
+            self.push();
+            clib.neuron.hoc_oc("delete_section()");  % Annoyingly, this outputs '1' to the console.
+            % neuron.stack.pop_sections(1);
+        end
+
         function delete(self)
         % Destroy the Section object.
         %   delete()
             if ~clibIsNull(self.sec.prop) && self.owner
-                % clib.neuron.section_unref(self.sec);
-                self.push();
-                clib.neuron.hoc_oc("delete_section()");
-                 % neuron.stack.pop_sections(1);
+                self.delete_nrn_sec();
             elseif clibIsNull(self.sec.prop)
-                % Prop null; already deleted.
-            else
-                % Matlab object is not owner of C++ object.
+                warning('Attempting to delete Section that was already deleted (' + self.name + ')');
             end
         end
 
