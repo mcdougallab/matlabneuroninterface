@@ -8,9 +8,7 @@ n.hoc_oc("create soma");
 dend1 = n.Section("dend1");
 dend1.length = 37;
 clear dend1;  % Remove section.
-n.hoc_oc("create axon1");
-dend2 = n.Section("dend2");
-delete(dend2);  % Remove section.
+axon1 = n.Section("axon1");
 axon2 = n.Section("axon2");
 axon2.length = 42;
 n.topology();
@@ -40,9 +38,16 @@ sl.append(soma_new);
 sl.append(axon1_new);
 sl.append(axon2_new);
 
+% Removing a non-owner section does nothing.
+clear axon1_new;
+penultimate_sections = n.allsec(sl);
+for i=1:width(penultimate_sections)
+    disp(i + " " + penultimate_sections{i}.name);
+end
+
 % Remove a section; check that it does not show up in allsec(sl).
-delete(axon1_new);
-all_sections = n.allsec(sl);
-for i=1:width(all_sections)
-    disp(i + " " + all_sections{i}.name);
+clear axon1;
+ultimate_sections = n.allsec(sl);
+for i=1:width(ultimate_sections)
+    disp(i + " " + ultimate_sections{i}.name);
 end
