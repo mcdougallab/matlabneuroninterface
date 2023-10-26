@@ -1,4 +1,4 @@
-classdef Section
+classdef Section < handle
 % Section Class for manipulating Neuron sections.
     properties (Access=private)
         sec         % C++ Section object.
@@ -6,6 +6,7 @@ classdef Section
     properties (SetAccess=protected, GetAccess=public)
         mech_list   % List of allowed insertable mechanisms.
         range_list  % List of allowed range variables.
+        owner       % Set to false if Matlab section does not own Neuron section.
     end
     properties (Dependent)
         length      % Section length.
@@ -13,7 +14,7 @@ classdef Section
         name        % Name of the section.
     end
     methods
-        function self = Section(value)
+        function self = Section(value, owner)
         % Initialize a new Section by providing a name or Neuron section object.
         %   Section(name) 
         %   Section(cppobj)
@@ -27,6 +28,11 @@ classdef Section
                     self.sec = sec;
                 else
                     error("Invalid input for Section constructor.")
+                end
+                if exist('owner', 'var')
+                    self.owner = owner;
+                else
+                    self.owner = true;
                 end
                 self.mech_list = [];
                 self.range_list = [];
@@ -52,20 +58,19 @@ classdef Section
                 error("Initialize a Neuron session before making a Section.");
             end
         end
+        
         function delete(self)
         % Destroy the Section object.
-        %   delete_nrn_obj()
-            if (class(self.sec) == "clib.neuron.Section")
-                % clib.neuron.section_unref(self.sec);  % TODO: is this needed?
-                self.sec.refcount = self.sec.refcount - 1;
-                if self.sec.refcount == 0
-                    clib.neuron.nrn_pushsec(self.sec);
-                    clibRelease(self.sec);
-                    sym = clib.neuron.hoc_lookup("delete_section");
-                    clib.neuron.hoc_call_func(sym, 0);
-                    % It looks like delete_section already pops the section off the stack.
-                    % clib.neuron.nrn_sec_pop();
-                end
+        %   delete()
+            if ~clibIsNull(self.sec.prop) && self.owner
+                % clib.neuron.section_unref(self.sec);
+                self.push();
+                clib.neuron.hoc_oc("delete_section()");
+                 % neuron.stack.pop_sections(1);
+            elseif clibIsNull(self.sec.prop)
+                % Prop null; already deleted.
+            else
+                % Matlab object is not owner of C++ object.
             end
         end
 

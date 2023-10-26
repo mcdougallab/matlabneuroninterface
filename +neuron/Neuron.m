@@ -275,11 +275,13 @@ classdef Neuron < dynamicprops
         %   reset_sections()
             clib.neuron.hoc_oc("forall delete_section()");
         end
-        function all_sections = allsec(section_list)
+        function all_sections = allsec(section_list, owner)
         % Return cell array containing all sections, or all sections in a NEURON
         % SectionList section_list (optional).
+        % Boolean owner (optional, default: false).
         %   allsec()
         %   allsec(section_list)
+        %   allsec(section_list, true)
 
             % Deal with input.
             if ~exist('section_list', 'var') % No input: get SectionList of all Sections.
@@ -294,12 +296,16 @@ classdef Neuron < dynamicprops
                 end
             end
 
+            if ~exist('owner', 'var')
+                owner = false;
+            end
+
             section_iter = section_list.next;
             section = clib.neuron.get_hoc_item_element_sec(section_iter);
             if clibIsNull(section)
                 all_sections = {};
             else
-                all_sections = {neuron.Section(section)};
+                all_sections = {neuron.Section(section, owner)};
             
                 % Iterate using section_iter.next.
                 while true
@@ -315,7 +321,7 @@ classdef Neuron < dynamicprops
                             clib.neuron.section_unref(section);
                         else
                             % Valid section: append.
-                            all_sections{end+1} = neuron.Section(section);
+                            all_sections{end+1} = neuron.Section(section, owner);
                         end
                     end
                 end
