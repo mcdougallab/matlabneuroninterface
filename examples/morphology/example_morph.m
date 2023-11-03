@@ -57,6 +57,5 @@ branch1.info();
 
 % We are unhappy with branch2, so let's remove it.
 n.topology();
-delete(branch2);  % Remove from neuron.
-clear branch2;  % Remove from matlab.
+clear branch2;
 n.topology();
