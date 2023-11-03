@@ -17,9 +17,14 @@ classdef Section < handle
     end
     methods
         function self = Section(value, owner)
-        % Initialize a new Section by providing a name or Neuron section object.
+        % Initialize a new Section by providing a name or Neuron section
+        % object. The optional 'owner' argument is a boolean - if set to true
+        % (default value) the C++ Section object is destroyed upon
+        % destroying the Matlab Section; if set to false, the C++ Section
+        % is kept in place.
         %   Section(name) 
         %   Section(cppobj)
+        %   Section(cppobj, false)
             if clib.neuron.isinitialized()
                 % Check if input is a section name (string/char)
                 if (isa(value, "string") || isa(value, "char"))
@@ -77,7 +82,7 @@ classdef Section < handle
                 if ~clibIsNull(self.sec.prop)
                     self.delete_nrn_sec();
                 else
-                    warning('Attempting to delete Section that was already deleted (' + self.name + ')');
+                    warning('Attempting to delete Section that was already deleted.');
                 end
             end
         end
