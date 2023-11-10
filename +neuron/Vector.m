@@ -97,14 +97,13 @@ classdef Vector < neuron.Object
         % Access Vector data as Matlab doubles.
         %   arr = double()
         %   element = double(index)
-            vec_len = self.length();
-            vec_data = self.data();
             if nargin == 2
-                arr = vec_data(index);
+                arr = double(self.data(index));
             else
-                arr = zeros(1, vec_len);
-                for i=1:vec_len
-                    arr(i) = vec_data(i);
+                if self.length() > 0
+                    arr = double(self.data());
+                else
+                    arr = zeros(1, 0);
                 end
             end
         end
