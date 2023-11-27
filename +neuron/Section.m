@@ -69,10 +69,10 @@ classdef Section < handle
         function delete_nrn_sec(self)
         % Destroy the Neuron Section.
         %   delete_nrn_sec()
-            % clib.neuron.section_unref(self.sec);
+            % clib.neuron.section_unref(self.sec);  % Not necessary.
             self.push();
-            clib.neuron.hoc_oc("delete_section()");  % Annoyingly, this outputs '1' to the console.
-            % neuron.stack.pop_sections(1);
+            clib.neuron.hoc_oc("{delete_section()}");
+            % neuron.stack.pop_sections(1);  % Not necessary.
         end
 
         function delete(self)
