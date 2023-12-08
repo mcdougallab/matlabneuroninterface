@@ -1,6 +1,6 @@
 % Init neuron.
 clearvars -except testCase;  % Make sure testing params are not cleared.
-n = neuron.start_session();
+n = neuron.launch();
 n.reset_sections();
 
 % Make section.

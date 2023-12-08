@@ -1,6 +1,6 @@
 % Minimal Intfire2/IntFire4/NetStim/NetCon example.
 clearvars -except testCase;  % Make sure testing params are not cleared.
-n = neuron.start_session();
+n = neuron.launch();
 n.reset_sections();
 soma = n.Section("soma");
 

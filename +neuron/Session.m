@@ -147,7 +147,7 @@ classdef Session < dynamicprops
         %   Available functions are displayed using Neuron.list_function().
         %
         %   Getting/setting direct top-level variables is possible using:
-        %   n = neuron.start_session();
+        %   n = neuron.launch();
         %   n.t, n.dt, n.GAMMA, n.PHI, etc.
             try
                 [varargout{1:nargout}] = self.dynamic_call(S);

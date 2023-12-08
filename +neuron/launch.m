@@ -1,5 +1,5 @@
-function n = start_session()
+function n = launch()
 % Start a Neuron session.
-%   n = neuron.Session()
+%   n = neuron.launch()
     n = neuron.Session();
 end
