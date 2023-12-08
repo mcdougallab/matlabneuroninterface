@@ -1,6 +1,6 @@
 % Minimal Exp3Syn/CVode/n.celcius example.
 clearvars -except testCase;  % Make sure testing params are not cleared.
-n = neuron.start_session();
+n = neuron.launch();
 n.reset_sections();
 n.load_file('stdrun.hoc');
 

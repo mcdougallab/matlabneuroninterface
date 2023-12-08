@@ -73,10 +73,10 @@ Smaller example scripts are available at:
 ### Basic API usage
 
 The main Neuron class can be found at `neuron.Session`. A (singleton) 
-`neuron.Session` is returned upon calling the `neuron.start_session()` function.
+`neuron.Session` is returned upon calling the `neuron.launch()` function.
 
 ```matlab
-n = neuron.start_session();
+n = neuron.launch();
 ```
 
 Now all top-level variables, functions and classes can be accessed

@@ -2,7 +2,7 @@
 % Fixed for nrn9!
 clear;
 setup;
-n = neuron.start_session();
+n = neuron.launch();
 n.reset_sections();
 v = n.Vector(10);
 
