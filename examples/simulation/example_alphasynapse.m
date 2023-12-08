@@ -1,6 +1,6 @@
 % Minimal AlphaSynapse example.
 clearvars -except testCase;  % Make sure testing params are not cleared.
-n = neuron.Neuron();
+n = neuron.start_session();
 n.reset_sections();
 
 n.load_file('stdrun.hoc');

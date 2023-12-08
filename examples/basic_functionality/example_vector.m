@@ -3,7 +3,7 @@
 
 % Initialization.
 clearvars -except testCase;  % Make sure testing params are not cleared.
-n = neuron.Neuron();
+n = neuron.start_session();
 n.reset_sections();
 n.hoc_oc("create soma");
 n.topology();

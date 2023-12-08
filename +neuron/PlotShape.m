@@ -15,12 +15,12 @@ classdef PlotShape < neuron.Object
         %   data = get_plot_data()
 
             % Call n.define_shape() first
-            neuron.Neuron.call_func_hoc("define_shape", "double");
+            neuron.Session.call_func_hoc("define_shape", "double");
             data = {};
 
             spi = clib.neuron.get_plotshape_interface(self.obj);
             sl = spi.neuron_section_list();
-            secs = neuron.Neuron.allsec(sl);
+            secs = neuron.Session.allsec(sl);
 
             for i=1:numel(secs)
                 s = secs{i};
