@@ -203,6 +203,7 @@ classdef Section < handle
         %   nrnref = ref(rangevar, loc) 
             if any(strcmp(self.range_list, rangevar))
                 nrnref = clib.neuron.range_ref(self.sec, rangevar, loc);
+                nrnref = neuron.NrnRef(nrnref);
             else
                 warning("Range variable '"+rangevar+"' not found.");
                 disp("Available range variables:")

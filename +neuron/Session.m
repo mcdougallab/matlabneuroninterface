@@ -288,7 +288,7 @@ classdef Session < dynamicprops
         function nrnref = ref(sym)
         % Return an NrnRef containing a pointer to a top-level symbol (sym).
         %   nrnref = ref(sym)
-            nrnref = clib.neuron.ref(sym);
+            nrnref = neuron.NrnRef(clib.neuron.ref(sym));
         end
         function reset_sections()
         % Reset topology.

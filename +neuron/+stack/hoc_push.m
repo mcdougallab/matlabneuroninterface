@@ -10,7 +10,9 @@ function hoc_push(value)
     elseif isa(value, "neuron.Object")
         clib.neuron.hoc_push_object(value.obj);  
     elseif isa(value, "clib.neuron.Object")
-        clib.neuron.hoc_push_object(value);  
+        clib.neuron.hoc_push_object(value);
+    elseif isa(value, "neuron.NrnRef")
+        clib.neuron.matlab_hoc_pushpx(value.obj);
     elseif isa(value, "clib.neuron.NrnRef")
         clib.neuron.matlab_hoc_pushpx(value);
     elseif isa(value, "clib.type.nullptr")
