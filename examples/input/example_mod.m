@@ -1,6 +1,6 @@
 % Initialization.
 clearvars -except testCase;  % Make sure testing params are not cleared.
-n = neuron.Neuron();
+n = neuron.start_session();
 n.reset_sections();
 
 % If we try to find 'hd' mechanism here, we get:
