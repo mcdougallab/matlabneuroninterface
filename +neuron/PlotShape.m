@@ -11,42 +11,32 @@ classdef PlotShape < neuron.Object
         end
 
         function data = get_plot_data(self)
-        % Get PlotShape data; a cell array of structs with data to plot.
+        % Get PlotShape data; a array of structs with data to plot.
         %   data = get_plot_data()
 
             % Call n.define_shape() first
             neuron.Session.call_func_hoc("define_shape", "double");
-            data = {};
 
             spi = clib.neuron.get_plotshape_interface(self.obj);
             sl = spi.neuron_section_list();
             secs = neuron.Session.allsec(sl);
 
+            data = struct('x', {}, 'y', {}, 'z', {}, 'line_width', {}, 'color', {});
             for i=1:numel(secs)
                 s = secs{i};
 
-                len = s.get_plot_data_length();
-                section_plot_data = clib.neuron.get_section_plot_data(s.sec, len);
-                section_plot_data = reshape(section_plot_data, [], 9);
+                section_plot_data = double(clib.neuron.get_section_plot_data(s.sec));
+                section_plot_data = transpose(reshape(section_plot_data, 9, []));
 
-                % Plot between pt3ds, one pair at a time.
-                for k=1:size(section_plot_data, 1)
-                    x = [section_plot_data(k, 1) section_plot_data(k, 2)];
-                    y = [section_plot_data(k, 3) section_plot_data(k, 4)];
-                    z = [section_plot_data(k, 5) section_plot_data(k, 6)];
-                    d = [section_plot_data(k, 7) section_plot_data(k, 8)];
-                    v = section_plot_data(k, 9);
-                    plot_struct = struct;
-                    plot_struct.x = x;
-                    plot_struct.y = y;
-                    plot_struct.z = z;
-                    plot_struct.line_width = mean(d);
-                    plot_struct.color = [v, 0, 1-v];
-                    data{end+1} = plot_struct;
-                end
-                % end
+                x = [section_plot_data(:, 1) section_plot_data(:, 2)];
+                y = [section_plot_data(:, 3) section_plot_data(:, 4)];
+                z = [section_plot_data(:, 5) section_plot_data(:, 6)];
+                d = (section_plot_data(:, 7) + section_plot_data(:, 8)) / 2;
+                v = section_plot_data(:, 9);
+                plot_table = table(x, y, z, d, [v, zeros(size(v)), 1-v], 'VariableNames', {'x', 'y', 'z', 'line_width', 'color'}); 
+                plot_struct = table2struct(plot_table);
+                data = [data; plot_struct];
             end
-
         end
 
         function plot(self)
@@ -58,10 +48,12 @@ classdef PlotShape < neuron.Object
             spi = clib.neuron.get_plotshape_interface(self.obj);
 
             % Plot segments between 3d points.
+            % TODO: Do one plot3 call instead of in a loop
+            %       Can be difficult since each plot3 call needs a seperate line_width and / or color
             figure;
             hold on;
             for i=1:numel(data)
-                seg = data{i};
+                seg = data(i);
                 h = plot3(seg.x, seg.y, seg.z);
                 h.LineWidth = seg.line_width;
                 set(h, 'color', seg.color);

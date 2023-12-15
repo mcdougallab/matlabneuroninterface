@@ -1,4 +1,5 @@
 #include <string>
+#include <vector>
 #include "neuron_api_headers.h"
 
 class SavedState;
@@ -64,12 +65,12 @@ void set_secondorder(int);
 int get_secondorder(void);
 
 // Get pt3d functions
-double* get_x3d(Section* sec, int len);
-double* get_y3d(Section* sec, int len);
-double* get_z3d(Section* sec, int len);
-double* get_arc3d(Section* sec, int len);
-double* get_d3d(Section* sec, int len);
-double* get_section_plot_data(Section* sec, int len);
+std::vector<double> get_x3d(Section* sec);
+std::vector<double> get_y3d(Section* sec);
+std::vector<double> get_z3d(Section* sec);
+std::vector<double> get_arc3d(Section* sec);
+std::vector<double> get_d3d(Section* sec);
+std::vector<double> get_section_plot_data(Section* sec);
 
 // C++ Neuron functions directly accessible from MATLAB.
 #ifdef _WIN32

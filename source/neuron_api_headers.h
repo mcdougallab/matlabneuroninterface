@@ -352,6 +352,7 @@ typedef Point_process* (ppoptr_function)(Object*);
 typedef void (vsecptrd_function)(Section*, double);
 typedef Node* (nptrsecptrd_function)(Section*, double);
 typedef double* (dptrv_function)(void);
+typedef double (dsecptr_function)(Section*);
 typedef void (vitemptr_function)(hoc_Item*);
 
 typedef void (hoc_oop_ss)(Object**, Objectdata**, int*, Symlist**);

@@ -15,6 +15,7 @@
 
 // Import C++ name mangled functions.
 MANGLED vv_function delete_section;
+MANGLED dsecptr_function section_length;
 MANGLED initer_function ivocmain_session;
 MANGLED vsecptri_function mech_insert1;
 MANGLED voptrsptritemptrptri_function new_sections;
