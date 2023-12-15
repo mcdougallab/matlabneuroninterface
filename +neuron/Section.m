@@ -16,7 +16,7 @@ classdef Section < handle
         name        % Name of the section.
     end
     methods
-        function self = Section(value, owner)
+        function self = Section(value, owner, mech_list, range_list, is_initialized)
         % Initialize a new Section by providing a name or Neuron section
         % object. The optional 'owner' argument is a boolean - if set to true
         % (default value) the C++ Section object is destroyed upon
@@ -25,28 +25,37 @@ classdef Section < handle
         %   Section(name) 
         %   Section(cppobj)
         %   Section(cppobj, false)
-            if clib.neuron.isinitialized()
-                % Check if input is a section name (string/char)
-                if (isa(value, "string") || isa(value, "char"))
-                    name = value;
-                    self.sec = clib.neuron.new_section(name);
-                elseif isa(value, "clib.neuron.Section")
-                    sec = value;
-                    self.sec = sec;
-                else
-                    error("Invalid input for Section constructor.")
+            if ~(exist('is_initialized', 'var') && is_initialized)
+                if ~clib.neuron.isinitialized()
+                    error("Initialize a Neuron session before making a Section.");
                 end
-                if exist('owner', 'var')
-                    self.owner = owner;
-                else
-                    self.owner = true;
-                end
+            end
+
+            % Check if input is a section name (string/char)
+            if (isa(value, "string") || isa(value, "char"))
+                name = value;
+                self.sec = clib.neuron.new_section(name);
+            elseif isa(value, "clib.neuron.Section")
+                sec = value;
+                self.sec = sec;
+            else
+                error("Invalid input for Section constructor.")
+            end
+            if exist('owner', 'var')
+                self.owner = owner;
+            else
+                self.owner = true;
+            end
+            if exist('mech_list', 'var') & exist('range_list', 'var')
+                self.mech_list = mech_list;
+                self.range_list = range_list;
+            else
                 self.mech_list = [];
                 self.range_list = [];
 
                 arr = split(clib.neuron.get_nrn_functions(), ";");
                 arr = arr(1:end-1);
-    
+
                 % Add dynamic mechanisms and range variables.
                 % See: doc/DEV_README.md#neuron-types
                 for i=1:length(arr)
@@ -60,9 +69,6 @@ classdef Section < handle
                         self.mech_list = [self.mech_list var(1)];
                     end
                 end
-
-            else
-                error("Initialize a Neuron session before making a Section.");
             end
         end
         

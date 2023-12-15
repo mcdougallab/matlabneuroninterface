@@ -321,7 +321,7 @@ classdef Neuron < dynamicprops
                             clib.neuron.section_unref(section);
                         else
                             % Valid section: append.
-                            all_sections{end+1} = neuron.Section(section, owner);
+                            all_sections{end+1} = neuron.Section(section, owner, all_sections{1}.mech_list, all_sections{1}.range_list, true);
                         end
                     end
                 end
