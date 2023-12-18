@@ -25,7 +25,7 @@ classdef PlotShape < neuron.Object
             for i=1:numel(secs)
                 s = secs{i};
 
-                section_plot_data = double(clib.neuron.get_section_plot_data(s.sec));
+                section_plot_data = double(clib.neuron.get_section_plot_data(s.sec, spi));
                 section_plot_data = transpose(reshape(section_plot_data, 9, []));
 
                 x = [section_plot_data(:, 1) section_plot_data(:, 2)];

@@ -70,7 +70,7 @@ std::vector<double> get_y3d(Section* sec);
 std::vector<double> get_z3d(Section* sec);
 std::vector<double> get_arc3d(Section* sec);
 std::vector<double> get_d3d(Section* sec);
-std::vector<double> get_section_plot_data(Section* sec);
+std::vector<double> get_section_plot_data(Section* sec, ShapePlotInterface* spi);
 
 // C++ Neuron functions directly accessible from MATLAB.
 #ifdef _WIN32

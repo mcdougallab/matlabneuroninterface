@@ -295,10 +295,6 @@ classdef Section < handle
             clib.neuron.hoc_call_func(sym, 0);
             clib.neuron.nrn_sec_pop();
         end
-        function value = get_plot_data_length(self)
-            npt3d = self.sec.npt3d;
-            value = (npt3d - 1) * 9;
-        end
         function pt3d = get_pt3d(self)
         % Get all 3D point information; returns a 5xN matrix for N 3D
         % points, with rows [x, y, z, arc, d].

@@ -381,7 +381,7 @@ std::vector<double> get_segment_arc(Section* sec, double low, double high) {
     return result;
 }
 
-std::vector<double> get_section_plot_data(Section* sec) {
+std::vector<double> get_section_plot_data(Section* sec, ShapePlotInterface* spi) {
     auto result = std::vector<double>();
 
     size_t n_segments = sec->nnode - 1;
@@ -396,10 +396,16 @@ std::vector<double> get_section_plot_data(Section* sec) {
     for (size_t i = 0; i < n_segments; i++) {
         double x_lo = (double) i / n_segments;
         double x_hi = (double) (i + 1) / n_segments;
+        double x = (double) (i + 0.5) / n_segments;
         x_lo *= sec_length;
         x_hi *= sec_length;
 
         auto segment_arc = get_segment_arc(sec, x_lo, x_hi);
+
+        double seg_value = *nrn_rangepointer(sec, hoc_lookup(spi->varname()), x);
+        seg_value = seg_value - spi->low();
+        seg_value = seg_value / (spi->high() - spi->low());
+        seg_value = std::min(std::max(seg_value, 0.), 1.);
 
         for (size_t j = 0; j < segment_arc.size() - 1; j++) {
             result.push_back(interp1(arcs, xs, segment_arc[j]));
@@ -410,7 +416,7 @@ std::vector<double> get_section_plot_data(Section* sec) {
             result.push_back(interp1(arcs, zs, segment_arc[j + 1]));
             result.push_back(interp1(arcs, ds, segment_arc[j]));
             result.push_back(interp1(arcs, ds, segment_arc[j + 1]));
-            result.push_back(1);
+            result.push_back(seg_value);
         }
     }
 
