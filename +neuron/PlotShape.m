@@ -11,7 +11,7 @@ classdef PlotShape < neuron.Object
         end
 
         function data = get_plot_data(self)
-        % Get PlotShape data; a array of structs with data to plot.
+        % Get PlotShape data; a table with data to plot.
         %   data = get_plot_data()
 
             % Call n.define_shape() first
@@ -21,7 +21,7 @@ classdef PlotShape < neuron.Object
             sl = spi.neuron_section_list();
             secs = neuron.Session.allsec(sl);
 
-            data = struct('x', {}, 'y', {}, 'z', {}, 'line_width', {}, 'color', {});
+            data = [];
             for i=1:numel(secs)
                 s = secs{i};
 
@@ -34,8 +34,7 @@ classdef PlotShape < neuron.Object
                 d = (section_plot_data(:, 7) + section_plot_data(:, 8)) / 2;
                 v = section_plot_data(:, 9);
                 plot_table = table(x, y, z, d, [v, zeros(size(v)), 1-v], 'VariableNames', {'x', 'y', 'z', 'line_width', 'color'}); 
-                plot_struct = table2struct(plot_table);
-                data = [data; plot_struct];
+                data = [data; plot_table];
             end
         end
 
@@ -52,11 +51,11 @@ classdef PlotShape < neuron.Object
             %       Can be difficult since each plot3 call needs a seperate line_width and / or color
             figure;
             hold on;
-            for i=1:numel(data)
-                seg = data(i);
+            for i=1:size(data, 1)
+                seg = data(i, :);
                 h = plot3(seg.x, seg.y, seg.z);
                 h.LineWidth = seg.line_width;
-                set(h, 'color', seg.color);
+                h.Color = seg.color;
             end
 
             % Equal aspect ration for x,y,z.
