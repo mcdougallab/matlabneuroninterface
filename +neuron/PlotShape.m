@@ -33,9 +33,17 @@ classdef PlotShape < neuron.Object
                 z = [section_plot_data(:, 5) section_plot_data(:, 6)];
                 d = (section_plot_data(:, 7) + section_plot_data(:, 8)) / 2;
                 v = section_plot_data(:, 9);
-                plot_table = table(x, y, z, d, [v, zeros(size(v)), 1-v], 'VariableNames', {'x', 'y', 'z', 'line_width', 'color'}); 
+                plot_table = table(x, y, z, d, v, 'VariableNames', {'x', 'y', 'z', 'line_width', 'color'}); 
                 data = [data; plot_table];
             end
+
+            % Normalize color value
+            data.color = data.color - spi.low();
+            data.color = data.color / (spi.high() - spi.low());
+            data.color = min(max(data.color, 0), 1);
+
+            % Turn color value into rgb array
+            data.color = [data.color, zeros(size(data.color)), 1-data.color];
         end
 
         function plot(self)

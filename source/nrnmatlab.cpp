@@ -406,9 +406,6 @@ std::vector<double> get_section_plot_data(Section* sec, ShapePlotInterface* spi)
         auto segment_arc = get_segment_arc(sec, x_lo, x_hi);
 
         double seg_value = *nrn_rangepointer(sec, hoc_lookup(spi->varname()), x);
-        seg_value = seg_value - spi->low();
-        seg_value = seg_value / (spi->high() - spi->low());
-        seg_value = std::min(std::max(seg_value, 0.), 1.);
 
         for (size_t j = 0; j < segment_arc.size() - 1; j++) {
             result.push_back(interpolate_arrays(arcs, xs, segment_arc[j]));
