@@ -345,11 +345,14 @@ std::vector<double> get_d3d(Section* sec) {
     return result;
 }
 
-double lerp(double a, double b, double f) {
+// Linearly interpolates between a and b, extrapolates if f is outside the range [0, 1].
+// Added since we don't use c++ 20 or above where we could use:
+// https://en.cppreference.com/w/cpp/numeric/lerp
+double linearly_interpolate(double a, double b, double f) {
     return a + f * (b - a);
 }
 
-double interp1(std::vector<double> xs, std::vector<double> ys, double v) {
+double interpolate_arrays(std::vector<double> xs, std::vector<double> ys, double v) {
     auto xs_iter = xs.begin() + 1;
 
     while(v > *xs_iter) {
@@ -360,7 +363,7 @@ double interp1(std::vector<double> xs, std::vector<double> ys, double v) {
     auto b = ys.begin() + (xs_iter - xs.begin());
     double f = (v - *(xs_iter - 1)) / (*xs_iter - *(xs_iter - 1));
 
-    return lerp(*a, *b, f);
+    return linearly_interpolate(*a, *b, f);
 }
 
 std::vector<double> get_segment_arc(Section* sec, double low, double high) {
@@ -408,14 +411,14 @@ std::vector<double> get_section_plot_data(Section* sec, ShapePlotInterface* spi)
         seg_value = std::min(std::max(seg_value, 0.), 1.);
 
         for (size_t j = 0; j < segment_arc.size() - 1; j++) {
-            result.push_back(interp1(arcs, xs, segment_arc[j]));
-            result.push_back(interp1(arcs, xs, segment_arc[j + 1]));
-            result.push_back(interp1(arcs, ys, segment_arc[j]));
-            result.push_back(interp1(arcs, ys, segment_arc[j + 1]));
-            result.push_back(interp1(arcs, zs, segment_arc[j]));
-            result.push_back(interp1(arcs, zs, segment_arc[j + 1]));
-            result.push_back(interp1(arcs, ds, segment_arc[j]));
-            result.push_back(interp1(arcs, ds, segment_arc[j + 1]));
+            result.push_back(interpolate_arrays(arcs, xs, segment_arc[j]));
+            result.push_back(interpolate_arrays(arcs, xs, segment_arc[j + 1]));
+            result.push_back(interpolate_arrays(arcs, ys, segment_arc[j]));
+            result.push_back(interpolate_arrays(arcs, ys, segment_arc[j + 1]));
+            result.push_back(interpolate_arrays(arcs, zs, segment_arc[j]));
+            result.push_back(interpolate_arrays(arcs, zs, segment_arc[j + 1]));
+            result.push_back(interpolate_arrays(arcs, ds, segment_arc[j]));
+            result.push_back(interpolate_arrays(arcs, ds, segment_arc[j + 1]));
             result.push_back(seg_value);
         }
     }
