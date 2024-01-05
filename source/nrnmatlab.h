@@ -99,7 +99,9 @@ class NrnRef { /* Holds a pointer to a double. */
         double* ref;
         NrnRef(double* x);
         void set(double x);
+        void set_index(double x, size_t ind);
         double get();
+        double get_index(size_t ind);
 };
 
 // State

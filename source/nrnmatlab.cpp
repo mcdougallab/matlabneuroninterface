@@ -269,6 +269,12 @@ NrnRef::NrnRef(double* x) {
 void NrnRef::set(double x) {
     *(this->ref) = x;
 }
+void NrnRef::set_index(double x, size_t ind) {
+    *(this->ref + ind) = x;
+}
 double NrnRef::get() {
     return *(this->ref);
+}
+double NrnRef::get_index(size_t ind) {
+    return *(this->ref + ind);
 }
