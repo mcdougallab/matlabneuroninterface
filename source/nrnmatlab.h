@@ -97,7 +97,9 @@ MANGLED char* secname(Section*);
 class NrnRef { /* Holds a pointer to a double. */
     public:
         double* ref;
+        size_t n_elements;
         NrnRef(double* x);
+        NrnRef(double* x, size_t size);
         void set(double x);
         void set_index(double x, size_t ind);
         double get();

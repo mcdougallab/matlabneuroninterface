@@ -265,16 +265,32 @@ void SavedState::restore() {
 // Helper class for MATLAB interface.
 NrnRef::NrnRef(double* x) {
     this->ref = x;
+    this->n_elements = 1;
+}
+NrnRef::NrnRef(double* x, size_t size) {
+    this->ref = x;
+    this->n_elements = size;
 }
 void NrnRef::set(double x) {
     *(this->ref) = x;
 }
 void NrnRef::set_index(double x, size_t ind) {
-    *(this->ref + ind) = x;
+    if (ind < this->n_elements) {
+        *(this->ref + ind) = x;
+    } else {
+        char* err = (char*)"ERROR: index out of bounds";
+        mlprint(2, err);
+    }
 }
 double NrnRef::get() {
     return *(this->ref);
 }
 double NrnRef::get_index(size_t ind) {
-    return *(this->ref + ind);
+    if (ind < this->n_elements) {
+        return *(this->ref + ind);
+    } else {
+        char* err = (char*)"ERROR: index out of bounds";
+        mlprint(2, err);
+        return 0;
+    }
 }
