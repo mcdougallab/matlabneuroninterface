@@ -32,18 +32,35 @@ classdef Segment < handle
 
         function varargout = subsref(self, S)
         % Call a class method or dynamic property.
-            % Is the provided method listed above?
-            if ismethod(self, S(1).subs)
-                [varargout{1:nargout}] = builtin('subsref', self, S);
-            % Are we trying to directly access a class property?
-            elseif (isa(S(1).subs, "char") && length(S) == 1 && isprop(self, S(1).subs))
-                [varargout{1:nargout}] = self.(S(1).subs);
-            % If not a class property, return a Section range ref
-            elseif (isa(S(1).subs, "char") && length(S) == 1)
-                ref = self.ref(S(1).subs);
-                [varargout{1:nargout}] = ref.get();
-            else
-                warning("Section."+string(S(1).subs)+" not found.")
+            n_processed = 1;
+            if S(1).type == "."
+                if numel(S) > 1
+                    % Is the provided method listed above?
+                    if ismethod(self, S(1).subs)
+                        [varargout{1:nargout}] = builtin('subsref', self, S(1:2));
+                        n_processed = 2;
+                    % Are we trying to directly access a class property?
+                    elseif isprop(self, S(1).subs)
+                        [varargout{1:nargout}] = self.(S(1).subs);
+                    % If not a class property, return a Section range ref
+                    else
+                        ref = self.ref(S(1).subs);
+                        [varargout{1:nargout}] = ref.get();
+                    end
+                else
+                    % Are we trying to directly access a class property?
+                    if isprop(self, S(1).subs)
+                        [varargout{1:nargout}] = self.(S(1).subs);
+                    % If not a class property, return a Section range ref
+                    else
+                        ref = self.ref(S(1).subs);
+                        [varargout{1:nargout}] = ref.get();
+                    end
+                end
+            end
+            if numel(S) > n_processed
+                % Deal with a method/attribute call chain.
+                [varargout{1:nargout}] = varargout{:}.subsref(S(n_processed+1:end));
             end
         end
 
