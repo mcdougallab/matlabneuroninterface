@@ -1,5 +1,6 @@
 classdef Session < dynamicprops
-% Neuron Class for initializing a Neuron session and running generic Neuron functions.
+% Class for initializing a Neuron session and running generic Neuron
+% functions. Initialize using neuron.launch().
 
     properties (SetAccess=protected, GetAccess=public)
         var_list        % List of top-level Neuron variables.
@@ -10,7 +11,7 @@ classdef Session < dynamicprops
         null            % clib.type.nullptr
     end
 
-    methods
+    methods(Hidden)
         function self = Session()
         % Initialize the neuron session, if it has not been initialized before.
         %   Session()
@@ -19,6 +20,8 @@ classdef Session < dynamicprops
             self.fill_dynamic_props();
             self.null = clib.type.nullptr;
         end
+    end
+    methods
         function fill_dynamic_props(self)
         % Fill var_list, fn_double_list, fn_string_list, object_list with dynamic variables, functions and objects.
         %   fill_dynamic_props()
