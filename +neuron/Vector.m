@@ -44,7 +44,7 @@ classdef Vector < neuron.Object
             % Are we trying to access a Vector element?
             if (length(S) == 1 && S(1).type == "()")
                 element_id = S(1).subs{:};
-                if length(self) > 0
+                if self.length() > 0
                     [varargout{1:nargout}] = self.data(element_id);
                 else
                     error("Trying to access element of empty Vector.")

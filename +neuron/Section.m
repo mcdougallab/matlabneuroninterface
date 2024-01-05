@@ -107,32 +107,36 @@ classdef Section < handle
             % S(1).subs is method (or property) name;
             % S(2).subs is a cell array containing arguments.
 
-            % Is the provided method listed above?
-            if ismethod(self, S(1).subs)
-                [varargout{1:nargout}] = builtin('subsref', self, S);
-            % Are we trying to directly access a class property?
-            elseif (isa(S(1).subs, "char") && length(S) == 1 && isprop(self, S(1).subs))
-                [varargout{1:nargout}] = self.(S(1).subs);
-            % Are we trying to get a Segment by using ()-indexing?
-            elseif (S(1).type == "()")
-                x = S(1).subs{:};
-                seg = neuron.Segment(self, x);
-                % TODO: fix the following in a less ugly way.
-                if length(S) == 1
-                    [varargout{1:nargout}] = seg;
-                elseif length(S) == 2
-                    % Allow getting a Segment property directly after
-                    % creating it.
-                    [varargout{1:nargout}] = seg.(S(2).subs);
-                elseif length(S) == 3
-                    % Allow calling a Segment method directly after
-                    % creating it.
-                    [varargout{1:nargout}] = seg.(S(2).subs)(S(3).subs{:});
+
+            n_processed = 1;  % Number of elements of S to process.
+            if S(1).type == "."
+                if numel(S) > 1
+                    % Is the provided method listed above?
+                    if ismethod(self, S(1).subs)
+                        [varargout{1:nargout}] = builtin('subsref', self, S(1:2));
+                        n_processed = 2;
+                    % Are we trying to directly access a class property?
+                    elseif isprop(self, S(1).subs)
+                        [varargout{1:nargout}] = self.(S(1).subs);
+                    else
+                        warning("Section."+string(S(1).subs)+" not found.")
+                    end
                 else
-                    error("Arbitrarily deep chained method calls not (yet) possible.")
+                    % Are we trying to directly access a class property?
+                    if isprop(self, S(1).subs)
+                        [varargout{1:nargout}] = self.(S(1).subs);
+                    else
+                        warning("Section."+string(S(1).subs)+" not found.")
+                    end
                 end
-            else
-                warning("Section."+string(S(1).subs)+" not found.")
+            % Are we trying to get a Segment by using ()-indexing?
+            elseif S(1).type == "()"
+                x = S(1).subs{:};
+                [varargout{1:nargout}] = neuron.Segment(self, x);
+            end
+            if numel(S) > n_processed
+                % Deal with a method/attribute call chain.
+                [varargout{1:nargout}] = varargout{:}.subsref(S(n_processed+1:end));
             end
         end
         function arr = segment_locations(self, endpoints)
