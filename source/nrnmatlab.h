@@ -23,6 +23,7 @@ std::string get_class_methods(const char* class_name);
 // Vector object.
 int get_vector_capacity(Object* vec);
 const double* get_vector_vec(Object* vec, int len);
+NrnRef* get_vector_ref(Object* vec, size_t len);
 
 // Pushing/popping objects onto/from the stack.
 void matlab_hoc_pushpx(NrnRef* nrnref);

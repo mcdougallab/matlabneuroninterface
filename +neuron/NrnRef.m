@@ -5,6 +5,9 @@ classdef NrnRef < handle
     properties (SetAccess=protected, GetAccess=public)
         obj             % C++ NrnRef object.
     end
+    properties (Dependent)
+        length          % Data length.
+    end
     
     methods
         function self = NrnRef(obj)
@@ -32,8 +35,11 @@ classdef NrnRef < handle
                 self.obj.set(value);
             end
         end
-        function value = length(self)
+        function value = get.length(self)
             value = self.obj.n_elements;
+        end
+        function self = set.length(self, n)
+            self.obj.n_elements = n;
         end
         % Allow for access by index.
         function varargout = subsref(self, S)
