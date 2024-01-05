@@ -154,26 +154,48 @@ classdef Object < dynamicprops
             % S(2).subs is a cell array containing arguments.
             method = S(1).subs;
 
-            % Is the provided method listed above?
-            if ismethod(self, method)
-                [varargout{1:nargout}] = builtin('subsref', self, S);
-            % Are we trying to directly access a class property?
-            elseif (isa(method, "char") && length(S) == 1 && isprop(self, method))
-                [varargout{1:nargout}] = self.(method);
-            % Are we trying to directly access a class property array?
-            elseif (isa(method, "char") && length(S) == 2 && isprop(self, method))
-                [varargout{1:nargout}] = self.(method)(S(2).subs{:});
-            % Is this method present in the HOC lookup table, and does it return a double?
-            elseif any(strcmp(self.mt_double_list, method))
-                [varargout{1:nargout}] = call_method_hoc(self, method, "double", S(2).subs{:});
-            % Is this method present in the HOC lookup table, and does it return an object?
-            elseif any(strcmp(self.mt_object_list, method))
-                [varargout{1:nargout}] = call_method_hoc(self, method, "Object", S(2).subs{:});  
-            % Is this method present in the HOC lookup table, and does it return a string?
-            elseif any(strcmp(self.mt_string_list, method))
-                [varargout{1:nargout}] = call_method_hoc(self, method, "string", S(2).subs{:});
-            else
-                warning("'"+string(method)+"': not found; call Object.list_methods() to see all available methods.")
+            n_processed = 2;  % Number of elements of S to process.
+            if S(1).type == "."
+                if numel(S) > 1
+                    % Is the provided method listed above?
+                    if ismethod(self, method)
+                        [varargout{1:nargout}] = builtin('subsref', self, S(1:2));
+                    % Are we trying to directly access a class property array element?
+                    elseif ((S(2).type == "()") && isprop(self, method))
+                        [varargout{1:nargout}] = self.(method)(S(2).subs{:});
+                    % Are we trying to directly access a class property?
+                    elseif isprop(self, method)
+                        [varargout{1:nargout}] = self.(method);
+                        n_processed = 1;
+                    % Is this method present in the HOC lookup table, and does it return a double?
+                    elseif any(strcmp(self.mt_double_list, method))
+                        [varargout{1:nargout}] = call_method_hoc(self, method, "double", S(2).subs{:});
+                    % Is this method present in the HOC lookup table, and does it return an object?
+                    elseif any(strcmp(self.mt_object_list, method))
+                        [varargout{1:nargout}] = call_method_hoc(self, method, "Object", S(2).subs{:});  
+                    % Is this method present in the HOC lookup table, and does it return a string?
+                    elseif any(strcmp(self.mt_string_list, method))
+                        [varargout{1:nargout}] = call_method_hoc(self, method, "string", S(2).subs{:});
+                    % If none of the above, throw error.
+                    else
+                        error("'"+string(func)+"': not found; call Object.list_methods() " + ...
+                              "to see all available methods and attributes.")
+                    end
+                else
+                    % Are we trying to directly access a class property?
+                    if isprop(self, method)
+                        [varargout{1:nargout}] = self.(method);
+                        n_processed = 1;
+                    % If none of the above, throw error.
+                    else
+                        error("'"+string(func)+"': not found; call Object.list_methods() " + ...
+                              "to see all available methods and attributes.")
+                    end
+                end
+            end
+            if numel(S) > n_processed
+                % Deal with a method/attribute call chain.
+                [varargout{1:nargout}] = varargout{:}.subsref(S(n_processed+1:end));
             end
         end
 
