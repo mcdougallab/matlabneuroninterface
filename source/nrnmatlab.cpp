@@ -304,6 +304,7 @@ double NrnRef::get_index(size_t ind) {
     } else {
         throw std::out_of_range("NrnRef index out of bounds");
     }
+}
 
 std::vector<double> get_x3d(Section* sec) {
     auto result = std::vector<double>(sec->npt3d);
@@ -483,4 +484,21 @@ void setup_nrnmatlab() {
     sym->u.u_proc->defn.pf = nrnmatlab;
     sym->u.u_proc->nauto = 0;
     sym->u.u_proc->nobjauto = 0;
+}
+
+std::vector<double> get_plot_data(ShapePlotInterface* spi) {
+    auto result = std::vector<double>();
+
+    auto section_iterator = section_list->next;
+    while (true) {
+        auto section = get_hoc_item_element_sec(section_iterator);
+        if (section == NULL) break;
+
+        auto sec_plot_data = get_section_plot_data(section, spi);
+        result.insert(result.end(), sec_plot_data.begin(), sec_plot_data.end());
+
+        section_iterator = section_iterator->next;
+    }
+
+    return result;
 }

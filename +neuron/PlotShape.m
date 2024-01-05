@@ -18,24 +18,16 @@ classdef PlotShape < neuron.Object
             neuron.Session.call_func_hoc("define_shape", "double");
 
             spi = clib.neuron.get_plotshape_interface(self.obj);
-            sl = spi.neuron_section_list();
-            secs = neuron.Session.allsec(sl);
 
-            data = [];
-            for i=1:numel(secs)
-                s = secs{i};
+            section_plot_data = double(clib.neuron.get_plot_data(spi));
+            section_plot_data = transpose(reshape(section_plot_data, 9, []));
 
-                section_plot_data = double(clib.neuron.get_section_plot_data(s.sec, spi));
-                section_plot_data = transpose(reshape(section_plot_data, 9, []));
-
-                x = [section_plot_data(:, 1) section_plot_data(:, 2)];
-                y = [section_plot_data(:, 3) section_plot_data(:, 4)];
-                z = [section_plot_data(:, 5) section_plot_data(:, 6)];
-                d = (section_plot_data(:, 7) + section_plot_data(:, 8)) / 2;
-                v = section_plot_data(:, 9);
-                plot_table = table(x, y, z, d, v, 'VariableNames', {'x', 'y', 'z', 'line_width', 'color'}); 
-                data = [data; plot_table];
-            end
+            x = [section_plot_data(:, 1) section_plot_data(:, 2)];
+            y = [section_plot_data(:, 3) section_plot_data(:, 4)];
+            z = [section_plot_data(:, 5) section_plot_data(:, 6)];
+            d = (section_plot_data(:, 7) + section_plot_data(:, 8)) / 2;
+            v = section_plot_data(:, 9);
+            data = table(x, y, z, d, v, 'VariableNames', {'x', 'y', 'z', 'line_width', 'color'}); 
 
             % Normalize color value
             data.color = data.color - spi.low();
@@ -59,20 +51,24 @@ classdef PlotShape < neuron.Object
             %       Can be difficult since each plot3 call needs a seperate line_width and / or color
             figure;
             hold on;
+            cellData = {};
             for i=1:size(data, 1)
                 seg = data(i, :);
-                h = plot3(seg.x, seg.y, seg.z);
-                h.LineWidth = seg.line_width;
-                h.Color = seg.color;
+                cellData{end+1} = seg.x;
+                cellData{end+1} = seg.y;
+                cellData{end+1} = seg.z;
             end
 
-            % Equal aspect ration for x,y,z.
-            h = get(gca,'DataAspectRatio');
-            if h(3)==1
-                set(gca,'DataAspectRatio',[1 1 1/max(h(1:2))])
-            else
-                set(gca,'DataAspectRatio',[1 1 h(3)])
+            l = plot3(cellData{:});
+
+            for i=1:size(data, 1)
+                seg = data(i, :);
+                l(i).Color = seg.color;
+                l(i).LineWidth = seg.line_width;
             end
+
+            % Equal aspect ratio for x,y,z.
+            set(gca, 'DataAspectRatio', [1 1 1])
             xlabel('x');
             ylabel('y');
             zlabel('z');

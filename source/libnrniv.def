@@ -1,5 +1,6 @@
 EXPORTS
 _Z11hoc_installPKcidPP7Symlist
+_Z14section_lengthP7Section
 _Z14delete_sectionv
 _Z16ivocmain_sessioniPPKcS1_i
 _Z12mech_insert1P7Sectioni
