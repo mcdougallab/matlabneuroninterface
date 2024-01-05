@@ -54,6 +54,12 @@ classdef Vector < neuron.Object
             end
         end
 
+        function nrnref = ref(self)
+        % Get reference to vector data.
+        %   nrnref = ref()
+            nrnref = neuron.NrnRef(clib.neuron.get_vector_ref(self.obj, self.length()));
+        end
+
         function vec = get_vec(self)
         % Access C++ Vector object.
         %   vec = get_vec()

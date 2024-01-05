@@ -132,6 +132,12 @@ const double* get_vector_vec(Object* vec, int len){
     return vector_vec(vec->u.this_pointer);
 }
 
+// Get Vector ref.
+NrnRef* get_vector_ref(Object* vec, size_t len){
+    NrnRef* ref = new NrnRef(vector_vec(vec->u.this_pointer), len);
+    return ref;
+}
+
 // Pushing/popping objects onto/from the stack.
 void matlab_hoc_pushpx(NrnRef* nrnref) {
     hoc_pushpx(nrnref->ref);

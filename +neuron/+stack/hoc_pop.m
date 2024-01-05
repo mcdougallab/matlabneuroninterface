@@ -7,7 +7,12 @@ function value = hoc_pop(returntype)
         value = clib.neuron.matlab_hoc_strpop();
     elseif (returntype=="Object")
         obj = clib.neuron.matlab_hoc_objpop();
-        value = neuron.Object(obj);
+        objtype = obj.ctemplate.sym.name;
+        if objtype == "Vector"
+            value = neuron.Vector(obj);
+        else
+            value = neuron.Object(obj);
+        end
     elseif (returntype=="void")
         % For procedures returning nothing.
         value = 1.0;
