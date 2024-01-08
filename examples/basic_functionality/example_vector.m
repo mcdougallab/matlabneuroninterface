@@ -55,3 +55,7 @@ disp("Vector from list:");
 disp(v2.double());
 disp(v2(end));
 disp("----------");
+
+% Chained method call.
+v2_max = v2.append(10).append(11).append(12).max();
+disp(v2_max);

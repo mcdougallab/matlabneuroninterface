@@ -47,8 +47,15 @@ classdef NrnRef < handle
                 [varargout{1:nargout}] = self.get(S(1).subs{:});
                 n_processed = 1;
             elseif S(1).type == "."
-                [varargout{1:nargout}] = builtin('subsref', self, S(1:2));
-                n_processed = 2;
+                % Are we calling a built in class method?
+                if ismethod(self, S(1).subs)
+                    [varargout{1:nargout}] = builtin('subsref', self, S(1:2));
+                    n_processed = 2;
+                % Are we trying to directly access a class property?
+                elseif isprop(self, S(1).subs)
+                    [varargout{1:nargout}] = self.(S(1).subs);
+                    n_processed = 1;
+                end
             end
             if numel(S) > n_processed
                 % Deal with a method/attribute call chain.
