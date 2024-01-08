@@ -41,6 +41,14 @@ classdef NrnRef < handle
         function self = set.length(self, n)
             self.obj.n_elements = n;
         end
+        function sz = size(self)
+            x = 1;
+            y = self.length;
+            sz = [x y];
+        end
+        function value = numel(self)
+            value = self.length;
+        end
         % Allow for access by index.
         function varargout = subsref(self, S)
             if S(1).type == "()"
