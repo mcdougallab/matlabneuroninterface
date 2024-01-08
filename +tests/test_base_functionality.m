@@ -23,9 +23,10 @@ classdef test_base_functionality < matlab.unittest.TestCase
             testCase.verifyEqual(v(11), 5, "RelTol", testCase.tol);
             % Asserts for second vector.
             testCase.verifyClass(v2, "neuron.Vector");
-            testCase.verifyEqual(length(v2), 6);
             testCase.verifyEqual(v2(2), 1, "RelTol", testCase.tol);
             testCase.verifyEqual(v2(6), 5.3, "RelTol", testCase.tol);
+            testCase.verifyEqual(length(v2), 9);
+            testCase.verifyEqual(v2_max, 12, "RelTol", testCase.tol);
         end
 
     end
