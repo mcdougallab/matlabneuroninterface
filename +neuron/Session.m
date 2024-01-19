@@ -11,7 +11,7 @@ classdef Session < dynamicprops
         null            % clib.type.nullptr
     end
 
-    methods(Hidden)
+    methods(Access=private)
         function self = Session()
         % Initialize the neuron session, if it has not been initialized before.
         %   Session()
@@ -214,7 +214,21 @@ classdef Session < dynamicprops
         end
 
     end
-    methods(Static)
+    methods(Static)   
+        % Check if a Session already exists. If so, return it; if not, make
+        % a new Session.
+        function self = instance()
+            % mlock;  % TODO: mlock would prevent clearing the object on
+            %         % "clear all", but we currently have no destructor 
+            %         % to do an munlock (see issue #95).
+            persistent uniqueInstance
+            if isempty(uniqueInstance)
+                self = neuron.Session();
+                uniqueInstance = self;
+            else
+                self = uniqueInstance;
+            end
+        end
         function value = call_func_hoc(func, returntype, varargin)
         % Call function by passing function name (func) to HOC lookup, along with its return type (returntype) and arguments (varargin).
         %   value = call_func_hoc(func, returntype, varargin)
