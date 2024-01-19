@@ -32,31 +32,24 @@ classdef Segment < handle
 
         function varargout = subsref(self, S)
         % Call a class method or dynamic property.
-            n_processed = 1;
             if S(1).type == "."
-                if numel(S) > 1
-                    % Is the provided method listed above?
-                    if ismethod(self, S(1).subs)
-                        [varargout{1:nargout}] = builtin('subsref', self, S(1:2));
-                        n_processed = 2;
-                    % Are we trying to directly access a class property?
-                    elseif isprop(self, S(1).subs)
-                        [varargout{1:nargout}] = self.(S(1).subs);
-                    % If not a class property, return a Section range ref
-                    else
-                        ref = self.ref(S(1).subs);
-                        [varargout{1:nargout}] = ref.get();
-                    end
+                % Are we trying to directly access a class property?
+                if isprop(self, S(1).subs)
+                    [varargout{1:nargout}] = self.(S(1).subs);
+                    n_processed = 1;  % Number of elements of S to process.
+                % Is the provided method listed above?
+                elseif numel(S) > 1 && ismethod(self, S(1).subs)
+                    [varargout{1:nargout}] = builtin('subsref', self, S(1:2));
+                    n_processed = 2;  % Number of elements of S to process.
+                % If not a class property, return a Section range ref
                 else
-                    % Are we trying to directly access a class property?
-                    if isprop(self, S(1).subs)
-                        [varargout{1:nargout}] = self.(S(1).subs);
-                    % If not a class property, return a Section range ref
-                    else
-                        ref = self.ref(S(1).subs);
-                        [varargout{1:nargout}] = ref.get();
-                    end
+                    ref = self.ref(S(1).subs);
+                    [varargout{1:nargout}] = ref.get();
+                    n_processed = 1;  % Number of elements of S to process.
                 end
+            % Other indexing types ({} or ()) not supported.
+            else
+                error("Indexing type "+S(1).type+" not supported.");
             end
             if numel(S) > n_processed
                 % Deal with a method/attribute call chain.

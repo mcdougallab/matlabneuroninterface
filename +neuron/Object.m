@@ -154,19 +154,19 @@ classdef Object < dynamicprops
             % S(2).subs is a cell array containing arguments.
             method = S(1).subs;
 
-            n_processed = 2;  % Number of elements of S to process.
             if S(1).type == "."
                 if numel(S) > 1
+                    n_processed = 2;  % Number of elements of S to process.
                     % Is the provided method listed above?
                     if ismethod(self, method)
                         [varargout{1:nargout}] = builtin('subsref', self, S(1:2));
                     % Are we trying to directly access a class property array element?
                     elseif ((S(2).type == "()") && isprop(self, method))
                         [varargout{1:nargout}] = self.(method)(S(2).subs{:});
-                    % Are we trying to directly access a class property?
+                    % Are we trying to directly access a class property in a chained call?
                     elseif isprop(self, method)
                         [varargout{1:nargout}] = self.(method);
-                        n_processed = 1;
+                        n_processed = 1;  % Number of elements of S to process.
                     % Is this method present in the HOC lookup table, and does it return a double?
                     elseif any(strcmp(self.mt_double_list, method))
                         [varargout{1:nargout}] = call_method_hoc(self, method, "double", S(2).subs{:});
@@ -192,6 +192,9 @@ classdef Object < dynamicprops
                               "to see all available methods and attributes.")
                     end
                 end
+            % Other indexing types ({} or ()) not supported.
+            else
+                error("Indexing type "+S(1).type+" not supported.");
             end
             if numel(S) > n_processed
                 % Deal with a method/attribute call chain.

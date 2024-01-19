@@ -94,16 +94,16 @@ classdef Session < dynamicprops
             % S(2).subs is a cell array containing arguments.
             func = S(1).subs;
 
-            n_processed = 2;  % Number of elements of S to process.
             if S(1).type == "."
-                if numel(S) > 1
-                    % Are we trying to directly access a Matlab defined property?
-                    if isprop(self, func)
-                        [varargout{1:nargout}] = self.(func);
-                        n_processed = 1;
+                % Are we trying to directly access a Matlab defined property?
+                if isprop(self, func)
+                    [varargout{1:nargout}] = self.(func);
+                    n_processed = 1;  % Number of elements of S to process.
+                elseif numel(S) > 1
+                    n_processed = 2;  % Number of elements of S to process.
                     % Check for special type "Section";
                     % the special types "Vector" and "PlotShape" are checked in self.hoc_new_obj().
-                    elseif (func == "Section")
+                    if (func == "Section")
                         name = S(2).subs{1};
                         [varargout{1:nargout}] = neuron.Section(name);
                     % Is the provided function listed as a Neuron class method?
@@ -121,22 +121,19 @@ classdef Session < dynamicprops
                     % Is this method present in the HOC lookup table, and does it return a string?
                     elseif any(strcmp(self.fn_string_list, func))
                         [varargout{1:nargout}] = self.call_func_hoc(func, "string", S(2).subs{:});
-                    % If none of the above, throw error.
                     else
+                        % If none of the above, throw error.
                         error("'"+string(func)+"': not found; call Neuron.list_functions() " + ...
                               "to see all available methods and attributes.")
                     end
                 else
-                    % Are we trying to directly access a Matlab defined property?
-                    if isprop(self, func)
-                        [varargout{1:nargout}] = self.(func);
-                        n_processed = 1;
                     % If none of the above, throw error.
-                    else
-                        error("'"+string(func)+"': not found; call Neuron.list_functions() " + ...
-                              "to see all available methods and attributes.")
-                    end
+                    error("'"+string(func)+"': not found; call Neuron.list_functions() " + ...
+                          "to see all available methods and attributes.")
                 end
+            else
+                % Other indexing types ({} or ()) not supported.
+                error("Indexing type "+S(1).type+" not supported.");
             end
             if numel(S) > n_processed
                 % Deal with a method/attribute call chain.
