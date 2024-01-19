@@ -108,31 +108,30 @@ classdef Section < handle
             % S(2).subs is a cell array containing arguments.
 
 
-            n_processed = 1;  % Number of elements of S to process.
             if S(1).type == "."
-                if numel(S) > 1
+                % Are we trying to directly access a class property?
+                if isprop(self, S(1).subs)
+                    [varargout{1:nargout}] = self.(S(1).subs);
+                    n_processed = 1;  % Number of elements of S to process.
+                elseif numel(S) > 1
                     % Is the provided method listed above?
                     if ismethod(self, S(1).subs)
                         [varargout{1:nargout}] = builtin('subsref', self, S(1:2));
-                        n_processed = 2;
-                    % Are we trying to directly access a class property?
-                    elseif isprop(self, S(1).subs)
-                        [varargout{1:nargout}] = self.(S(1).subs);
+                        n_processed = 2;  % Number of elements of S to process.
                     else
-                        warning("Section."+string(S(1).subs)+" not found.")
+                        error("Section."+string(S(1).subs)+" not found.")
                     end
                 else
-                    % Are we trying to directly access a class property?
-                    if isprop(self, S(1).subs)
-                        [varargout{1:nargout}] = self.(S(1).subs);
-                    else
-                        warning("Section."+string(S(1).subs)+" not found.")
-                    end
+                    error("Section."+string(S(1).subs)+" not found.")
                 end
             % Are we trying to get a Segment by using ()-indexing?
             elseif S(1).type == "()"
                 x = S(1).subs{:};
                 [varargout{1:nargout}] = neuron.Segment(self, x);
+                n_processed = 1;  % Number of elements of S to process.
+            % Other indexing types ({}) not supported.
+            else
+                error("Indexing type "+S(1).type+" not supported.");
             end
             if numel(S) > n_processed
                 % Deal with a method/attribute call chain.
@@ -255,7 +254,7 @@ classdef Section < handle
             clib.neuron.hoc_call_func(sym, 4);
             neuron.stack.pop_sections(1);
         end
-        function self = set.length(self, val)
+        function set.length(self, val)
         % Set length of Section.
             clib.neuron.set_dparam(self.sec, 2, val);
             clib.neuron.nrn_length_change(self.sec, val);
