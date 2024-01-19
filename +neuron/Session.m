@@ -137,7 +137,13 @@ classdef Session < dynamicprops
             end
             if numel(S) > n_processed
                 % Deal with a method/attribute call chain.
-                [varargout{1:nargout}] = varargout{:}.subsref(S(n_processed+1:end));
+                if numel(varargout) == 1
+                    [varargout{1:nargout}] = varargout{:}.subsref(S(n_processed+1:end));
+                elseif numel(varargout) == 0
+                    error("Cannot run chained method call on empty method output.");
+                else
+                    error("Cannot run chained method call on multiple method outputs.");
+                end
             end
 
         end
