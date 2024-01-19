@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <cstring>
 #include <string>
+#include <stdexcept>
 #include "neuron_api_headers.h"
 #include "neuron_dllimports.h"
 #include "nrnmatlab.h"
@@ -284,8 +285,7 @@ void NrnRef::set_index(double x, size_t ind) {
     if (ind < this->n_elements) {
         *(this->ref + ind) = x;
     } else {
-        char* err = (char*)"ERROR: index out of bounds";
-        mlprint(2, err);
+        throw std::out_of_range("NrnRef index out of bounds");
     }
 }
 double NrnRef::get() {
@@ -295,8 +295,6 @@ double NrnRef::get_index(size_t ind) {
     if (ind < this->n_elements) {
         return *(this->ref + ind);
     } else {
-        char* err = (char*)"ERROR: index out of bounds";
-        mlprint(2, err);
-        return 0;
+        throw std::out_of_range("NrnRef index out of bounds");
     }
 }
