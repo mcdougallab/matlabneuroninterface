@@ -27,8 +27,8 @@ classdef NrnRef < handle
         end
         function self = set(self, value, ind)
         % Set value.
-        %   value = set()
-        %   value = set(index)
+        %   set(value)
+        %   set(value, index)
             if exist('ind', 'var')
                 self.obj.set_index(value, ind - 1);
             else
@@ -56,7 +56,7 @@ classdef NrnRef < handle
                 n_processed = 1;
             elseif S(1).type == "."
                 % Are we calling a built in class method?
-                if ismethod(self, S(1).subs)
+                if numel(S) > 1 && ismethod(self, S(1).subs)
                     [varargout{1:nargout}] = builtin('subsref', self, S(1:2));
                     n_processed = 2;
                 % Are we trying to directly access a class property?
