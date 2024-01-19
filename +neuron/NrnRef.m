@@ -38,7 +38,7 @@ classdef NrnRef < handle
         function value = get.length(self)
             value = self.obj.n_elements;
         end
-        function self = set.length(self, n)
+        function set.length(self, n)
             self.obj.n_elements = n;
         end
         function sz = size(self)
