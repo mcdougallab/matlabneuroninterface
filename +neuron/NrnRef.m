@@ -63,24 +63,23 @@ classdef NrnRef < handle
                 elseif isprop(self, S(1).subs)
                     [varargout{1:nargout}] = self.(S(1).subs);
                     n_processed = 1;
-                end
-            end
-            if numel(S) > n_processed
-                % Deal with a method/attribute call chain.
-                if numel(varargout) == 1
-                    [varargout{1:nargout}] = varargout{:}.subsref(S(n_processed+1:end));
-                elseif numel(varargout) == 0
-                    error("Cannot run chained method call on empty method output.");
                 else
-                    error("Cannot run chained method call on multiple method outputs.");
+                    error("Method/property "+S(1).subs+" not recognized.");
                 end
+            else
+                % Other indexing type ({}) not supported.
+                error("Indexing type "+S(1).type+" not supported.");
             end
+            [varargout{1:nargout}] = neuron.chained_method(varargout, S, n_processed);
         end
         function self = subsasgn(self, S, varargin)
             if S(1).type == "()"
                 self.set(varargin{:}, S(1).subs{:});
             elseif S(1).type == "."
                 self = builtin('subsasgn', self, S, varargin{:});
+            else
+                % Other indexing type ({}) not supported.
+                error("Indexing type "+S(1).type+" not supported.");
             end
         end
     end
