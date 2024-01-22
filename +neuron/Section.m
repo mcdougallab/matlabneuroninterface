@@ -133,16 +133,7 @@ classdef Section < handle
             else
                 error("Indexing type "+S(1).type+" not supported.");
             end
-            if numel(S) > n_processed
-                % Deal with a method/attribute call chain.
-                if numel(varargout) == 1
-                    [varargout{1:nargout}] = varargout{:}.subsref(S(n_processed+1:end));
-                elseif numel(varargout) == 0
-                    error("Cannot run chained method call on empty method output.");
-                else
-                    error("Cannot run chained method call on multiple method outputs.");
-                end
-            end
+            [varargout{1:nargout}] = neuron.chained_method(varargout, S, n_processed);
         end
         function arr = segment_locations(self, endpoints)
         % Return array of all section segment locations; set endpoints 

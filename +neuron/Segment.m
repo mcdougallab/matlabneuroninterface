@@ -41,26 +41,19 @@ classdef Segment < handle
                 elseif numel(S) > 1 && ismethod(self, S(1).subs)
                     [varargout{1:nargout}] = builtin('subsref', self, S(1:2));
                     n_processed = 2;  % Number of elements of S to process.
-                % If not a class property, return a Section range ref
-                else
+                % Is it a Section range ref?
+                elseif any(strcmp(self.parent_sec.range_list, S(1).subs))
                     ref = self.ref(S(1).subs);
                     [varargout{1:nargout}] = ref.get();
                     n_processed = 1;  % Number of elements of S to process.
+                else
+                    error("Method/property "+S(1).subs+" not recognized.");
                 end
             % Other indexing types ({} or ()) not supported.
             else
                 error("Indexing type "+S(1).type+" not supported.");
             end
-            if numel(S) > n_processed
-                % Deal with a method/attribute call chain.
-                if numel(varargout) == 1
-                    [varargout{1:nargout}] = varargout{:}.subsref(S(n_processed+1:end));
-                elseif numel(varargout) == 0
-                    error("Cannot run chained method call on empty method output.");
-                else
-                    error("Cannot run chained method call on multiple method outputs.");
-                end
-            end
+            [varargout{1:nargout}] = neuron.chained_method(varargout, S, n_processed);
         end
 
         function self = subsasgn(self, S, varargin)
