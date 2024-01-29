@@ -250,7 +250,7 @@ classdef Session < dynamicprops
             catch e
                 value = NaN;
                 warning(e.message);
-                warning("'"+string(func)+"': number or type of arguments incorrect.");
+                warning("'"+string(func)+"': caught error during call to Neuron function.");
                 state.restore();
             end
             clibRelease(state);
