@@ -98,7 +98,7 @@ classdef Object < dynamicprops
                 neuron.stack.pop_sections(nsecs);
             catch e
                 warning(e.message);
-                warning("'"+string(method)+"': number or type of arguments incorrect.");
+                warning("'"+string(method)+"': caught error during call to Neuron function.");
                 value = NaN;
                 state.restore();
             end
