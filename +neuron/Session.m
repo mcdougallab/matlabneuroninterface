@@ -229,6 +229,8 @@ classdef Session < dynamicprops
             else
                 self = uniqueInstance;
             end
+        function quit()
+            warn("Quit on Neuron is not implemented. Close the Matlab session instead.");
         end
         function value = call_func_hoc(func, returntype, varargin)
         % Call function by passing function name (func) to HOC lookup, along with its return type (returntype) and arguments (varargin).
