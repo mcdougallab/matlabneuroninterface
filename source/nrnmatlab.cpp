@@ -334,3 +334,22 @@ Object* create_FInitializeHandler(int type, const char* func_name, const char* i
     auto ps = hoc_newobj1(hoc_lookup("FInitializeHandler"), n_args);
     return ps;
 }
+
+void nrnmatlab() {
+    std::string command = hoc_gargstr(1);
+    char* command_c = const_cast<char*>(command.c_str());
+
+    int status = mexEvalString(command_c);
+
+    hoc_ret();
+    hoc_pushx(status);
+}
+
+void setup_nrnmatlab() {
+    const int function_type = 280;
+    Symbol* sym;
+    sym = hoc_install("nrnmatlab", function_type, 0, &hoc_top_level_symlist);
+    sym->u.u_proc->defn.pf = nrnmatlab;
+    sym->u.u_proc->nauto = 0;
+    sym->u.u_proc->nobjauto = 0;
+}

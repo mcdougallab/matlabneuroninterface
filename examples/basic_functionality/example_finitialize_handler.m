@@ -11,7 +11,7 @@ disp("-------------------")
 disp("Changes to 47")
 disp("-------------------")
 
-a = neuron.FInitializeHandler(@set_0_833_to_47);
+a = n.FInitializeHandler(@set_0_833_to_47);
 n.finitialize(-65);
 sec.info()
 
@@ -19,7 +19,7 @@ disp("-------------------")
 disp("Changes to 47 and to 20")
 disp("-------------------")
 
-b = neuron.FInitializeHandler(2, @set_0_166_to_20);
+b = n.FInitializeHandler(2, @set_0_166_to_20);
 n.finitialize(-65);
 sec.info();
 
