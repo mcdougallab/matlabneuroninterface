@@ -37,6 +37,7 @@ classdef PlotShape < neuron.Object
 
         function plot(self, cmap)
         % Plot PlotShape data.
+        % With cmap as the colormap.
         %   plot()
 
             % Get data.
@@ -44,8 +45,6 @@ classdef PlotShape < neuron.Object
             spi = clib.neuron.get_plotshape_interface(self.obj);
 
             % Plot segments between 3d points.
-            % TODO: Do one plot3 call instead of in a loop
-            %       Can be difficult since each plot3 call needs a seperate line_width and / or color
             figure;
             hold on;
             cellData = {};
