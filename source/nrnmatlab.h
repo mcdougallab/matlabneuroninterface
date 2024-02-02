@@ -57,6 +57,7 @@ Section* get_hoc_item_element_sec(hoc_Item*);
 hoc_Item* get_obj_u_this_pointer(Object*);
 ShapePlotInterface* get_plotshape_interface(Object*);
 Object* create_FInitializeHandler(int type, const char* func_name, const char* instance_id);
+void setup_nrnmatlab();
 
 // Special case: set/get n.secondorder.
 void set_secondorder(int);

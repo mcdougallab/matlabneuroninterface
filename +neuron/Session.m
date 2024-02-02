@@ -106,6 +106,8 @@ classdef Session < dynamicprops
                     if (func == "Section")
                         name = S(2).subs{1};
                         [varargout{1:nargout}] = neuron.Section(name);
+                    elseif (func == "FInitializeHandler")
+                        [varargout{1:nargout}] = neuron.FInitializeHandler(S(2).subs{:});
                     % Is the provided function listed as a Neuron class method?
                     elseif ismethod(self, func)
                         [varargout{1:nargout}] = builtin('subsref', self, S(1:2));
