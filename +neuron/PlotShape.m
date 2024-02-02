@@ -33,12 +33,9 @@ classdef PlotShape < neuron.Object
             data.color = data.color - spi.low();
             data.color = data.color / (spi.high() - spi.low());
             data.color = min(max(data.color, 0), 1);
-
-            % Turn color value into rgb array
-            data.color = [data.color, zeros(size(data.color)), 1-data.color];
         end
 
-        function plot(self)
+        function plot(self, cmap)
         % Plot PlotShape data.
         %   plot()
 
@@ -59,11 +56,17 @@ classdef PlotShape < neuron.Object
                 cellData{end+1} = seg.z;
             end
 
+            if nargin < 2
+                cmap = colormap;
+            end
+            values = table2array(data(:, 'color'));
+            indices = round(interp1(linspace(0, 1, length(cmap)), 1:length(cmap), values, 'linear', 'extrap'));
+
             l = plot3(cellData{:});
 
             for i=1:size(data, 1)
                 seg = data(i, :);
-                l(i).Color = seg.color;
+                l(i).Color = cmap(indices(i), :);
                 l(i).LineWidth = seg.line_width;
             end
 
