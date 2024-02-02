@@ -4,7 +4,7 @@ disp("Initial state")
 disp("-------------------")
 global sec
 sec = n.Section("my_section");
-clib.neuron.nrn_change_nseg(sec.sec, 3);
+sec.nseg = 3;
 sec.info();
 
 disp("-------------------")
