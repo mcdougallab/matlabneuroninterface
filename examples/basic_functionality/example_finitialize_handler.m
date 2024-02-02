@@ -23,6 +23,16 @@ b = neuron.FInitializeHandler(2, @set_0_166_to_20);
 n.finitialize(-65);
 sec.info();
 
+delete(a);
+delete(b);
+
+disp("-------------------")
+disp("No changes since objects have been deleted")
+disp("-------------------")
+
+n.finitialize(-65);
+sec.info();
+
 function set_0_833_to_47()
     global sec;
     sec_v = sec.ref("v", 0.833333);
