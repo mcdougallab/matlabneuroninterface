@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <cstdio>
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
@@ -14,6 +15,9 @@
 // We cannot include mex.h with clib, because during build will give
 // "error Using MATLAB Data API with C Matrix API is not supported."
 extern "C" int mexPrintf(const char *message, ...);
+
+// Declare mexEvalString
+extern "C" int mexEvalString(const char *command);
 
 // Define ivocmain_session input.
 static const char* argv[] = {"nrn_test", "-nogui", "-nopython", NULL};
@@ -291,10 +295,42 @@ void NrnRef::set_index(double x, size_t ind) {
 double NrnRef::get() {
     return *(this->ref);
 }
+
 double NrnRef::get_index(size_t ind) {
     if (ind < this->n_elements) {
         return *(this->ref + ind);
     } else {
         throw std::out_of_range("NrnRef index out of bounds");
     }
+
+void finitialize_callback() {
+    std::string instance_id = hoc_gargstr(1);
+    std::string command = "neuron.FInitializeHandler.handlers(" + instance_id + ")";
+    char* command_c = const_cast<char*>(command.c_str());
+
+    mexEvalString(command_c);
+
+    hoc_ret();
+    hoc_pushx(0);
+}
+
+Object* create_FInitializeHandler(int type, const char* func_name, const char* instance_id) {
+    // Register the function with NEURON
+    const int function_type = 280;
+    Symbol* sym;
+    sym = hoc_install(func_name, function_type, 0, &hoc_top_level_symlist);
+    sym->u.u_proc->defn.pf = finitialize_callback;
+    sym->u.u_proc->nauto = 0;
+    sym->u.u_proc->nobjauto = 0;
+
+    std::string command = func_name;
+    std::string id = instance_id;
+    command += "(\"" + id + "\")";
+    char* command_c = const_cast<char*>(command.c_str());
+
+    int n_args = 2;
+    hoc_pushx(type);
+    hoc_pushstr(&command_c);
+    auto ps = hoc_newobj1(hoc_lookup("FInitializeHandler"), n_args);
+    return ps;
 }
