@@ -1,3 +1,3 @@
-n = neuron.Neuron();
+n = neuron.launch();
 
 n.nrnmatlab("version");

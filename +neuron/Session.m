@@ -116,7 +116,7 @@ classdef Session < dynamicprops
                         if clibConfiguration("neuron").ExecutionMode ~= "inprocess"
                             error("Neuron has to be run inprocess to be able to run nrnmatlab");
                         end
-                        [varargout{1:nargout}] = neuron.nrnmatlab(S(1).subs{:});
+                        [varargout{1:nargout}] = self.call_func_hoc(func, "void", S(2).subs{:});
                     % Is the provided function listed as a Neuron class method?
                     elseif ismethod(self, func)
                         [varargout{1:nargout}] = builtin('subsref', self, S(1:2));
@@ -229,6 +229,7 @@ classdef Session < dynamicprops
             else
                 self = uniqueInstance;
             end
+        end
         function value = call_func_hoc(func, returntype, varargin)
         % Call function by passing function name (func) to HOC lookup, along with its return type (returntype) and arguments (varargin).
         %   value = call_func_hoc(func, returntype, varargin)

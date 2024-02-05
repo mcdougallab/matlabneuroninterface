@@ -1,4 +1,4 @@
-n = neuron.Neuron();
+n = neuron.launch();
 
 disp("Initial state")
 disp("-------------------")
