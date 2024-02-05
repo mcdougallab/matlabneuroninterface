@@ -1,4 +1,5 @@
 EXPORTS
+_Z11hoc_installPKcidPP7Symlist
 _Z14delete_sectionv
 _Z16ivocmain_sessioniPPKcS1_i
 _Z12mech_insert1P7Sectioni
@@ -15,6 +16,7 @@ _Z16nrn_rangepointerP7SectionP6Symbold
 _Z15nrn_change_nsegP7Sectioni
 _Z17nrn_length_changeP7Sectiond
 _Z10nrn_popsecv
+_Z11hoc_gargstri
 _Z11nrn_pushsecP7Section
 _Z11nrn_sec_popv
 _Z13hoc_call_funcP6Symboli

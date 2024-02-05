@@ -203,7 +203,6 @@ classdef Session < dynamicprops
         %   set_secondorder(propname, value)
             clib.neuron.set_secondorder(value);
         end
-
     end
     methods(Static)   
         % Check if a Session already exists. If so, return it; if not, make
@@ -219,7 +218,6 @@ classdef Session < dynamicprops
             else
                 self = uniqueInstance;
             end
-        end
         function value = call_func_hoc(func, returntype, varargin)
         % Call function by passing function name (func) to HOC lookup, along with its return type (returntype) and arguments (varargin).
         %   value = call_func_hoc(func, returntype, varargin)
