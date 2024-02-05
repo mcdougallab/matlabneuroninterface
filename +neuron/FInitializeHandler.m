@@ -7,6 +7,10 @@ classdef FInitializeHandler < handle
     end
     methods
         function self = FInitializeHandler(type_or_func_handle, func_handle)
+            if clibConfiguration("neuron").ExecutionMode ~= "inprocess"
+                error("Neuron has to be run inprocess to be able to instantiate FInitializeHandler");
+            end
+
             persistent instance_id
             if isempty(instance_id) 
                 instance_id = 0;
