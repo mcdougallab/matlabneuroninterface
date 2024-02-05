@@ -10,6 +10,10 @@ function value = hoc_pop(returntype)
         objtype = obj.ctemplate.sym.name;
         if objtype == "Vector"
             value = neuron.Vector(obj);
+        elseif objtype == "PlotShape"
+            value = neuron.PlotShape(obj);
+        elseif objtype == "RangeVarPlot"
+            value = neuron.RangeVarPlot(obj);
         else
             value = neuron.Object(obj);
         end
