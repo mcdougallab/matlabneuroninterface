@@ -19,6 +19,10 @@ classdef Session < dynamicprops
             clib.neuron.initialize();
             self.fill_dynamic_props();
             self.null = clib.type.nullptr;
+
+            if clibConfiguration("neuron").ExecutionMode == "inprocess"
+                clib.neuron.setup_nrnmatlab();
+            end
         end
     end
     methods
@@ -108,6 +112,11 @@ classdef Session < dynamicprops
                         [varargout{1:nargout}] = neuron.Section(name);
                     elseif (func == "FInitializeHandler")
                         [varargout{1:nargout}] = neuron.FInitializeHandler(S(2).subs{:});
+                    elseif (func == "nrnmatlab")
+                        if clibConfiguration("neuron").ExecutionMode ~= "inprocess"
+                            error("Neuron has to be run inprocess to be able to run nrnmatlab");
+                        end
+                        [varargout{1:nargout}] = neuron.nrnmatlab(S(1).subs{:});
                     % Is the provided function listed as a Neuron class method?
                     elseif ismethod(self, func)
                         [varargout{1:nargout}] = builtin('subsref', self, S(1:2));
