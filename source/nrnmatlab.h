@@ -63,6 +63,14 @@ void setup_nrnmatlab();
 void set_secondorder(int);
 int get_secondorder(void);
 
+// Get pt3d functions
+double* get_x3d(Section* sec, int len);
+double* get_y3d(Section* sec, int len);
+double* get_z3d(Section* sec, int len);
+double* get_arc3d(Section* sec, int len);
+double* get_d3d(Section* sec, int len);
+double* get_section_plot_data(Section* sec, int len);
+
 // C++ Neuron functions directly accessible from MATLAB.
 #ifdef _WIN32
 #define MANGLED __declspec(dllimport)

@@ -303,6 +303,74 @@ double NrnRef::get_index(size_t ind) {
     } else {
         throw std::out_of_range("NrnRef index out of bounds");
     }
+
+double* get_x3d(Section* sec, int len) {
+    double* result = new double[sec->npt3d];
+    for (size_t i = 0; i < sec->npt3d; i++) {
+        result[i] = sec->pt3d[i].x;
+    }
+    return result;
+}
+
+double* get_y3d(Section* sec, int len) {
+    double* result = new double[sec->npt3d];
+    for (size_t i = 0; i < sec->npt3d; i++) {
+        result[i] = sec->pt3d[i].y;
+    }
+    return result;
+}
+
+double* get_z3d(Section* sec, int len) {
+    double* result = new double[sec->npt3d];
+    for (size_t i = 0; i < sec->npt3d; i++) {
+        result[i] = sec->pt3d[i].z;
+    }
+    return result;
+}
+
+double* get_arc3d(Section* sec, int len) {
+    double* result = new double[sec->npt3d];
+    for (size_t i = 0; i < sec->npt3d; i++) {
+        result[i] = sec->pt3d[i].arc;
+    }
+    return result;
+}
+
+double* get_d3d(Section* sec, int len) {
+    double* result = new double[sec->npt3d];
+    for (size_t i = 0; i < sec->npt3d; i++) {
+        result[i] = sec->pt3d[i].d;
+    }
+    return result;
+}
+
+double* get_section_plot_data(Section* sec, int len) {
+    int n = sec->npt3d - 1;
+    double* result = new double[n * 9];
+
+    // TODO: Add interpolation and segment usage
+    // Defined in section.h implemented in:
+    // https://github.com/neuronsimulator/nrn/blob/master/src/nrnoc/cabcode.cpp#L367
+    // double secLength = section_length(sec);
+
+    // for (size_t i = 0; i < sec->nnode; i++) {
+        // double* segment = nullptr;
+        // double x_lo = segment[0] * secLength;
+        // double x_hi = segment[sec->nnode - 1] * secLength;
+    // }
+
+    for (size_t j = 0; j < sec->npt3d - 1; j++) {
+        result[j + 0 * n] = sec->pt3d[j].x;
+        result[j + 1 * n] = sec->pt3d[j + 1].x;
+        result[j + 2 * n] = sec->pt3d[j].y;
+        result[j + 3 * n] = sec->pt3d[j + 1].y;
+        result[j + 4 * n] = sec->pt3d[j].z;
+        result[j + 5 * n] = sec->pt3d[j + 1].z;
+        result[j + 6 * n] = sec->pt3d[j].d;
+        result[j + 7 * n] = sec->pt3d[j + 1].d;
+        result[j + 8 * n] = 1;
+    }
+    return result;
 }
 
 // Used as hoc function with void return type and instance_id: string.

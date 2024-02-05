@@ -25,51 +25,26 @@ classdef PlotShape < neuron.Object
             for i=1:numel(secs)
                 s = secs{i};
 
-                % Get all 3D point information.
-                pt3d = s.get_pt3d();
+                len = s.get_plot_data_length();
+                section_plot_data = clib.neuron.get_section_plot_data(s.sec, len);
+                section_plot_data = reshape(section_plot_data, [], 9);
 
-                % Get total section length and arc points.
-                dx = double(s.length);
-                arc3d = pt3d(4, :);
-
-                % Iterate over segments.
-                segments = s.segments();
-                for j=1:s.nseg
-                    % Get start, pt3ds and end point for each segment.
-                    seg = segments{j};
-                    [x_lo, x_hi] = seg.get_bounds();
-                    x_lo = x_lo * dx;
-                    x_hi = x_hi * dx;
-                    seg_arc_arr = arc3d(arc3d(:) > x_lo & arc3d(:) < x_hi);
-                    seg_arc_arr = [x_lo seg_arc_arr x_hi];
-
-                    % Interpolate x,y,z,d for each point in seg_arc_arr.
-                    seg_x3d_arr = interp1_arr(pt3d(4, :), pt3d(1, :), seg_arc_arr);
-                    seg_y3d_arr = interp1_arr(pt3d(4, :), pt3d(2, :), seg_arc_arr);
-                    seg_z3d_arr = interp1_arr(pt3d(4, :), pt3d(3, :), seg_arc_arr);
-                    seg_d3d_arr = interp1_arr(pt3d(4, :), pt3d(5, :), seg_arc_arr);
-
-                    % Find value of selected quantity for this segment.
-                    var = spi.varname();
-                    seg_value = s.ref(var, seg.x).get();
-                    seg_value_rel = seg_value - spi.low();
-                    seg_value_rel = seg_value_rel  / (spi.high() - spi.low());
-                    seg_value_rel = min(max(seg_value_rel, 0), 1);
-                    
-                    % Plot between pt3ds, one pair at a time.
-                    for k=1:numel(seg_arc_arr)-1
-                        x = [seg_x3d_arr(k) seg_x3d_arr(k+1)];
-                        y = [seg_y3d_arr(k) seg_y3d_arr(k+1)];
-                        z = [seg_z3d_arr(k) seg_z3d_arr(k+1)];
-                        plot_struct = struct;
-                        plot_struct.x = x;
-                        plot_struct.y = y;
-                        plot_struct.z = z;
-                        plot_struct.line_width = (seg_d3d_arr(k) + seg_d3d_arr(k+1))/2;
-                        plot_struct.color = [seg_value_rel, 0, 1-seg_value_rel];
-                        data{end+1} = plot_struct;
-                    end
+                % Plot between pt3ds, one pair at a time.
+                for k=1:size(section_plot_data, 1)
+                    x = [section_plot_data(k, 1) section_plot_data(k, 2)];
+                    y = [section_plot_data(k, 3) section_plot_data(k, 4)];
+                    z = [section_plot_data(k, 5) section_plot_data(k, 6)];
+                    d = [section_plot_data(k, 7) section_plot_data(k, 8)];
+                    v = section_plot_data(k, 9);
+                    plot_struct = struct;
+                    plot_struct.x = x;
+                    plot_struct.y = y;
+                    plot_struct.z = z;
+                    plot_struct.line_width = mean(d);
+                    plot_struct.color = [v, 0, 1-v];
+                    data{end+1} = plot_struct;
                 end
+                % end
             end
 
         end
