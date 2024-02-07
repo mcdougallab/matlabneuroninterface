@@ -47,21 +47,13 @@ classdef PlotShape < neuron.Object
             % Plot segments between 3d points.
             figure;
             hold on;
-            cellData = {};
-            for i=1:size(data, 1)
-                seg = data(i, :);
-                cellData{end+1} = seg.x;
-                cellData{end+1} = seg.y;
-                cellData{end+1} = seg.z;
-            end
-
             if nargin < 2
                 cmap = colormap;
             end
             values = table2array(data(:, 'color'));
             indices = round(interp1(linspace(0, 1, length(cmap)), 1:length(cmap), values, 'linear', 'extrap'));
 
-            l = plot3(cellData{:});
+            l = plot3(transpose(data.x), transpose(data.y), transpose(data.z));
 
             for i=1:size(data, 1)
                 seg = data(i, :);
