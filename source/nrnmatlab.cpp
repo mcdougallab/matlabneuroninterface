@@ -303,6 +303,8 @@ double NrnRef::get_index(size_t ind) {
         throw std::out_of_range("NrnRef index out of bounds");
     }
 
+// Used as hoc function with void return type and instance_id: string.
+// Calls matlab function defined in static dictionary with key instance_id.
 void finitialize_callback() {
     std::string instance_id = hoc_gargstr(1);
     std::string command = "neuron.FInitializeHandler.handlers(" + instance_id + ")";
@@ -314,8 +316,10 @@ void finitialize_callback() {
     hoc_pushx(0);
 }
 
+// Register and create FInitalizeHandler object in hoc,
+// which is set to call finitialize_callback defined above with hoc argument instance_id
 Object* create_FInitializeHandler(int type, const char* func_name, const char* instance_id) {
-    // Register the function with NEURON
+    // Register the the callback in hoc
     const int function_type = 280;
     Symbol* sym;
     sym = hoc_install(func_name, function_type, 0, &hoc_top_level_symlist);
@@ -323,11 +327,14 @@ Object* create_FInitializeHandler(int type, const char* func_name, const char* i
     sym->u.u_proc->nauto = 0;
     sym->u.u_proc->nobjauto = 0;
 
+    // Create hoc command for calling the callback with instance_id
     std::string command = func_name;
     std::string id = instance_id;
     command += "(\"" + id + "\")";
     char* command_c = const_cast<char*>(command.c_str());
 
+    // Register FInitializeHandler object
+    // calling the constructor with (type, command_c)
     int n_args = 2;
     hoc_pushx(type);
     hoc_pushstr(&command_c);
@@ -335,6 +342,8 @@ Object* create_FInitializeHandler(int type, const char* func_name, const char* i
     return ps;
 }
 
+// Function to be called through hoc to run arbitrary matlab code
+// passed as string argument.
 void nrnmatlab() {
     std::string command = hoc_gargstr(1);
     char* command_c = const_cast<char*>(command.c_str());
@@ -345,6 +354,8 @@ void nrnmatlab() {
     hoc_pushx(status);
 }
 
+// Register nrnmatlab function in hoc.
+// This calls the above nrnmatlab function.
 void setup_nrnmatlab() {
     const int function_type = 280;
     Symbol* sym;
