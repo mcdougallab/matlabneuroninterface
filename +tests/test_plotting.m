@@ -11,11 +11,13 @@ classdef test_plotting < matlab.unittest.TestCase
             set(0,'DefaultFigureVisible','off');
             example_plotshape;
             plot_data_some = ps_some.get_plot_data();
-            testCase.verifyEqual(plot_data_some{1}.x(2), 3);
-            testCase.verifyEqual(plot_data_some{end}.line_width, 2);
+            testCase.verifyEqual(plot_data_some(1, :).x(2), 3);
+            testCase.verifyEqual(plot_data_some(end, :).line_width, 2);
+            testCase.verifyEqual(size(plot_data_some, 1), 12);
             plot_data_all = ps_all.get_plot_data();
-            testCase.verifyEqual(plot_data_all{16}.y(2), 2.5);
-            testCase.verifyEqual(plot_data_all{end}.line_width, 3);
+            testCase.verifyEqual(plot_data_all(16, :).y(2), 2.5);
+            testCase.verifyEqual(plot_data_all(end, :).line_width, 3);
+            testCase.verifyEqual(size(plot_data_all, 1), 18);
             set(0,'DefaultFigureVisible','on');
         end
         
