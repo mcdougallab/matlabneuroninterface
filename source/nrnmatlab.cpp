@@ -489,7 +489,16 @@ void setup_nrnmatlab() {
 std::vector<double> get_plot_data(ShapePlotInterface* spi) {
     auto result = std::vector<double>();
 
-    auto section_iterator = section_list->next;
+    hoc_Item* my_section_list;
+    Object* sl = spi->neuron_section_list();
+    if (sl) {
+        my_section_list = (hoc_Item*) sl->u.this_pointer;
+    } else {
+        // no section list specified so use the global all sections list
+        my_section_list = section_list;
+    }
+
+    auto section_iterator = my_section_list->next;
     while (true) {
         auto section = get_hoc_item_element_sec(section_iterator);
         if (section == NULL) break;
