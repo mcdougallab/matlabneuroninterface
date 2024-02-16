@@ -32,9 +32,8 @@ classdef FInitializeHandler < handle
             neuron.FInitializeHandler.handlers(self, instance_id);
 
             % Create unique function name for this handler in hoc name space.
-            % Postfix added to clarify that this function should not be used by others,
-            % as we are polluting the hoc name space.
-            func_name = "neuron_FInitializeHandler_" + instance_id + "_9b543_hl5345";
+            % Random UUID used as we are polluting the hoc name space.
+            func_name = "matlab_Neuron_" + char(matlab.lang.internal.uuid());
             self.hoc_object = clib.neuron.create_FInitializeHandler(type, func_name, string(instance_id));
         end
         function delete(self)
