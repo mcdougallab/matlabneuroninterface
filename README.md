@@ -5,6 +5,9 @@
 > * Windows: Matlab R2022a or higher, MinGW compiler, and Administrator rights
 > * Linux: Matlab R2023a or higher and GCC compiler
 > * Mac: [Under Development] Matlab R2023a or higher, Intel Macs only and Clang compiler
+>
+> For the compiler used, the version should preferably match the exact version used
+> to compile NEURON, as using a newer or older version could have different symbol name-mangling.
 
 The NEURON Toolbox provides a MATLAB API to NEURON, using the MATLAB
 provided clibgen and clib packages to connect MATLAB and NEURON.
