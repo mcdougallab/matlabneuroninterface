@@ -9,6 +9,7 @@ classdef Session < dynamicprops
         fn_void_list    % List of top-level Neuron functions returning nothing.
         object_list     % List of Neuron Objects.
         null            % clib.type.nullptr
+        nrnmatlab_ready % Indicates if setup_nrnmatlab has been called.
     end
 
     methods(Access=private)
@@ -19,10 +20,7 @@ classdef Session < dynamicprops
             clib.neuron.initialize();
             self.fill_dynamic_props();
             self.null = clib.type.nullptr;
-
-            if clibConfiguration("neuron").ExecutionMode == "inprocess"
-                clib.neuron.setup_nrnmatlab();
-            end
+            self.nrnmatlab_ready = false;
         end
     end
     methods
@@ -113,7 +111,12 @@ classdef Session < dynamicprops
                     elseif (func == "FInitializeHandler")
                         [varargout{1:nargout}] = neuron.FInitializeHandler(S(2).subs{:});
                     elseif (func == "nrnmatlab")
-                        if clibConfiguration("neuron").ExecutionMode ~= "inprocess"
+                        if clibConfiguration("neuron").ExecutionMode == "inprocess"
+                            if self.nrnmatlab_ready == false
+                                clib.neuron.setup_nrnmatlab();
+                                self.nrnmatlab_ready = true;
+                            end
+                        else
                             error("Neuron has to be run inprocess to be able to run nrnmatlab");
                         end
                         [varargout{1:nargout}] = self.call_func_hoc(func, "void", S(2).subs{:});
