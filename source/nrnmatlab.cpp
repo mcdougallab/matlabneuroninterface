@@ -420,13 +420,13 @@ std::vector<double> get_section_plot_data(Section* sec, ShapePlotInterface* spi)
         result.push_back(seg_value);
         // Use initial run and reuse previously calculated values
         for (size_t j = 1; j < segment_arc.size() - 1; j++) {
-            result.push_back(result[9 * j + 1]); // xs for segment j
+            result.push_back(result[result.size() - 8]); // xs for segment j
             result.push_back(interpolate_arrays(arcs, xs, segment_arc[j + 1]));
-            result.push_back(result[9 * j + 3]); // ys for segment j
+            result.push_back(result[result.size() - 8]); // ys for segment j
             result.push_back(interpolate_arrays(arcs, ys, segment_arc[j + 1]));
-            result.push_back(result[9 * j + 5]); // zs for segment j
+            result.push_back(result[result.size() - 8]); // zs for segment j
             result.push_back(interpolate_arrays(arcs, zs, segment_arc[j + 1]));
-            result.push_back(result[9 * j + 7]); // ds for segment j
+            result.push_back(result[result.size() - 8]); // ds for segment j
             result.push_back(interpolate_arrays(arcs, ds, segment_arc[j + 1]));
             result.push_back(seg_value);
         }
