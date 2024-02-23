@@ -303,6 +303,7 @@ double NrnRef::get_index(size_t ind) {
     } else {
         throw std::out_of_range("NrnRef index out of bounds");
     }
+}
 
 // Used as hoc function with void return type and instance_id: string.
 // Calls matlab function defined in static dictionary with key instance_id.
