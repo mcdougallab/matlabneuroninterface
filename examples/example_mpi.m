@@ -7,7 +7,8 @@ function example_mpi()
     pc = n.ParallelContext();
     disp("I am " + num2str(pc.id()) + " of " + num2str(pc.nhost()));
     pc.done();
+    
     % Close this matlab session
-    exit(0);
+    n.quit();
 
 end
