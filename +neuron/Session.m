@@ -214,6 +214,14 @@ classdef Session < dynamicprops
         %   set_secondorder(propname, value)
             clib.neuron.set_secondorder(value);
         end
+        function quit(self)
+        % Quit neuron and close matlab.
+            if ismac || isunix
+                warn("Calling Neuron's quit() can lead to errors on linux or mac.");
+            end
+            self.call_func_hoc("quit", "double");
+        end
+
     end
     methods(Static)   
         % Check if a Session already exists. If so, return it; if not, make
