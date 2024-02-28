@@ -435,6 +435,7 @@ std::vector<double> get_section_plot_data(Section* sec, ShapePlotInterface* spi)
     return result;
 }
 
+
 // Used as hoc function with void return type and instance_id: string.
 // Calls matlab function defined in static dictionary with key instance_id.
 void finitialize_callback() {
