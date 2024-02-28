@@ -299,20 +299,11 @@ classdef Section < handle
         % Get all 3D point information; returns a 5xN matrix for N 3D
         % points, with rows [x, y, z, arc, d].
         %   pt3d = get_pt3d()
-            npt3d = self.sec.npt3d;
-            x3d = zeros(1, npt3d);
-            y3d = zeros(1, npt3d);
-            z3d = zeros(1, npt3d);
-            arc3d = zeros(1, npt3d);
-            d3d = zeros(1, npt3d);
-            for j=1:npt3d
-                pt = self.sec.pt3d(j);
-                x3d(j) = pt.x;
-                y3d(j) = pt.y;
-                z3d(j) = pt.z;
-                arc3d(j) = pt.arc;
-                d3d(j) = pt.d;
-            end
+            x3d = double(clib.neuron.get_x3d(self.sec));
+            y3d = double(clib.neuron.get_y3d(self.sec));
+            z3d = double(clib.neuron.get_z3d(self.sec));
+            arc3d = double(clib.neuron.get_arc3d(self.sec));
+            d3d = double(clib.neuron.get_d3d(self.sec));
             pt3d = [x3d; y3d; z3d; arc3d; d3d];
         end
         function info(self)

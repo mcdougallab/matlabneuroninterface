@@ -11,71 +11,33 @@ classdef PlotShape < neuron.Object
         end
 
         function data = get_plot_data(self)
-        % Get PlotShape data; a cell array of structs with data to plot.
+        % Get PlotShape data; a table with data to plot.
         %   data = get_plot_data()
 
             % Call n.define_shape() first
             neuron.Session.call_func_hoc("define_shape", "double");
-            data = {};
 
             spi = clib.neuron.get_plotshape_interface(self.obj);
-            sl = spi.neuron_section_list();
-            secs = neuron.Session.allsec(sl);
 
-            for i=1:numel(secs)
-                s = secs{i};
+            section_plot_data = double(clib.neuron.get_plot_data(spi));
+            section_plot_data = transpose(reshape(section_plot_data, 9, []));
 
-                % Get all 3D point information.
-                pt3d = s.get_pt3d();
+            x = [section_plot_data(:, 1) section_plot_data(:, 2)];
+            y = [section_plot_data(:, 3) section_plot_data(:, 4)];
+            z = [section_plot_data(:, 5) section_plot_data(:, 6)];
+            d = (section_plot_data(:, 7) + section_plot_data(:, 8)) / 2;
+            v = section_plot_data(:, 9);
+            data = table(x, y, z, d, v, 'VariableNames', {'x', 'y', 'z', 'line_width', 'color'}); 
 
-                % Get total section length and arc points.
-                dx = double(s.length);
-                arc3d = pt3d(4, :);
-
-                % Iterate over segments.
-                segments = s.segments();
-                for j=1:s.nseg
-                    % Get start, pt3ds and end point for each segment.
-                    seg = segments{j};
-                    [x_lo, x_hi] = seg.get_bounds();
-                    x_lo = x_lo * dx;
-                    x_hi = x_hi * dx;
-                    seg_arc_arr = arc3d(arc3d(:) > x_lo & arc3d(:) < x_hi);
-                    seg_arc_arr = [x_lo seg_arc_arr x_hi];
-
-                    % Interpolate x,y,z,d for each point in seg_arc_arr.
-                    seg_x3d_arr = interp1_arr(pt3d(4, :), pt3d(1, :), seg_arc_arr);
-                    seg_y3d_arr = interp1_arr(pt3d(4, :), pt3d(2, :), seg_arc_arr);
-                    seg_z3d_arr = interp1_arr(pt3d(4, :), pt3d(3, :), seg_arc_arr);
-                    seg_d3d_arr = interp1_arr(pt3d(4, :), pt3d(5, :), seg_arc_arr);
-
-                    % Find value of selected quantity for this segment.
-                    var = spi.varname();
-                    seg_value = s.ref(var, seg.x).get();
-                    seg_value_rel = seg_value - spi.low();
-                    seg_value_rel = seg_value_rel  / (spi.high() - spi.low());
-                    seg_value_rel = min(max(seg_value_rel, 0), 1);
-                    
-                    % Plot between pt3ds, one pair at a time.
-                    for k=1:numel(seg_arc_arr)-1
-                        x = [seg_x3d_arr(k) seg_x3d_arr(k+1)];
-                        y = [seg_y3d_arr(k) seg_y3d_arr(k+1)];
-                        z = [seg_z3d_arr(k) seg_z3d_arr(k+1)];
-                        plot_struct = struct;
-                        plot_struct.x = x;
-                        plot_struct.y = y;
-                        plot_struct.z = z;
-                        plot_struct.line_width = (seg_d3d_arr(k) + seg_d3d_arr(k+1))/2;
-                        plot_struct.color = [seg_value_rel, 0, 1-seg_value_rel];
-                        data{end+1} = plot_struct;
-                    end
-                end
-            end
-
+            % Normalize color value
+            data.color = data.color - spi.low();
+            data.color = data.color / (spi.high() - spi.low());
+            data.color = min(max(data.color, 0), 1);
         end
 
-        function plot(self)
+        function plot(self, cmap)
         % Plot PlotShape data.
+        % With cmap as the colormap.
         %   plot()
 
             % Get data.
@@ -85,20 +47,22 @@ classdef PlotShape < neuron.Object
             % Plot segments between 3d points.
             figure;
             hold on;
-            for i=1:numel(data)
-                seg = data{i};
-                h = plot3(seg.x, seg.y, seg.z);
-                h.LineWidth = seg.line_width;
-                set(h, 'color', seg.color);
+            if nargin < 2
+                cmap = colormap;
+            end
+            values = table2array(data(:, 'color'));
+            indices = round(interp1(linspace(0, 1, length(cmap)), 1:length(cmap), values, 'linear', 'extrap'));
+
+            l = plot3(transpose(data.x), transpose(data.y), transpose(data.z));
+
+            for i=1:size(data, 1)
+                seg = data(i, :);
+                l(i).Color = cmap(indices(i), :);
+                l(i).LineWidth = seg.line_width;
             end
 
-            % Equal aspect ration for x,y,z.
-            h = get(gca,'DataAspectRatio');
-            if h(3)==1
-                set(gca,'DataAspectRatio',[1 1 1/max(h(1:2))])
-            else
-                set(gca,'DataAspectRatio',[1 1 h(3)])
-            end
+            % Equal aspect ratio for x,y,z.
+            set(gca, 'DataAspectRatio', [1 1 1])
             xlabel('x');
             ylabel('y');
             zlabel('z');

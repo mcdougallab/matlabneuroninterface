@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <assert.h>
 #include <cstdio>
 #include <iostream>
@@ -305,6 +306,136 @@ double NrnRef::get_index(size_t ind) {
     }
 }
 
+std::vector<double> get_x3d(Section* sec) {
+    auto result = std::vector<double>(sec->npt3d);
+    for (size_t i = 0; i < sec->npt3d; i++) {
+        result[i] = sec->pt3d[i].x;
+    }
+    return result;
+}
+
+std::vector<double> get_y3d(Section* sec) {
+    auto result = std::vector<double>(sec->npt3d);
+    for (size_t i = 0; i < sec->npt3d; i++) {
+        result[i] = sec->pt3d[i].y;
+    }
+    return result;
+}
+
+std::vector<double> get_z3d(Section* sec) {
+    auto result = std::vector<double>(sec->npt3d);
+    for (size_t i = 0; i < sec->npt3d; i++) {
+        result[i] = sec->pt3d[i].z;
+    }
+    return result;
+}
+
+std::vector<double> get_arc3d(Section* sec) {
+    auto result = std::vector<double>(sec->npt3d);
+    for (size_t i = 0; i < sec->npt3d; i++) {
+        result[i] = sec->pt3d[i].arc;
+    }
+    return result;
+}
+
+std::vector<double> get_d3d(Section* sec) {
+    auto result = std::vector<double>(sec->npt3d);
+    for (size_t i = 0; i < sec->npt3d; i++) {
+        result[i] = sec->pt3d[i].d;
+    }
+    return result;
+}
+
+// Linearly interpolates between a and b, extrapolates if f is outside the range [0, 1].
+// Added since we don't use c++ 20 or above where we could use:
+// https://en.cppreference.com/w/cpp/numeric/lerp
+double linearly_interpolate(double a, double b, double f) {
+    return a + f * (b - a);
+}
+
+double interpolate_arrays(std::vector<double> xs, std::vector<double> ys, double v) {
+    auto xs_iter = xs.begin() + 1;
+
+    while(v > *xs_iter) {
+        xs_iter++;
+    }
+
+    auto a = ys.begin() + ((xs_iter - 1) - xs.begin());
+    auto b = ys.begin() + (xs_iter - xs.begin());
+    double f = (v - *(xs_iter - 1)) / (*xs_iter - *(xs_iter - 1));
+
+    return linearly_interpolate(*a, *b, f);
+}
+
+std::vector<double> get_segment_arc(Section* sec, double low, double high) {
+    auto result = std::vector<double>();
+
+    result.push_back(low);
+
+    for (size_t i = 0; i < sec->npt3d; i++) {
+        double arc = sec->pt3d[i].arc;
+
+        if (arc > low && arc < high) {
+            result.push_back(arc);
+        }
+    }
+
+    result.push_back(high);
+
+    return result;
+}
+
+std::vector<double> get_section_plot_data(Section* sec, ShapePlotInterface* spi) {
+    auto result = std::vector<double>();
+
+    size_t n_segments = sec->nnode - 1;
+    double sec_length = section_length(sec);
+
+    auto arcs = get_arc3d(sec);
+    auto xs = get_x3d(sec);
+    auto ys = get_y3d(sec);
+    auto zs = get_z3d(sec);
+    auto ds = get_d3d(sec);
+
+    for (size_t i = 0; i < n_segments; i++) {
+        double x_lo = (double) i / n_segments;
+        double x_hi = (double) (i + 1) / n_segments;
+        double x = (double) (i + 0.5) / n_segments;
+        x_lo *= sec_length;
+        x_hi *= sec_length;
+
+        auto segment_arc = get_segment_arc(sec, x_lo, x_hi);
+
+        double seg_value = *nrn_rangepointer(sec, hoc_lookup(spi->varname()), x);
+
+        // Do one initial run
+        result.push_back(interpolate_arrays(arcs, xs, segment_arc[0]));
+        result.push_back(interpolate_arrays(arcs, xs, segment_arc[1]));
+        result.push_back(interpolate_arrays(arcs, ys, segment_arc[0]));
+        result.push_back(interpolate_arrays(arcs, ys, segment_arc[1]));
+        result.push_back(interpolate_arrays(arcs, zs, segment_arc[0]));
+        result.push_back(interpolate_arrays(arcs, zs, segment_arc[1]));
+        result.push_back(interpolate_arrays(arcs, ds, segment_arc[0]));
+        result.push_back(interpolate_arrays(arcs, ds, segment_arc[1]));
+        result.push_back(seg_value);
+        // Use initial run and reuse previously calculated values
+        for (size_t j = 1; j < segment_arc.size() - 1; j++) {
+            result.push_back(result[result.size() - 8]); // xs for segment j
+            result.push_back(interpolate_arrays(arcs, xs, segment_arc[j + 1]));
+            result.push_back(result[result.size() - 8]); // ys for segment j
+            result.push_back(interpolate_arrays(arcs, ys, segment_arc[j + 1]));
+            result.push_back(result[result.size() - 8]); // zs for segment j
+            result.push_back(interpolate_arrays(arcs, zs, segment_arc[j + 1]));
+            result.push_back(result[result.size() - 8]); // ds for segment j
+            result.push_back(interpolate_arrays(arcs, ds, segment_arc[j + 1]));
+            result.push_back(seg_value);
+        }
+    }
+
+    return result;
+}
+
+
 // Used as hoc function with void return type and instance_id: string.
 // Calls matlab function defined in static dictionary with key instance_id.
 void finitialize_callback() {
@@ -365,4 +496,30 @@ void setup_nrnmatlab() {
     sym->u.u_proc->defn.pf = nrnmatlab;
     sym->u.u_proc->nauto = 0;
     sym->u.u_proc->nobjauto = 0;
+}
+
+std::vector<double> get_plot_data(ShapePlotInterface* spi) {
+    auto result = std::vector<double>();
+
+    hoc_Item* my_section_list;
+    Object* sl = spi->neuron_section_list();
+    if (sl) {
+        my_section_list = (hoc_Item*) sl->u.this_pointer;
+    } else {
+        // no section list specified so use the global all sections list
+        my_section_list = section_list;
+    }
+
+    auto section_iterator = my_section_list->next;
+    while (true) {
+        auto section = get_hoc_item_element_sec(section_iterator);
+        if (section == NULL) break;
+
+        auto sec_plot_data = get_section_plot_data(section, spi);
+        result.insert(result.end(), sec_plot_data.begin(), sec_plot_data.end());
+
+        section_iterator = section_iterator->next;
+    }
+
+    return result;
 }
