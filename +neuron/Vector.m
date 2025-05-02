@@ -14,6 +14,7 @@ classdef Vector < neuron.Object
             self = self@neuron.Object(obj);
 
             self.apply_func_list = [];
+            error("Functionality not implemented.");
             arr = split(clib.neuron.get_nrn_functions(), ";");
             arr = arr(1:end-1);
 
@@ -57,6 +58,7 @@ classdef Vector < neuron.Object
         function nrnref = ref(self)
         % Get reference to vector data.
         %   nrnref = ref()
+            error("Functionality not implemented.");
             nrnref = neuron.NrnRef(clib.neuron.get_vector_ref(self.obj, self.length()));
         end
 
@@ -70,6 +72,7 @@ classdef Vector < neuron.Object
         % Access Vector data.
         %   arr = data()
         %   element = data(index)
+            error("Functionality not implemented.");
             arr = clib.neuron.get_vector_vec(self.obj, self.length());
             if nargin == 2
                 arr = arr(index);

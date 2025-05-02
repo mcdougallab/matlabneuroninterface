@@ -17,7 +17,6 @@ classdef Session < dynamicprops
         % Initialize the neuron session, if it has not been initialized before.
         %   Session()
             self = self@dynamicprops;
-            clib.neuron.initialize();
             self.fill_dynamic_props();
             self.null = clib.type.nullptr;
             self.nrnmatlab_ready = false;
@@ -27,7 +26,9 @@ classdef Session < dynamicprops
         function fill_dynamic_props(self)
         % Fill var_list, fn_double_list, fn_string_list, object_list with dynamic variables, functions and objects.
         %   fill_dynamic_props()
-            arr = split(clib.neuron.get_nrn_functions(), ";");
+            arr = split(neuron_api('get_nrn_functions'), ";");
+            // disp(arr);
+            error("Functionality not implemented.");
             call_list = arr(1:end-1);
 
             % Reset dynamic method lists.
@@ -113,6 +114,7 @@ classdef Session < dynamicprops
                     elseif (func == "nrnmatlab")
                         if clibConfiguration("neuron").ExecutionMode == "inprocess"
                             if self.nrnmatlab_ready == false
+                                error("Functionality not implemented.");
                                 clib.neuron.setup_nrnmatlab();
                                 self.nrnmatlab_ready = true;
                             end
@@ -198,6 +200,7 @@ classdef Session < dynamicprops
         %   get_prop(propname)
             % TODO: this method does not work as GetMethod if we move
             % it to methods(Static)... why?
+            error("Functionality not implemented.");
             value = clib.neuron.ref(propname).get();
         end
         function set_prop(~, propname, value)
@@ -205,16 +208,19 @@ classdef Session < dynamicprops
         %   set_prop(propname, value)
             % TODO: this method does not work as SetMethod if we move
             % it to methods(Static)... why?
+            error("Functionality not implemented.");
             clib.neuron.ref(propname).set(value);
         end
         function value = get_secondorder(~)
         % Get property secondorder.
         %   get_secondorder(propname)
+            error("Functionality not implemented.");
             value = clib.neuron.get_secondorder();
         end
         function set_secondorder(~, value)
         % Set property secondorder.
         %   set_secondorder(propname, value)
+            error("Functionality not implemented.");
             clib.neuron.set_secondorder(value);
         end
         function quit(self)
@@ -246,11 +252,15 @@ classdef Session < dynamicprops
         %   value = call_func_hoc(func, returntype, varargin)
 
             % Save state & try/catch in case the call fails.
+            error("Functionality not implemented.");
             clib.neuron.increase_try_catch_nest_depth();
+            error("Functionality not implemented.");
             state = clib.neuron.SavedState();
             try
                 [nsecs, nargs] = neuron.stack.push_args(varargin{:});
+                error("Functionality not implemented.");
                 sym = clib.neuron.hoc_lookup(func);
+                error("Functionality not implemented.");
                 func_val = clib.neuron.hoc_call_func(sym, nargs);
                 if (returntype=="double")
                     value = func_val;
@@ -265,6 +275,7 @@ classdef Session < dynamicprops
                 state.restore();
             end
             clibRelease(state);
+            error("Functionality not implemented.");
             clib.neuron.decrease_try_catch_nest_depth();
 
         end
@@ -273,12 +284,16 @@ classdef Session < dynamicprops
         %   obj = hoc_new_obj(objtype, varargin)
 
             % Save state & try/catch in case the call fails.
+            error("Functionality not implemented.");
             clib.neuron.increase_try_catch_nest_depth();
+            error("Functionality not implemented.");
             state = clib.neuron.SavedState();
             try
                 if (objtype == "Vector") && (numel(varargin) == 1) && (numel(varargin{:}) > 1)
                     % Special case: construct Vector from list.
+                    error("Functionality not implemented.");
                     sym = clib.neuron.hoc_lookup("Vector");
+                    error("Functionality not implemented.");
                     cppobj = clib.neuron.hoc_newobj1(sym, 0);
                     obj = neuron.Vector(cppobj);
                     vector_data = varargin{:};
@@ -289,7 +304,9 @@ classdef Session < dynamicprops
                 else
                     % Generic case: push arguments to stack and create Object.
                     [nsecs, nargs] = neuron.stack.push_args(varargin{:});
+                    error("Functionality not implemented.");
                     sym = clib.neuron.hoc_lookup(objtype);
+                    error("Functionality not implemented.");
                     cppobj = clib.neuron.hoc_newobj1(sym, nargs);
                     if (objtype == "Vector")
                         obj = neuron.Vector(cppobj);
@@ -309,22 +326,26 @@ classdef Session < dynamicprops
                 state.restore();
             end
             clibRelease(state);
+            error("Functionality not implemented.");
             clib.neuron.decrease_try_catch_nest_depth();
 
         end
         function value = hoc_oc(str)
         % Pass string to hoc_oc.
         %   hoc_oc()
+            error("Functionality not implemented.");
             value = clib.neuron.hoc_oc(str);
         end
         function nrnref = ref(sym)
         % Return an NrnRef containing a pointer to a top-level symbol (sym).
         %   nrnref = ref(sym)
+            error("Functionality not implemented.");
             nrnref = neuron.NrnRef(clib.neuron.ref(sym));
         end
         function reset_sections()
         % Reset topology.
         %   reset_sections()
+            error("Functionality not implemented.");
             clib.neuron.hoc_oc("forall delete_section()");
         end
         function all_sections = allsec(section_list, owner)
@@ -337,13 +358,17 @@ classdef Session < dynamicprops
 
             % Deal with input.
             if ~exist('section_list', 'var') % No input: get SectionList of all Sections.
+                error("Functionality not implemented.");
                 section_list = clib.neuron.get_section_list();
             elseif isa(section_list, 'neuron.Object') % Input is a 'n.SectionList'
+                error("Functionality not implemented.");
                 section_list = clib.neuron.get_obj_u_this_pointer(section_list.obj);
             elseif isa(section_list, 'clib.neuron.Object') % Input is a C++ NEURON object
                 if clibIsNull(section_list) % If NULL, get SectionList of all Sections.
+                    error("Functionality not implemented.");
                     section_list = clib.neuron.get_section_list();
                 else  % Input is a fair dinkum NEURON SectionList
+                    error("Functionality not implemented.");
                     section_list = clib.neuron.get_obj_u_this_pointer(section_list);
                 end
             end
@@ -353,6 +378,7 @@ classdef Session < dynamicprops
             end
 
             section_iter = section_list.next;
+            error("Functionality not implemented.");
             section = clib.neuron.get_hoc_item_element_sec(section_iter);
             if clibIsNull(section)
                 all_sections = {};
@@ -362,6 +388,7 @@ classdef Session < dynamicprops
                 % Iterate using section_iter.next.
                 while true
                     section_iter = section_iter.next;
+                    error("Functionality not implemented.");
                     section = clib.neuron.get_hoc_item_element_sec(section_iter);
                     if clibIsNull(section)
                         % End of the section chain.
@@ -369,7 +396,9 @@ classdef Session < dynamicprops
                     else
                         if clibIsNull(section.prop)
                             % Invalidated section: do not append, delete and unref.
+                            error("Functionality not implemented.");
                             clib.neuron.hoc_l_delete(section_iter);
+                            error("Functionality not implemented.");
                             clib.neuron.section_unref(section);
                         else
                             % Valid section: append.
