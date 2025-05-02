@@ -35,9 +35,11 @@ classdef FInitializeHandler < handle
             % Random UUID used as we are polluting the hoc name space.
             uuid = replace(char(matlab.lang.internal.uuid()), "-", "_");
             func_name = "matlab_Neuron_" + uuid;
+            error("Functionality not implemented.");
             self.hoc_object = clib.neuron.create_FInitializeHandler(type, func_name, string(instance_id));
         end
         function delete(self)
+            error("Functionality not implemented.");
             clib.neuron.hoc_obj_unref(self.hoc_object);
         end
     end

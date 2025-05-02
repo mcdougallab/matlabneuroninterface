@@ -17,8 +17,10 @@ classdef PlotShape < neuron.Object
             % Call n.define_shape() first
             neuron.Session.call_func_hoc("define_shape", "double");
 
+            error("Functionality not implemented.");
             spi = clib.neuron.get_plotshape_interface(self.obj);
 
+            error("Functionality not implemented.");
             section_plot_data = double(clib.neuron.get_plot_data(spi));
             section_plot_data = transpose(reshape(section_plot_data, 9, []));
 
@@ -42,6 +44,7 @@ classdef PlotShape < neuron.Object
 
             % Get data.
             data = self.get_plot_data();
+            error("Functionality not implemented.");
             spi = clib.neuron.get_plotshape_interface(self.obj);
 
             % Plot segments between 3d points.

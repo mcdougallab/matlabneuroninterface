@@ -20,11 +20,13 @@ classdef Object < dynamicprops
 
             self = self@dynamicprops;
             self.attr_array_map = containers.Map;
+            error("Functionality not implemented.");
             if clib.neuron.isinitialized()
                 self.objtype = obj.ctemplate.sym.name;
                 self.obj = obj;
 
                 % Get method list.
+                error("Functionality not implemented.");
                 method_str = clib.neuron.get_class_methods(self.objtype);
                 method_list = split(method_str, ";");
                 method_list = method_list(1:end-1);
@@ -42,6 +44,7 @@ classdef Object < dynamicprops
                         p.GetMethod = @(self)get_steered_prop(self, method(1));
                         p.SetMethod = @(self, value)set_steered_prop(self, method(1), value);
                     elseif (method_type == "310")  % point process property
+                        error("Functionality not implemented.");
                         sym = clib.neuron.hoc_table_lookup(method(1), self.obj.ctemplate.symtable);
                         if clibIsNull(sym.arayinfo)  % scalar property
                             self.attr_list = [self.attr_list method(1)];
@@ -71,7 +74,7 @@ classdef Object < dynamicprops
         function delete(self)
         % Decrease refcount by 1.
         %   delete()
-
+            error("Functionality not implemented.");
             clib.neuron.hoc_obj_unref(self.obj);
 
         end
@@ -87,12 +90,16 @@ classdef Object < dynamicprops
         %   value = call_method_double(method, varargin)
             
             % Save state & try/catch in case the call fails.
+            error("Functionality not implemented.");
             clib.neuron.increase_try_catch_nest_depth();
+            error("Functionality not implemented.");
             state = clib.neuron.SavedState();
             try
                 [nsecs, nargs] = neuron.stack.push_args(varargin{:});
+                error("Functionality not implemented.");
                 sym = clib.neuron.hoc_table_lookup(method, ...
                     self.obj.ctemplate.symtable);
+                error("Functionality not implemented.");
                 clib.neuron.hoc_call_ob_proc(self.obj, sym, nargs);
                 value = neuron.stack.hoc_pop(returntype);
                 neuron.stack.pop_sections(nsecs);
@@ -103,6 +110,7 @@ classdef Object < dynamicprops
                 state.restore();
             end
             clibRelease(state);
+            error("Functionality not implemented.");
             clib.neuron.decrease_try_catch_nest_depth();
 
         end
@@ -202,12 +210,14 @@ classdef Object < dynamicprops
         function set_pp_prop(self, propname, value)
         % Set dynamic property.
         %   set_pp_prop(propname, value)
+            error("Functionality not implemented.");
             clib.neuron.set_pp_property(self.obj, propname, value);
         end
 
         function value = get_pp_prop(self, propname)
         % Get dynamic property.
         %   value = get_pp_prop(propname)
+            error("Functionality not implemented.");
             value = clib.neuron.get_pp_property(self.obj, propname);
         end
 
@@ -217,6 +227,7 @@ classdef Object < dynamicprops
             n = self.attr_array_map(propname);
             value = zeros(1, n);
             for i=1:n
+                error("Functionality not implemented.");
                 value(i) = clib.neuron.get_pp_property(self.obj, propname, i-1);
             end
         end
@@ -234,18 +245,21 @@ classdef Object < dynamicprops
         function set_pp_arr_element(self, propname, value, i)
         % Set dynamic property array element.
         %   set_pp_arr_element(propname, value, index)
+            error("Functionality not implemented.");
             clib.neuron.set_pp_property(self.obj, propname, value, i-1);
         end
 
         function set_steered_prop(self, propname, value)
         % Set dynamic property.
         %   set_prop(propname, value)
+            error("Functionality not implemented.");
             clib.neuron.set_steered_property(self.obj, propname, value);
         end
 
         function value = get_steered_prop(self, propname)
         % Get dynamic property.
         %   value = get_prop(propname)
+            error("Functionality not implemented.");
             value = clib.neuron.get_steered_property(self.obj, propname);
         end
 
@@ -254,8 +268,10 @@ classdef Object < dynamicprops
         %   nrnref = ref(prop_name)
         %   nrnref = ref(prop_arr_name, index)
             if ~exist('index', 'var')
+                error("Functionality not implemented.");
                 nrnref = clib.neuron.ref_pp_property(self.obj, propname);
             else
+                error("Functionality not implemented.");
                 nrnref = clib.neuron.ref_pp_property(self.obj, propname, index-1);
             end
         end
