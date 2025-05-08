@@ -2,7 +2,7 @@ function value = hoc_pop(returntype)
 % Pop an object of type returntype ("double", "string", "Object" or "void") off the NEURON stack.
 %   hoc_pop(returntype)
     if (returntype=="double")
-        value = clib.neuron.hoc_xpop();
+        value = neuron_api('nrn_double_pop');
     elseif (returntype=="string" || returntype=="char")
         value = clib.neuron.matlab_hoc_strpop();
     elseif (returntype=="Object")

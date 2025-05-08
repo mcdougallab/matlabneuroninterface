@@ -27,9 +27,8 @@ classdef Session < dynamicprops
         % Fill var_list, fn_double_list, fn_string_list, object_list with dynamic variables, functions and objects.
         %   fill_dynamic_props()
             arr = split(neuron_api('get_nrn_functions'), ";");
-            // disp(arr);
-            error("Functionality not implemented.");
             call_list = arr(1:end-1);
+            % disp(call_list);
 
             % Reset dynamic method lists.
             self.fn_double_list = string.empty;
@@ -42,47 +41,49 @@ classdef Session < dynamicprops
             for i=1:length(call_list)
                 f = split(call_list(i), ":");
                 f_types = split(f(2), "-");
-                f_type = f_types(1);
-                f_subtype = f_types(2);
+                f_type = f_types{1};
+                f_subtype = f_types{2};
                 % Depending on the NEURON type (f_type, f_subtype), we add
                 % the variable/function as a property (by adding it with 
                 % self.addprop) or as a method (by adding it to one of the 
                 % various self.*_list arrays).
+                disp("f_type: " + f_type);
                 switch f_type
                     case "263"  % Properties with get/set functionality.
-                        if f(1) == "secondorder" % special case secondorder
-                            if ~isprop(self, f(1))
-                                self.var_list = [self.var_list f(1)];
-                                p = self.addprop(f(1));
+                        if f{1} == "secondorder" % special case secondorder
+                            if ~isprop(self, f{1})
+                                self.var_list = [self.var_list f{1}];
+                                p = self.addprop(f{1});
                                 p.GetMethod = @(self)get_secondorder(self);
                                 p.SetMethod = @(self, value)set_secondorder(self, value);
                             end
                         elseif f_subtype == "1" % int variable
-                            if ~isprop(self, f(1))
-                                self.var_list = [self.var_list f(1)];
-                                p = self.addprop(f(1));
-                                p.GetMethod = @(self)get_prop(self, f(1));
-                                p.SetMethod = @(self, value)set_prop(self, f(1), value);
+                            if ~isprop(self, f{1})
+                                self.var_list = [self.var_list f{1}];
+                                p = self.addprop(f{1});
+                                p.GetMethod = @(self)get_prop(self, f{1});
+                                p.SetMethod = @(self, value)set_prop(self, f{1}, value);
                             end
                         elseif f_subtype == "2" % double variable
-                            if ~isprop(self, f(1))
-                                self.var_list = [self.var_list f(1)];
-                                p = self.addprop(f(1));
-                                p.GetMethod = @(self)get_prop(self, f(1));
-                                p.SetMethod = @(self, value)set_prop(self, f(1), value);
+                            if ~isprop(self, f{1})
+                                self.var_list = [self.var_list f{1}];
+                                p = self.addprop(f{1});
+                                p.GetMethod = @(self)get_prop(self, f{1});
+                                p.SetMethod = @(self, value)set_prop(self, f{1}, value);
                             end
                         end
-                    case "270" % HOC function returning a double
-                        self.fn_double_list = [self.fn_double_list f(1)];
+                    case "264" % HOC function returning a double (e.g., abs)
+                        self.fn_double_list = [self.fn_double_list f{1}];
                     case "271" % HOC procedures (returning nothing)
-                        self.fn_void_list = [self.fn_void_list f(1)];
-                    case "280" % function returning a double
-                        self.fn_double_list = [self.fn_double_list f(1)];
-                    case "296" % function returning a string
-                        self.fn_string_list = [self.fn_string_list f(1)];
-                    case "324" % object
-                        self.object_list = [self.object_list f(1)];
+                        self.fn_void_list = [self.fn_void_list f{1}];
+                    case "280" % function returning a double,  e.g. n3d
+                        self.fn_double_list = [self.fn_double_list f{1}];
+                    case "295" % function returning a string, e.g., secname
+                        self.fn_string_list = [self.fn_string_list f{1}];
+                    case "325" % object (e.g., Vector, PlotShape, RangeVarPlot)
+                        self.object_list = [self.object_list f{1}];
                     otherwise
+                        disp("Unknown type: " + f_type + f{1});
                         % We ignore all other types; they will either be
                         % implemented at a later point, or they are internal 
                         % NEURON types that we do not need to interface with.
@@ -114,8 +115,7 @@ classdef Session < dynamicprops
                     elseif (func == "nrnmatlab")
                         if clibConfiguration("neuron").ExecutionMode == "inprocess"
                             if self.nrnmatlab_ready == false
-                                error("Functionality not implemented.");
-                                clib.neuron.setup_nrnmatlab();
+                                neuron_api('setup_nrnmatlab');
                                 self.nrnmatlab_ready = true;
                             end
                         else
@@ -167,6 +167,7 @@ classdef Session < dynamicprops
             catch  
                 % Check again if var/func exists; available functions can
                 % change due to importing .hoc files, for example.
+                disp("Refreshing dynamic properties.");
                 self.fill_dynamic_props();
                 [varargout{1:nargout}] = self.dynamic_call(S);
             end
@@ -201,7 +202,7 @@ classdef Session < dynamicprops
             % TODO: this method does not work as GetMethod if we move
             % it to methods(Static)... why?
             error("Functionality not implemented.");
-            value = clib.neuron.ref(propname).get();
+            value = neuron_api('nrn_get_value', propname);
         end
         function set_prop(~, propname, value)
         % Set dynamic property.
@@ -241,6 +242,7 @@ classdef Session < dynamicprops
             %         % to do an munlock (see issue #95).
             persistent uniqueInstance
             if isempty(uniqueInstance)
+                disp("Creating new neuron session.");
                 self = neuron.Session();
                 uniqueInstance = self;
             else
@@ -252,31 +254,24 @@ classdef Session < dynamicprops
         %   value = call_func_hoc(func, returntype, varargin)
 
             % Save state & try/catch in case the call fails.
-            error("Functionality not implemented.");
-            clib.neuron.increase_try_catch_nest_depth();
-            error("Functionality not implemented.");
-            state = clib.neuron.SavedState();
+            % error("Functionality not implemented.");
+            % clib.neuron.increase_try_catch_nest_depth();
+            % error("Functionality not implemented.");
+            % state = clib.neuron.SavedState();
             try
                 [nsecs, nargs] = neuron.stack.push_args(varargin{:});
-                error("Functionality not implemented.");
-                sym = clib.neuron.hoc_lookup(func);
-                error("Functionality not implemented.");
-                func_val = clib.neuron.hoc_call_func(sym, nargs);
-                if (returntype=="double")
-                    value = func_val;
-                else
-                    value = neuron.stack.hoc_pop(returntype);
-                end
-                neuron.stack.pop_sections(nsecs);
+                neuron_api('nrn_function_call', func, nargs);
+                value = neuron.stack.hoc_pop(returntype);
+                % neuron.stack.pop_sections(nsecs);
             catch e
                 value = NaN;
                 warning(e.message);
                 warning("'"+string(func)+"': caught error during call to Neuron function.");
-                state.restore();
+                % state.restore();
             end
-            clibRelease(state);
-            error("Functionality not implemented.");
-            clib.neuron.decrease_try_catch_nest_depth();
+            % clibRelease(state);
+            % error("Functionality not implemented.");
+            % clib.neuron.decrease_try_catch_nest_depth();
 
         end
         function obj = hoc_new_obj(objtype, varargin)
@@ -333,8 +328,8 @@ classdef Session < dynamicprops
         function value = hoc_oc(str)
         % Pass string to hoc_oc.
         %   hoc_oc()
-            error("Functionality not implemented.");
-            value = clib.neuron.hoc_oc(str);
+            neuron_api('nrn_hoc_call', str);
+            value = true;
         end
         function nrnref = ref(sym)
         % Return an NrnRef containing a pointer to a top-level symbol (sym).
