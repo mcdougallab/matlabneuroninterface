@@ -67,7 +67,7 @@ classdef Object < dynamicprops
                     end
                 end
             else
-                warning("Initialize a Neuron session before making an Object.");
+                warning("Initialize a NEURON session before making an Object.");
             end
         end
 

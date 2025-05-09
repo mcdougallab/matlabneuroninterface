@@ -47,7 +47,7 @@ classdef Session < dynamicprops
                 % the variable/function as a property (by adding it with 
                 % self.addprop) or as a method (by adding it to one of the 
                 % various self.*_list arrays).
-                disp("f_type: " + f_type);
+                % disp("f_type: " + f_type);
                 switch f_type
                     case "263"  % Properties with get/set functionality.
                         if f{1} == "secondorder" % special case secondorder
@@ -83,7 +83,7 @@ classdef Session < dynamicprops
                     case "325" % object (e.g., Vector, PlotShape, RangeVarPlot)
                         self.object_list = [self.object_list f{1}];
                     otherwise
-                        disp("Unknown type: " + f_type + f{1});
+                        % disp("Unknown type: " + f_type + f{1});
                         % We ignore all other types; they will either be
                         % implemented at a later point, or they are internal 
                         % NEURON types that we do not need to interface with.
@@ -260,6 +260,8 @@ classdef Session < dynamicprops
             % state = clib.neuron.SavedState();
             try
                 [nsecs, nargs] = neuron.stack.push_args(varargin{:});
+                disp(nsecs);
+                disp(nargs);
                 neuron_api('nrn_function_call', func, nargs);
                 value = neuron.stack.hoc_pop(returntype);
                 % neuron.stack.pop_sections(nsecs);
