@@ -4,12 +4,10 @@ function value = hoc_pop(returntype)
     if (returntype=="double")
         value = neuron_api('nrn_double_pop');
     elseif (returntype=="string" || returntype=="char")
-        error("Functionality not implemented.");
-        value = clib.neuron.matlab_hoc_strpop();
+        value = neuron_api('nrn_pop_str');
     elseif (returntype=="Object")
-        error("Functionality not implemented.");
-        obj = clib.neuron.matlab_hoc_objpop();
-        objtype = obj.ctemplate.sym.name;
+        obj = neuron_api('nrn_object_pop');
+        objtype = neuron_api('nrn_class_name', obj);
         if objtype == "Vector"
             value = neuron.Vector(obj);
         elseif objtype == "PlotShape"
