@@ -40,11 +40,13 @@ SymbolTableIterator* (*nrn_symbol_table_iterator_new_)(Symlist* my_symbol_table)
 void (*nrn_symbol_table_iterator_free_)(SymbolTableIterator* st) = nullptr;
 Symbol* (*nrn_symbol_table_iterator_next_)(SymbolTableIterator* st) = nullptr;
 int (*nrn_symbol_table_iterator_done_)(SymbolTableIterator* st) = nullptr;
+Symlist* (*nrn_symbol_table_)(Symbol* sym) = nullptr;
 
 Symbol* (*nrn_symbol_)(char const* const name) = nullptr;
 int (*nrn_symbol_type_)(const Symbol* sym) = nullptr;
 int (*nrn_symbol_subtype_)(const Symbol* sym) = nullptr;
 char const* (*nrn_symbol_name_)(const Symbol* sym) = nullptr;
+double* (*nrn_symbol_pval_)(Symbol* sym) = nullptr;
 
 Symbol* (*hoc_install_)(const char*, int, double, Symlist**) = nullptr;
 void (*nrn_register_function_)(void (*)(), const char*,  const int) = nullptr;
@@ -52,6 +54,12 @@ char* (*hoc_gargstr_)(int) = nullptr;
 void (*hoc_ret_)(void) = nullptr;
 void (*hoc_pushx_)(double) = nullptr;
 double (*hoc_xpop_)(void) = nullptr;
+void (*hoc_call_ob_proc_)(Object*, Symbol*, int) = nullptr;
+
+Object* (*nrn_object_new_)(Symbol* sym, int narg) = nullptr;
+void (*nrn_object_unref_)(Object*) = nullptr;
+char const* (*nrn_class_name_)(const Object*) = nullptr;
+Symbol* (*nrn_method_symbol_)(Object*, char const* const) = nullptr;
 
 bool has_inited = false;
 DLL_HANDLE neuron_handle = nullptr;
@@ -200,6 +208,96 @@ void nrn_function_call(const mxArray* prhs[], mxArray* plhs[]) {
     nrn_function_call_(sym, narg);
 }
 
+void nrn_object_new(const mxArray* prhs[], mxArray* plhs[]) {
+    auto [name, narg] = extractParams<std::string, int>(prhs, 1);
+    auto sym = nrn_symbol_(name.c_str());
+    Object* obj = nrn_object_new_(sym, narg);
+    // Return the Object* by casting to uint64
+    plhs[0] = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
+    *(uint64_t*)mxGetData(plhs[0]) = reinterpret_cast<uint64_t>(obj);
+}
+
+void nrn_object_unref(const mxArray* prhs[], mxArray* plhs[]) {
+    auto obj_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    Object* obj = reinterpret_cast<Object*>(obj_ptr);
+    nrn_object_unref_(obj);
+}
+
+void get_class_methods(const mxArray* prhs[], mxArray* plhs[]) {
+    auto [class_name] = extractParams<std::string>(prhs, 1);
+    auto sym = nrn_symbol_(class_name.c_str());
+    Symlist* table = nrn_symbol_table_(sym);
+    std::string result;
+
+    // Iterate over the symbol table
+    auto iter = nrn_symbol_table_iterator_new_(table);
+
+    while (!nrn_symbol_table_iterator_done_(iter)) {
+        Symbol* sym = nrn_symbol_table_iterator_next_(iter);
+        result += std::string(nrn_symbol_name_(sym)) + ":" + std::to_string(nrn_symbol_type_(sym)) + "-" + std::to_string(nrn_symbol_subtype_(sym)) + ";";
+    }
+
+    nrn_symbol_table_iterator_free_(iter);
+
+    // Return the result as a MATLAB string
+    plhs[0] = mxCreateString(result.c_str());
+}
+
+void nrn_class_name(const mxArray* prhs[], mxArray* plhs[]) {
+    auto obj_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    Object* obj = reinterpret_cast<Object*>(obj_ptr);
+    const char* class_name = nrn_class_name_(obj);
+    plhs[0] = mxCreateString(class_name);
+}
+
+void nrn_method_symbol(const mxArray* prhs[], mxArray* plhs[]) {
+    auto obj_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    Object* obj = reinterpret_cast<Object*>(obj_ptr);
+    auto [method_name] = extractParams<std::string>(prhs, 2);
+    Symbol* method_sym = nrn_method_symbol_(obj, method_name.c_str());
+    // Return the Symbol* by casting to uint64
+    plhs[0] = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
+    *(uint64_t*)mxGetData(plhs[0]) = reinterpret_cast<uint64_t>(method_sym);
+}
+
+void nrn_hoc_call_ob_proc(const mxArray* prhs[], mxArray* plhs[]) {
+    auto obj_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    Object* obj = reinterpret_cast<Object*>(obj_ptr);
+    auto sym_ptr = static_cast<uint64_t>(mxGetScalar(prhs[2]));
+    Symbol* sym = reinterpret_cast<Symbol*>(sym_ptr);
+    auto [narg] = extractParams<int>(prhs, 3);
+    hoc_call_ob_proc_(obj, sym, narg);
+}
+
+void nrn_get_value(const mxArray* prhs[], mxArray* plhs[]) {
+    // Get string name
+    std::string propname = getStringFromMxArray(prhs[1]);
+
+    // Lookup symbol in top-level HOC context
+    Symbol* sym = nrn_symbol_(propname.c_str());
+
+    // Read value
+    double* value_ptr = nrn_symbol_pval_(sym);
+    double value = *value_ptr;
+
+    // Return to MATLAB
+    plhs[0] = mxCreateDoubleScalar(value);
+}
+
+void nrn_set_value(const mxArray* prhs[], mxArray* plhs[]) {
+    // Extract arguments
+    std::string propname = getStringFromMxArray(prhs[1]);
+    double new_value = mxGetScalar(prhs[2]);
+
+    // Lookup symbol
+    Symbol* sym = nrn_symbol_(propname.c_str());
+
+    // Write new value
+    double* value_ptr = nrn_symbol_pval_(sym);
+    *value_ptr = new_value;
+}
+
+
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     if (!neuron_handle) {
@@ -271,7 +369,22 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         function_map["nrn_function_call"] = nrn_function_call;
         nrn_double_pop_ = (double (*)(void)) DLL_GET_PROC(neuron_handle, "nrn_double_pop");
         function_map["nrn_double_pop"] = nrn_double_pop;
-
+        nrn_object_new_ = (Object* (*)(Symbol*, int)) DLL_GET_PROC(neuron_handle, "nrn_object_new");
+        function_map["nrn_object_new"] = nrn_object_new;
+        nrn_object_unref_ = (void (*)(Object*)) DLL_GET_PROC(neuron_handle, "nrn_object_unref");
+        function_map["nrn_object_unref"] = nrn_object_unref;
+        nrn_symbol_table_ = (Symlist* (*)(Symbol*)) DLL_GET_PROC(neuron_handle, "nrn_symbol_table");
+        nrn_class_name_ = (char const* (*)(const Object*)) DLL_GET_PROC(neuron_handle, "nrn_class_name");
+        function_map["nrn_class_name"] = nrn_class_name;
+        function_map["get_class_methods"] = get_class_methods;
+        nrn_method_symbol_ = (Symbol* (*)(Object*, char const* const)) DLL_GET_PROC(neuron_handle, "nrn_method_symbol");
+        function_map["nrn_method_symbol"] = nrn_method_symbol;
+        hoc_call_ob_proc_ = (void (*)(Object*, Symbol*, int)) DLL_GET_PROC(neuron_handle, "hoc_call_ob_proc");
+        function_map["nrn_hoc_call_ob_proc"] = nrn_hoc_call_ob_proc;
+        function_map["nrn_get_value"] = nrn_get_value;
+        nrn_symbol_pval_ = (double* (*)(Symbol*)) DLL_GET_PROC(neuron_handle, "nrn_symbol_pval");
+        function_map["nrn_set_value"] = nrn_set_value;
+        
         // Clean up
         //DLL_FREE(wrapper_handle);
         //DLL_FREE(neuron_handle);
