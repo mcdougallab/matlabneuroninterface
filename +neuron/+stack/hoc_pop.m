@@ -4,8 +4,10 @@ function value = hoc_pop(returntype)
     if (returntype=="double")
         value = neuron_api('nrn_double_pop');
     elseif (returntype=="string" || returntype=="char")
+        error("Functionality not implemented.");
         value = clib.neuron.matlab_hoc_strpop();
     elseif (returntype=="Object")
+        error("Functionality not implemented.");
         obj = clib.neuron.matlab_hoc_objpop();
         objtype = obj.ctemplate.sym.name;
         if objtype == "Vector"

@@ -71,8 +71,8 @@ classdef Vector < neuron.Object
         % Access Vector data.
         %   arr = data()
         %   element = data(index)
-            error("Functionality not implemented.");
-            arr = clib.neuron.get_vector_vec(self.obj, self.length());
+            arr = neuron_api('nrn_vector_data', self.obj);
+            
             if nargin == 2
                 arr = arr(index);
             end

@@ -213,14 +213,12 @@ classdef Session < dynamicprops
         function value = get_secondorder(~)
         % Get property secondorder.
         %   get_secondorder(propname)
-            error("Functionality not implemented.");
-            value = clib.neuron.get_secondorder();
+            value = neuron_api('nrn_get_secondorder');
         end
         function set_secondorder(~, value)
         % Set property secondorder.
         %   set_secondorder(propname, value)
-            error("Functionality not implemented.");
-            clib.neuron.set_secondorder(value);
+            value = neuron_api('nrn_set_secondorder');
         end
         function quit(self)
         % Quit neuron and close matlab.
@@ -296,7 +294,7 @@ classdef Session < dynamicprops
                 else
                     % Generic case: push arguments to stack and create Object.
                     [nsecs, nargs] = neuron.stack.push_args(varargin{:});
-                    cppobj = neuron_api('nrn_object_new', 'Vector', 0);
+                    cppobj = neuron_api('nrn_object_new', 'Vector', nargs);
                     if (objtype == "Vector")
                         obj = neuron.Vector(cppobj);
                     elseif (objtype == "PlotShape")
