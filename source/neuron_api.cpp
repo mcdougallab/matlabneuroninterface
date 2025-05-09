@@ -63,6 +63,14 @@ void (*nrn_method_call_)(Object*, Symbol*, int) = nullptr;
 
 double* (*nrn_vector_data_)(Object*) = nullptr;
 
+void (*nrn_section_pop_)(void) = nullptr;
+char** (*nrn_pop_str_)(void) = nullptr;
+Object* (*nrn_object_pop_)(void) = nullptr;
+
+void (*nrn_str_push_)(char**) = nullptr;
+void (*nrn_object_push_)(Object*) = nullptr;
+void (*nrn_double_ptr_push_)(double*) = nullptr;
+
 
 bool has_inited = false;
 DLL_HANDLE neuron_handle = nullptr;
@@ -317,6 +325,40 @@ void nrn_vector_data(const mxArray* prhs[], mxArray* plhs[]) {
     *(uint64_t*)mxGetData(plhs[0]) = reinterpret_cast<uint64_t>(data);
 }
 
+void nrn_section_pop(const mxArray* prhs[], mxArray* plhs[]) {
+    nrn_section_pop_();
+}
+
+void nrn_pop_str(const mxArray* prhs[], mxArray* plhs[]) {
+    char** result = nrn_pop_str_();
+    plhs[0] = mxCreateString(*result);
+}
+
+void nrn_object_pop(const mxArray* prhs[], mxArray* plhs[]) {
+    Object* obj = nrn_object_pop_();
+    plhs[0] = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
+    *(uint64_t*)mxGetData(plhs[0]) = reinterpret_cast<uint64_t>(obj);
+}
+
+void nrn_str_push(const mxArray* prhs[], mxArray* plhs[]) {
+    auto str = static_cast<char**>(mxCalloc(1, sizeof(char*)));
+    *str = mxArrayToString(prhs[1]);
+    nrn_str_push_(str);
+    mxFree(*str);
+    mxFree(str);
+}
+
+void nrn_object_push(const mxArray* prhs[], mxArray* plhs[]) {
+    auto obj_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    Object* obj = reinterpret_cast<Object*>(obj_ptr);
+    nrn_object_push_(obj);
+}
+
+void nrn_double_ptr_push(const mxArray* prhs[], mxArray* plhs[]) {
+    auto addr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    double* ptr = reinterpret_cast<double*>(addr);
+    nrn_double_ptr_push_(ptr);
+}
 
 
 
@@ -410,6 +452,18 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         function_map["nrn_method_call"] = nrn_method_call;
         nrn_vector_data_ = (double* (*)(Object*)) DLL_GET_PROC(neuron_handle, "nrn_vector_data");
         function_map["nrn_vector_data"] = nrn_vector_data;
+        nrn_section_pop_ = (void (*)(void)) DLL_GET_PROC(neuron_handle, "nrn_section_pop");
+        nrn_pop_str_ = (char** (*)(void)) DLL_GET_PROC(neuron_handle, "nrn_pop_str");
+        function_map["nrn_pop_str"] = nrn_pop_str;
+        nrn_object_pop_ = (Object* (*)(void)) DLL_GET_PROC(neuron_handle, "nrn_object_pop");
+        function_map["nrn_object_pop"] = nrn_object_pop;
+        nrn_str_push_ = (void (*)(char**)) DLL_GET_PROC(neuron_handle, "nrn_str_push");
+        function_map["nrn_str_push"] = nrn_str_push;
+        nrn_object_push_ = (void (*)(Object*)) DLL_GET_PROC(neuron_handle, "nrn_object_push");
+        function_map["nrn_object_push"] = nrn_object_push;
+        nrn_double_ptr_push_ = (void (*)(double*)) DLL_GET_PROC(neuron_handle, "nrn_double_ptr_push");
+        function_map["nrn_double_ptr_push"] = nrn_double_ptr_push;
+        
         
         // Clean up
         //DLL_FREE(wrapper_handle);

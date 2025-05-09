@@ -6,17 +6,14 @@ function hoc_push(value)
     elseif isa(value, "double")
         neuron_api('nrn_double_push', value);
     elseif isa(value, "string") || isa(value, "char")
-        error("Functionality not implemented.");
-        clib.neuron.matlab_hoc_pushstr(value);  
+        neuron_api('nrn_str_push', value);
     elseif isa(value, "neuron.Object")
-        error("Functionality not implemented.");
-        clib.neuron.hoc_push_object(value.obj);  
+        neuron_api('nrn_object_push', value.obj);
     elseif isa(value, "clib.neuron.Object")
         error("Functionality not implemented.");
         clib.neuron.hoc_push_object(value);
     elseif isa(value, "neuron.NrnRef")
-        error("Functionality not implemented.");
-        clib.neuron.matlab_hoc_pushpx(value.obj);
+        neuron_api('nrn_double_ptr_push', value.obj);
     elseif isa(value, "clib.neuron.NrnRef")
         error("Functionality not implemented.");
         clib.neuron.matlab_hoc_pushpx(value);

@@ -256,11 +256,11 @@ classdef Session < dynamicprops
             % state = clib.neuron.SavedState();
             try
                 [nsecs, nargs] = neuron.stack.push_args(varargin{:});
-                disp(nsecs);
-                disp(nargs);
+                % disp(nsecs);
+                % disp(nargs);
                 neuron_api('nrn_function_call', func, nargs);
                 value = neuron.stack.hoc_pop(returntype);
-                % neuron.stack.pop_sections(nsecs);
+                neuron.stack.pop_sections(nsecs);
             catch e
                 value = NaN;
                 warning(e.message);
@@ -326,8 +326,7 @@ classdef Session < dynamicprops
         function nrnref = ref(sym)
         % Return an NrnRef containing a pointer to a top-level symbol (sym).
         %   nrnref = ref(sym)
-            error("Functionality not implemented.");
-            nrnref = neuron.NrnRef(clib.neuron.ref(sym));
+            nrnref = neuron.NrnRef(neuron_api('nrn_get_value', sym));
         end
         function reset_sections()
         % Reset topology.
