@@ -201,7 +201,6 @@ classdef Session < dynamicprops
         %   get_prop(propname)
             % TODO: this method does not work as GetMethod if we move
             % it to methods(Static)... why?
-            error("Functionality not implemented.");
             value = neuron_api('nrn_get_value', propname);
         end
         function set_prop(~, propname, value)
@@ -209,8 +208,7 @@ classdef Session < dynamicprops
         %   set_prop(propname, value)
             % TODO: this method does not work as SetMethod if we move
             % it to methods(Static)... why?
-            error("Functionality not implemented.");
-            clib.neuron.ref(propname).set(value);
+            neuron_api('nrn_set_value', propname, value);
         end
         function value = get_secondorder(~)
         % Get property secondorder.
@@ -281,17 +279,14 @@ classdef Session < dynamicprops
         %   obj = hoc_new_obj(objtype, varargin)
 
             % Save state & try/catch in case the call fails.
-            error("Functionality not implemented.");
-            clib.neuron.increase_try_catch_nest_depth();
-            error("Functionality not implemented.");
-            state = clib.neuron.SavedState();
+            % error("Functionality not implemented.");
+            % clib.neuron.increase_try_catch_nest_depth();
+            % error("Functionality not implemented.");
+            % state = clib.neuron.SavedState();
             try
                 if (objtype == "Vector") && (numel(varargin) == 1) && (numel(varargin{:}) > 1)
                     % Special case: construct Vector from list.
-                    error("Functionality not implemented.");
-                    sym = clib.neuron.hoc_lookup("Vector");
-                    error("Functionality not implemented.");
-                    cppobj = clib.neuron.hoc_newobj1(sym, 0);
+                    cppobj = neuron_api('nrn_object_new', 'Vector', 0);
                     obj = neuron.Vector(cppobj);
                     vector_data = varargin{:};
                     for i=1:numel(vector_data)
@@ -301,10 +296,7 @@ classdef Session < dynamicprops
                 else
                     % Generic case: push arguments to stack and create Object.
                     [nsecs, nargs] = neuron.stack.push_args(varargin{:});
-                    error("Functionality not implemented.");
-                    sym = clib.neuron.hoc_lookup(objtype);
-                    error("Functionality not implemented.");
-                    cppobj = clib.neuron.hoc_newobj1(sym, nargs);
+                    cppobj = neuron_api('nrn_object_new', 'Vector', 0);
                     if (objtype == "Vector")
                         obj = neuron.Vector(cppobj);
                     elseif (objtype == "PlotShape")
@@ -314,17 +306,17 @@ classdef Session < dynamicprops
                     else
                         obj = neuron.Object(cppobj);
                     end
-                    neuron.stack.pop_sections(nsecs);
+                    % neuron.stack.pop_sections(nsecs);
                 end
             catch e
                 obj = NaN;
                 warning(e.message);
                 warning("'"+string(objtype)+"': number or type of arguments incorrect.");
-                state.restore();
+                % state.restore();
             end
-            clibRelease(state);
-            error("Functionality not implemented.");
-            clib.neuron.decrease_try_catch_nest_depth();
+            % clibRelease(state);
+            % error("Functionality not implemented.");
+            % clib.neuron.decrease_try_catch_nest_depth();
 
         end
         function value = hoc_oc(str)
@@ -342,8 +334,7 @@ classdef Session < dynamicprops
         function reset_sections()
         % Reset topology.
         %   reset_sections()
-            error("Functionality not implemented.");
-            clib.neuron.hoc_oc("forall delete_section()");
+            neuron_api('nrn_hoc_call', 'forall delete_section()');
         end
         function all_sections = allsec(section_list, owner)
         % Return cell array containing all sections, or all sections in a NEURON

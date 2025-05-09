@@ -14,8 +14,7 @@ classdef Vector < neuron.Object
             self = self@neuron.Object(obj);
 
             self.apply_func_list = [];
-            error("Functionality not implemented.");
-            arr = split(clib.neuron.get_nrn_functions(), ";");
+            arr = split(neuron_api('get_nrn_functions'), ";");
             arr = arr(1:end-1);
 
             % Add dynamic mechanisms and range variables.

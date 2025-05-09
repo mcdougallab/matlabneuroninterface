@@ -20,62 +20,56 @@ classdef Object < dynamicprops
 
             self = self@dynamicprops;
             self.attr_array_map = containers.Map;
-            error("Functionality not implemented.");
-            if clib.neuron.isinitialized()
-                self.objtype = obj.ctemplate.sym.name;
-                self.obj = obj;
+            self.objtype = neuron_api('nrn_class_name', obj);
+            self.obj = obj;
 
-                % Get method list.
-                error("Functionality not implemented.");
-                method_str = clib.neuron.get_class_methods(self.objtype);
-                method_list = split(method_str, ";");
-                method_list = method_list(1:end-1);
+            % Get method list.
+            method_str = neuron_api('get_class_methods', self.objtype);
+            method_list = split(method_str, ";");
+            method_list = method_list(1:end-1);
+            disp(method_list);
 
-                % Add dynamic properties.
-                % See: doc/DEV_README.md#neuron-types
-                for i=1:length(method_list)
-                    method = split(method_list(i), ":");
-                    method_types = split(method(2), "-");
-                    method_type = method_types(1);
-                    % method_subtype = method_types(2);
-                    if (method_type == "263" && method(1) ~= 'x')  % steered property; we need to exclude Vector.x and Matrix.x to prevent errors.
+            % Add dynamic properties.
+            % See: doc/DEV_README.md#neuron-types
+            for i=1:length(method_list)
+                method = split(method_list(i), ":");
+                method_types = split(method(2), "-");
+                method_type = method_types(1);
+                % method_subtype = method_types(2);
+                if (method_type == "263" && method{1}(1) ~= 'x')  % steered property; we need to exclude Vector.x and Matrix.x to prevent errors.
+                    self.attr_list = [self.attr_list method(1)];
+                    p = self.addprop(method(1));
+                    p.GetMethod = @(self)get_steered_prop(self, method(1));
+                    p.SetMethod = @(self, value)set_steered_prop(self, method(1), value);
+                elseif (method_type == "310")  % point process property
+                    sym = neuron_api('nrn_method_symbol', self.obj, method(1));
+                    disp(sym);
+                    if clibIsNull(sym.arayinfo)  % scalar property
                         self.attr_list = [self.attr_list method(1)];
                         p = self.addprop(method(1));
-                        p.GetMethod = @(self)get_steered_prop(self, method(1));
-                        p.SetMethod = @(self, value)set_steered_prop(self, method(1), value);
-                    elseif (method_type == "310")  % point process property
-                        error("Functionality not implemented.");
-                        sym = clib.neuron.hoc_table_lookup(method(1), self.obj.ctemplate.symtable);
-                        if clibIsNull(sym.arayinfo)  % scalar property
-                            self.attr_list = [self.attr_list method(1)];
-                            p = self.addprop(method(1));
-                            p.GetMethod = @(self)get_pp_prop(self, method(1));
-                            p.SetMethod = @(self, value)set_pp_prop(self, method(1), value);
-                        else  % array property
-                            n = sym.arayinfo.sub.double();
-                            self.attr_array_map(method(1)) = n;
-                            p = self.addprop(method(1));
-                            p.GetMethod = @(self)get_pp_arr(self, method(1));
-                            p.SetMethod = @(self, value)set_pp_arr(self, method(1), value);
-                        end
-                    elseif (method_type == "270")
-                        self.mt_double_list = [self.mt_double_list method(1)];
-                    elseif (method_type == "328")
-                        self.mt_object_list = [self.mt_object_list method(1)];
-                    elseif (method_type == "329")
-                        self.mt_string_list = [self.mt_string_list method(1)];
+                        p.GetMethod = @(self)get_pp_prop(self, method(1));
+                        p.SetMethod = @(self, value)set_pp_prop(self, method(1), value);
+                    else  % array property
+                        n = sym.arayinfo.sub.double();
+                        self.attr_array_map(method(1)) = n;
+                        p = self.addprop(method(1));
+                        p.GetMethod = @(self)get_pp_arr(self, method(1));
+                        p.SetMethod = @(self, value)set_pp_arr(self, method(1), value);
                     end
+                elseif (method_type == "270")
+                    self.mt_double_list = [self.mt_double_list method(1)];
+                elseif (method_type == "328")
+                    self.mt_object_list = [self.mt_object_list method(1)];
+                elseif (method_type == "329")
+                    self.mt_string_list = [self.mt_string_list method(1)];
                 end
-            else
-                warning("Initialize a NEURON session before making an Object.");
             end
         end
 
         function delete(self)
         % Decrease refcount by 1.
         %   delete()
-            error("Functionality not implemented.");
-            clib.neuron.hoc_obj_unref(self.obj);
+            neuron_api('nrn_object_unref', self.obj);
 
         end
 
@@ -90,17 +84,15 @@ classdef Object < dynamicprops
         %   value = call_method_double(method, varargin)
             
             % Save state & try/catch in case the call fails.
-            error("Functionality not implemented.");
-            clib.neuron.increase_try_catch_nest_depth();
-            error("Functionality not implemented.");
-            state = clib.neuron.SavedState();
+            % error("Functionality not implemented.");
+            % clib.neuron.increase_try_catch_nest_depth();
+            % error("Functionality not implemented.");
+            % state = clib.neuron.SavedState();
             try
                 [nsecs, nargs] = neuron.stack.push_args(varargin{:});
+                sym = neuron_api('nrn_method_symbol', self.obj, method);
                 error("Functionality not implemented.");
-                sym = clib.neuron.hoc_table_lookup(method, ...
-                    self.obj.ctemplate.symtable);
-                error("Functionality not implemented.");
-                clib.neuron.hoc_call_ob_proc(self.obj, sym, nargs);
+                neuron_api('nrn_hoc_call_ob_proc', self.obj, sym, nargs);
                 value = neuron.stack.hoc_pop(returntype);
                 neuron.stack.pop_sections(nsecs);
             catch e
@@ -109,9 +101,9 @@ classdef Object < dynamicprops
                 value = NaN;
                 state.restore();
             end
-            clibRelease(state);
-            error("Functionality not implemented.");
-            clib.neuron.decrease_try_catch_nest_depth();
+            % clibRelease(state);
+            % error("Functionality not implemented.");
+            % clib.neuron.decrease_try_catch_nest_depth();
 
         end
 
