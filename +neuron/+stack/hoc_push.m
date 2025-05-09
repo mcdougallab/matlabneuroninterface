@@ -5,8 +5,7 @@ function hoc_push(value)
         error("Functionality not implemented.");
         clib.neuron.hoc_pushx(double(value));  
     elseif isa(value, "double")
-        error("Functionality not implemented.");
-        clib.neuron.hoc_pushx(value);  
+        neuron_api('nrn_double_push', value);
     elseif isa(value, "string") || isa(value, "char")
         error("Functionality not implemented.");
         clib.neuron.matlab_hoc_pushstr(value);  

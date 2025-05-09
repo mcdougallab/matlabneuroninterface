@@ -9,7 +9,7 @@ classdef Vector < neuron.Object
 
         function self = Vector(obj)
         % Initialize Vector
-        %   Vector(obj) constructs a Matlab wrapper for a Neuron vector
+        %   Vector(obj) constructs a Matlab wrapper for a NEURON vector
         %   (obj).
             self = self@neuron.Object(obj);
 
