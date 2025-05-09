@@ -8,7 +8,6 @@
 #include <string>
 
 
-
 #ifdef _WIN32
     #include <windows.h>
     #define DLL_HANDLE HMODULE
@@ -46,7 +45,7 @@ Symbol* (*nrn_symbol_)(char const* const name) = nullptr;
 int (*nrn_symbol_type_)(const Symbol* sym) = nullptr;
 int (*nrn_symbol_subtype_)(const Symbol* sym) = nullptr;
 char const* (*nrn_symbol_name_)(const Symbol* sym) = nullptr;
-double* (*nrn_symbol_pval_)(Symbol* sym) = nullptr;
+double* (*nrn_symbol_dataptr_)(Symbol* sym) = nullptr;
 
 Symbol* (*hoc_install_)(const char*, int, double, Symlist**) = nullptr;
 void (*nrn_register_function_)(void (*)(), const char*,  const int) = nullptr;
@@ -60,6 +59,10 @@ Object* (*nrn_object_new_)(Symbol* sym, int narg) = nullptr;
 void (*nrn_object_unref_)(Object*) = nullptr;
 char const* (*nrn_class_name_)(const Object*) = nullptr;
 Symbol* (*nrn_method_symbol_)(Object*, char const* const) = nullptr;
+void (*nrn_method_call_)(Object*, Symbol*, int) = nullptr;
+
+double* (*nrn_vector_data_)(Object*) = nullptr;
+
 
 bool has_inited = false;
 DLL_HANDLE neuron_handle = nullptr;
@@ -193,7 +196,7 @@ void nrnmatlab() {
     int status = mexEvalString(command_c);
 
     hoc_ret_();
-    hoc_pushx_(status);
+    nrn_double_push_(status);
 }
 
 // Register nrnmatlab function in hoc.
@@ -277,7 +280,7 @@ void nrn_get_value(const mxArray* prhs[], mxArray* plhs[]) {
     Symbol* sym = nrn_symbol_(propname.c_str());
 
     // Read value
-    double* value_ptr = nrn_symbol_pval_(sym);
+    double* value_ptr = nrn_symbol_dataptr_(sym);
     double value = *value_ptr;
 
     // Return to MATLAB
@@ -293,9 +296,28 @@ void nrn_set_value(const mxArray* prhs[], mxArray* plhs[]) {
     Symbol* sym = nrn_symbol_(propname.c_str());
 
     // Write new value
-    double* value_ptr = nrn_symbol_pval_(sym);
+    double* value_ptr = nrn_symbol_dataptr_(sym);
     *value_ptr = new_value;
 }
+
+void nrn_method_call(const mxArray* prhs[], mxArray* plhs[]) {
+    auto obj_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    Object* obj = reinterpret_cast<Object*>(obj_ptr);
+    auto sym_ptr = static_cast<uint64_t>(mxGetScalar(prhs[2]));
+    Symbol* method_sym = reinterpret_cast<Symbol*>(sym_ptr);
+    auto [narg] = extractParams<int>(prhs, 3);
+    nrn_method_call_(obj, method_sym, narg);
+}
+
+void nrn_vector_data(const mxArray* prhs[], mxArray* plhs[]) {
+    auto obj_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    Object* vec = reinterpret_cast<Object*>(obj_ptr);
+    double* data = nrn_vector_data_(vec);
+    plhs[0] = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
+    *(uint64_t*)mxGetData(plhs[0]) = reinterpret_cast<uint64_t>(data);
+}
+
+
 
 
 
@@ -382,8 +404,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         hoc_call_ob_proc_ = (void (*)(Object*, Symbol*, int)) DLL_GET_PROC(neuron_handle, "hoc_call_ob_proc");
         function_map["nrn_hoc_call_ob_proc"] = nrn_hoc_call_ob_proc;
         function_map["nrn_get_value"] = nrn_get_value;
-        nrn_symbol_pval_ = (double* (*)(Symbol*)) DLL_GET_PROC(neuron_handle, "nrn_symbol_pval");
+        nrn_symbol_dataptr_ = (double* (*)(Symbol*)) DLL_GET_PROC(neuron_handle, "nrn_symbol_dataptr");
         function_map["nrn_set_value"] = nrn_set_value;
+        nrn_method_call_ = (void (*)(Object*, Symbol*, int)) DLL_GET_PROC(neuron_handle, "nrn_method_call");
+        function_map["nrn_method_call"] = nrn_method_call;
+        nrn_vector_data_ = (double* (*)(Object*)) DLL_GET_PROC(neuron_handle, "nrn_vector_data");
+        function_map["nrn_vector_data"] = nrn_vector_data;
         
         // Clean up
         //DLL_FREE(wrapper_handle);

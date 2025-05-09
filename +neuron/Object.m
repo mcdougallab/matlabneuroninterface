@@ -91,15 +91,14 @@ classdef Object < dynamicprops
             try
                 [nsecs, nargs] = neuron.stack.push_args(varargin{:});
                 sym = neuron_api('nrn_method_symbol', self.obj, method);
-                error("Functionality not implemented.");
-                neuron_api('nrn_hoc_call_ob_proc', self.obj, sym, nargs);
+                neuron_api('nrn_method_call', self.obj, sym, nargs);
                 value = neuron.stack.hoc_pop(returntype);
                 neuron.stack.pop_sections(nsecs);
             catch e
                 warning(e.message);
                 warning("'"+string(method)+"': caught error during call to Neuron function.");
                 value = NaN;
-                state.restore();
+                % state.restore();
             end
             % clibRelease(state);
             % error("Functionality not implemented.");
