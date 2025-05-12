@@ -210,16 +210,6 @@ classdef Session < dynamicprops
             % it to methods(Static)... why?
             neuron_api('nrn_set_value', propname, value);
         end
-        function value = get_secondorder(~)
-        % Get property secondorder.
-        %   get_secondorder(propname)
-            value = neuron_api('nrn_get_secondorder');
-        end
-        function set_secondorder(~, value)
-        % Set property secondorder.
-        %   set_secondorder(propname, value)
-            value = neuron_api('nrn_set_secondorder');
-        end
         function quit(self)
         % Quit neuron and close matlab.
             if ismac || isunix
@@ -343,18 +333,17 @@ classdef Session < dynamicprops
 
             % Deal with input.
             if ~exist('section_list', 'var') % No input: get SectionList of all Sections.
-                error("Functionality not implemented.");
-                section_list = clib.neuron.get_section_list();
+                section_list = neuron_api('nrn_section_list');
             elseif isa(section_list, 'neuron.Object') % Input is a 'n.SectionList'
                 error("Functionality not implemented.");
-                section_list = clib.neuron.get_obj_u_this_pointer(section_list.obj);
+                section_list = neuron_api('nrn_sectionlist_data', section_list.obj);
             elseif isa(section_list, 'clib.neuron.Object') % Input is a C++ NEURON object
                 if clibIsNull(section_list) % If NULL, get SectionList of all Sections.
                     error("Functionality not implemented.");
-                    section_list = clib.neuron.get_section_list();
+                    section_list = neuron_api('nrn_section_list');
                 else  % Input is a fair dinkum NEURON SectionList
                     error("Functionality not implemented.");
-                    section_list = clib.neuron.get_obj_u_this_pointer(section_list);
+                    section_list = neuron_api('nrn_sectionlist_data', section_list);
                 end
             end
 
