@@ -27,7 +27,7 @@ classdef Object < dynamicprops
             method_str = neuron_api('get_class_methods', self.objtype);
             method_list = split(method_str, ";");
             method_list = method_list(1:end-1);
-            disp(method_list);
+            % disp(method_list);
 
             % Add dynamic properties.
             % See: doc/DEV_README.md#neuron-types
@@ -43,7 +43,7 @@ classdef Object < dynamicprops
                     p.SetMethod = @(self, value)set_steered_prop(self, method(1), value);
                 elseif (method_type == "310")  % point process property
                     sym = neuron_api('nrn_method_symbol', self.obj, method(1));
-                    disp(sym);
+                    % disp(sym);
                     if clibIsNull(sym.arayinfo)  % scalar property
                         self.attr_list = [self.attr_list method(1)];
                         p = self.addprop(method(1));

@@ -71,6 +71,8 @@ void (*nrn_str_push_)(char**) = nullptr;
 void (*nrn_object_push_)(Object*) = nullptr;
 void (*nrn_double_ptr_push_)(double*) = nullptr;
 
+int* (*nrn_symbol_intptr_)(Symbol* sym) = nullptr;
+
 
 bool has_inited = false;
 DLL_HANDLE neuron_handle = nullptr;
@@ -287,12 +289,15 @@ void nrn_get_value(const mxArray* prhs[], mxArray* plhs[]) {
     // Lookup symbol in top-level HOC context
     Symbol* sym = nrn_symbol_(propname.c_str());
 
-    // Read value
-    double* value_ptr = nrn_symbol_dataptr_(sym);
-    double value = *value_ptr;
-
-    // Return to MATLAB
-    plhs[0] = mxCreateDoubleScalar(value);
+    if (nrn_symbol_subtype_(sym) == 1) {
+        // If subtype is 2, cast to int* and return as int scalar
+        int* int_ptr = reinterpret_cast<int*>(nrn_symbol_dataptr_(sym));
+        plhs[0] = mxCreateDoubleScalar(static_cast<double>(*int_ptr));
+    } else {
+        // Otherwise, treat as double
+        double* value_ptr = nrn_symbol_dataptr_(sym);
+        plhs[0] = mxCreateDoubleScalar(*value_ptr);
+    }
 }
 
 void nrn_set_value(const mxArray* prhs[], mxArray* plhs[]) {
@@ -303,9 +308,15 @@ void nrn_set_value(const mxArray* prhs[], mxArray* plhs[]) {
     // Lookup symbol
     Symbol* sym = nrn_symbol_(propname.c_str());
 
-    // Write new value
-    double* value_ptr = nrn_symbol_dataptr_(sym);
-    *value_ptr = new_value;
+    if (nrn_symbol_subtype_(sym) == 1) {
+        // If subtype is 2, cast to int* and write new value as int
+        int* int_ptr = reinterpret_cast<int*>(nrn_symbol_dataptr_(sym));
+        *int_ptr = static_cast<int>(new_value);
+    } else {
+        // Otherwise, treat as double
+        double* value_ptr = nrn_symbol_dataptr_(sym);
+        *value_ptr = new_value;
+    }
 }
 
 void nrn_method_call(const mxArray* prhs[], mxArray* plhs[]) {
@@ -463,6 +474,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         function_map["nrn_object_push"] = nrn_object_push;
         nrn_double_ptr_push_ = (void (*)(double*)) DLL_GET_PROC(neuron_handle, "nrn_double_ptr_push");
         function_map["nrn_double_ptr_push"] = nrn_double_ptr_push;
+        nrn_symbol_intptr_ = (int* (*)(Symbol*)) DLL_GET_PROC(neuron_handle, "nrn_symbol_intptr");
         
         
         // Clean up
