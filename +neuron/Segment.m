@@ -17,8 +17,7 @@ classdef Segment < handle
         function push(self)
         % Push Segment to NEURON stack. 
         %   value = push()
-            error("Functionality not implemented.");
-            clib.neuron.nrn_pushsec(self.parent_sec.get_sec());
+            neuron_api('nrn_section_push', self.parent_sec.get_sec());
             neuron.stack.hoc_push(self.x);
         end
         function nrnref = ref(self, rangevar)

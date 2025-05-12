@@ -70,9 +70,19 @@ Object* (*nrn_object_pop_)(void) = nullptr;
 void (*nrn_str_push_)(char**) = nullptr;
 void (*nrn_object_push_)(Object*) = nullptr;
 void (*nrn_double_ptr_push_)(double*) = nullptr;
+void (*nrn_section_push_)(Section*) = nullptr;
 
-int* (*nrn_symbol_intptr_)(Symbol* sym) = nullptr;
-
+nrn_Item* (*nrn_allsec_)(void) = nullptr;
+nrn_Item* (*nrn_sectionlist_data_)(Object*) = nullptr;
+void (*nrn_mechanism_insert_)(Section*, const Symbol*) = nullptr;
+double (*nrn_rangevar_get_)(Symbol*, Section*, double) = nullptr;
+void (*nrn_section_connect_)(Section*, double, Section*, double) = nullptr;
+void (*nrn_section_length_set_)(Section*, double) = nullptr;
+double (*nrn_section_length_get_)(Section*) = nullptr;
+const char* (*nrn_secname_)(Section*) = nullptr;
+int (*nrn_nseg_get_)(Section const*) = nullptr;
+void (*nrn_nseg_set_)(Section*, const int) = nullptr;
+void (*nrn_segment_diam_set_)(Section*, const double, const double) = nullptr;
 
 bool has_inited = false;
 DLL_HANDLE neuron_handle = nullptr;
@@ -371,6 +381,107 @@ void nrn_double_ptr_push(const mxArray* prhs[], mxArray* plhs[]) {
     nrn_double_ptr_push_(ptr);
 }
 
+void nrn_section_list(const mxArray* prhs[], mxArray* plhs[]) {
+    nrn_Item* allsec = nrn_allsec_();
+    plhs[0] = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
+    *(uint64_t*)mxGetData(plhs[0]) = reinterpret_cast<uint64_t>(allsec);
+}
+
+void nrn_sectionlist_data(const mxArray* prhs[], mxArray* plhs[]) {
+    auto obj_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    Object* obj = reinterpret_cast<Object*>(obj_ptr);
+    nrn_Item* item = nrn_sectionlist_data_(obj);
+    plhs[0] = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
+    *(uint64_t*)mxGetData(plhs[0]) = reinterpret_cast<uint64_t>(item);
+}
+
+void nrn_section_push(const mxArray* prhs[], mxArray* plhs[]) {
+    auto sec_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    Section* sec = reinterpret_cast<Section*>(sec_ptr);
+    nrn_section_push_(sec);
+}
+
+void nrn_mechanism_insert(const mxArray* prhs[], mxArray* plhs[]) {
+    auto sec_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    Section* sec = reinterpret_cast<Section*>(sec_ptr);
+    auto mech_name = getStringFromMxArray(prhs[2]);
+    const Symbol* mechanism = nrn_symbol_(mech_name.c_str());
+    nrn_mechanism_insert_(sec, mechanism);
+}
+
+void nrn_rangevar_get(const mxArray* prhs[], mxArray* plhs[]) {
+    auto sym_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    Symbol* sym = reinterpret_cast<Symbol*>(sym_ptr);
+    auto sec_ptr = static_cast<uint64_t>(mxGetScalar(prhs[2]));
+    Section* sec = reinterpret_cast<Section*>(sec_ptr);
+    auto [x] = extractParams<double>(prhs, 3);
+    double result = nrn_rangevar_get_(sym, sec, x);
+    plhs[0] = mxCreateDoubleScalar(result);
+}
+
+void nrn_section_connect(const mxArray* prhs[], mxArray* plhs[]) {
+    auto child_sec_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    Section* child_sec = reinterpret_cast<Section*>(child_sec_ptr);
+    auto [child_x] = extractParams<double>(prhs, 2);
+    auto parent_sec_ptr = static_cast<uint64_t>(mxGetScalar(prhs[3]));
+    Section* parent_sec = reinterpret_cast<Section*>(parent_sec_ptr);
+    auto [parent_x] = extractParams<double>(prhs, 4);
+    nrn_section_connect_(child_sec, child_x, parent_sec, parent_x);
+}
+
+void nrn_section_length_set(const mxArray* prhs[], mxArray* plhs[]) {
+    auto sec_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    Section* sec = reinterpret_cast<Section*>(sec_ptr);
+    auto [length] = extractParams<double>(prhs, 2);
+    nrn_section_length_set_(sec, length);
+}
+
+void nrn_section_length_get(const mxArray* prhs[], mxArray* plhs[]) {
+    auto sec_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    Section* sec = reinterpret_cast<Section*>(sec_ptr);
+    double length = nrn_section_length_get_(sec);
+    plhs[0] = mxCreateDoubleScalar(length);
+}
+
+void nrn_secname(const mxArray* prhs[], mxArray* plhs[]) {
+    auto sec_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    Section* sec = reinterpret_cast<Section*>(sec_ptr);
+    const char* name = nrn_secname_(sec);
+    plhs[0] = mxCreateString(name);
+}
+
+void nrn_nseg_get(const mxArray* prhs[], mxArray* plhs[]) {
+    auto sec_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    Section* sec = reinterpret_cast<Section*>(sec_ptr);
+    int nseg = nrn_nseg_get_(sec);
+    plhs[0] = mxCreateDoubleScalar(static_cast<double>(nseg));
+}
+
+void nrn_nseg_set(const mxArray* prhs[], mxArray* plhs[]) {
+    auto sec_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    Section* sec = reinterpret_cast<Section*>(sec_ptr);
+    int nseg = (int) mxGetScalar(prhs[2]);
+    nrn_nseg_set_(sec, nseg);
+}
+
+void nrn_segment_diam_set(const mxArray* prhs[], mxArray* plhs[]) {
+    auto sec_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    Section* sec = reinterpret_cast<Section*>(sec_ptr);
+    auto [x, diam] = extractParams<double, double>(prhs, 2);
+    nrn_segment_diam_set_(sec, x, diam);
+}
+
+void nrn_section_diam_set(const mxArray* prhs[], mxArray* plhs[]) {
+    auto sec_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    Section* sec = reinterpret_cast<Section*>(sec_ptr);
+    double diam = mxGetScalar(prhs[2]);
+
+    int nseg = nrn_nseg_get_(sec);
+    for (int i = 0; i < nseg; ++i) {
+        double x = (i + 0.5) / nseg;  // center of each segment
+        nrn_segment_diam_set_(sec, x, diam);
+    }
+}
 
 
 
@@ -464,6 +575,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         nrn_vector_data_ = (double* (*)(Object*)) DLL_GET_PROC(neuron_handle, "nrn_vector_data");
         function_map["nrn_vector_data"] = nrn_vector_data;
         nrn_section_pop_ = (void (*)(void)) DLL_GET_PROC(neuron_handle, "nrn_section_pop");
+        function_map["nrn_section_pop"] = nrn_section_pop;
         nrn_pop_str_ = (char** (*)(void)) DLL_GET_PROC(neuron_handle, "nrn_pop_str");
         function_map["nrn_pop_str"] = nrn_pop_str;
         nrn_object_pop_ = (Object* (*)(void)) DLL_GET_PROC(neuron_handle, "nrn_object_pop");
@@ -474,7 +586,33 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         function_map["nrn_object_push"] = nrn_object_push;
         nrn_double_ptr_push_ = (void (*)(double*)) DLL_GET_PROC(neuron_handle, "nrn_double_ptr_push");
         function_map["nrn_double_ptr_push"] = nrn_double_ptr_push;
-        nrn_symbol_intptr_ = (int* (*)(Symbol*)) DLL_GET_PROC(neuron_handle, "nrn_symbol_intptr");
+        nrn_allsec_ = (nrn_Item* (*)(void)) DLL_GET_PROC(neuron_handle, "nrn_allsec");
+        function_map["nrn_section_list"] = nrn_section_list;
+        nrn_sectionlist_data_ = (nrn_Item* (*)(Object*)) DLL_GET_PROC(neuron_handle, "nrn_sectionlist_data");
+        function_map["nrn_sectionlist_data"] = nrn_sectionlist_data;
+        nrn_section_push_ = (void (*)(Section*)) DLL_GET_PROC(neuron_handle, "nrn_section_push");
+        function_map["nrn_section_push"] = nrn_section_push;
+        nrn_section_new_ = (Section* (*)(char const*)) DLL_GET_PROC(neuron_handle, "nrn_section_new");
+        function_map["nrn_section_new"] = nrn_section_new;
+        nrn_mechanism_insert_ = (void (*)(Section*, const Symbol*)) DLL_GET_PROC(neuron_handle, "nrn_mechanism_insert");
+        function_map["nrn_mechanism_insert"] = nrn_mechanism_insert;
+        nrn_rangevar_get_ = (double (*)(Symbol*, Section*, double)) DLL_GET_PROC(neuron_handle, "nrn_rangevar_get");
+        function_map["nrn_rangevar_get"] = nrn_rangevar_get;
+        nrn_section_connect_ = (void (*)(Section*, double, Section*, double)) DLL_GET_PROC(neuron_handle, "nrn_section_connect");
+        function_map["nrn_section_connect"] = nrn_section_connect;
+        nrn_section_length_set_ = (void (*)(Section*, double)) DLL_GET_PROC(neuron_handle, "nrn_section_length_set");
+        function_map["nrn_section_length_set"] = nrn_section_length_set;
+        nrn_section_length_get_ = (double (*)(Section*)) DLL_GET_PROC(neuron_handle, "nrn_section_length_get");
+        function_map["nrn_section_length_get"] = nrn_section_length_get;
+        nrn_secname_ = (const char* (*)(Section*)) DLL_GET_PROC(neuron_handle, "nrn_secname");
+        function_map["nrn_secname"] = nrn_secname;
+        nrn_nseg_get_ = (int (*)(Section const*)) DLL_GET_PROC(neuron_handle, "nrn_nseg_get");
+        function_map["nrn_nseg_get"] = nrn_nseg_get;
+        nrn_nseg_set_ = (void (*)(Section*, const int)) DLL_GET_PROC(neuron_handle, "nrn_nseg_set");
+        function_map["nrn_nseg_set"] = nrn_nseg_set;
+        nrn_segment_diam_set_ = (void (*)(Section*, const double, const double)) DLL_GET_PROC(neuron_handle, "nrn_segment_diam_set");
+        function_map["nrn_segment_diam_set"] = nrn_segment_diam_set;
+        function_map["nrn_section_diam_set"] = nrn_section_diam_set;
         
         
         // Clean up

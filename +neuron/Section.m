@@ -25,57 +25,48 @@ classdef Section < handle
         %   Section(name) 
         %   Section(cppobj)
         %   Section(cppobj, false)
-            error("Functionality not implemented.");
-            if clib.neuron.isinitialized()
-                % Check if input is a section name (string/char)
-                if (isa(value, "string") || isa(value, "char"))
-                    name = value;
-                    error("Functionality not implemented.");
-                    self.sec = clib.neuron.new_section(name);
-                elseif isa(value, "clib.neuron.Section")
-                    sec = value;
-                    self.sec = sec;
-                else
-                    error("Invalid input for Section constructor.")
-                end
-                if exist('owner', 'var')
-                    self.owner = owner;
-                else
-                    self.owner = true;
-                end
-                self.mech_list = [];
-                self.range_list = [];
+            % Check if input is a section name (string/char)
+            if (isa(value, "string") || isa(value, "char"))
+                name = value;
+                self.sec = neuron_api('nrn_section_new', name);
+            elseif isa(value, "clib.neuron.Section")
                 error("Functionality not implemented.");
-                arr = split(clib.neuron.get_nrn_functions(), ";");
-                arr = arr(1:end-1);
-    
-                % Add dynamic mechanisms and range variables.
-                % See: doc/DEV_README.md#neuron-types
-                for i=1:length(arr)
-                    var = split(arr(i), ":");
-                    var_types = split(var(2), "-");
-                    var_type = var_types(1);
-                    % var_subtype = var_types(2);
-                    if (var_type == "310") % range variable
-                        self.range_list = [self.range_list var(1)];
-                    elseif (var_type == "311") % insertable mechanism
-                        self.mech_list = [self.mech_list var(1)];
-                    end
-                end
-
+                sec = value;
+                self.sec = sec;
             else
-                error("Initialize a Neuron session before making a Section.");
+                error("Invalid input for Section constructor.")
+            end
+            if exist('owner', 'var')
+                self.owner = owner;
+            else
+                self.owner = true;
+            end
+            self.mech_list = [];
+            self.range_list = [];
+            arr = split(neuron_api('get_nrn_functions'), ";");
+            arr = arr(1:end-1);
+
+            % Add dynamic mechanisms and range variables.
+            % See: doc/DEV_README.md#neuron-types
+            for i=1:length(arr)
+                var = split(arr(i), ":");
+                var_types = split(var(2), "-");
+                var_type = var_types(1);
+                % var_subtype = var_types(2);
+                if (var_type == "310") % range variable
+                    self.range_list = [self.range_list var(1)];
+                elseif (var_type == "311") % insertable mechanism
+                    self.mech_list = [self.mech_list var(1)];
+                end
             end
         end
         
         function delete_nrn_sec(self)
         % Destroy the Neuron Section.
         %   delete_nrn_sec()
-            error("Functionality not implemented.");
             % clib.neuron.section_unref(self.sec);  % Not necessary.
             self.push();
-            error("Functionality not implemented.");
-            clib.neuron.hoc_oc("{delete_section()}");
+            neuron_api('nrn_hoc_call', '{delete_section()}');
             % neuron.stack.pop_sections(1);  % Not necessary.
         end
 
@@ -183,10 +174,7 @@ classdef Section < handle
         % Insert a mechanism by providing a mechanism name.
         %   insert_mechanism(mech_name)
             if any(strcmp(self.mech_list, mech_name))
-                error("Functionality not implemented.");
-                sym = clib.neuron.hoc_lookup(mech_name);
-                error("Functionality not implemented.");
-                clib.neuron.mech_insert1(self.sec, sym.subtype);
+                neuron_api('nrn_mechanism_insert', self.sec, mech_name);
             else
                 error("Insertable mechanism '"+mech_name+"' not found.");
                 disp("Available insertable mechanisms:")
@@ -204,9 +192,12 @@ classdef Section < handle
         % along the segment (loc) between 0 and 1.
         %   nrnref = ref(rangevar, loc) 
             if any(strcmp(self.range_list, rangevar))
+                double = neuron_api('nrn_rangevar_get', self.sec, rangevar, loc);
+                disp("double: "+double);
+                nrnref_ptr = uint64(double); % Interpret the double as a pointer
+                disp(nrnref_ptr);
                 error("Functionality not implemented.");
-                nrnref = clib.neuron.range_ref(self.sec, rangevar, loc);
-                nrnref = neuron.NrnRef(nrnref);
+                nrnref = neuron.NrnRef(nrnref_ptr); % Create an NrnRef object
             else
                 warning("Range variable '"+rangevar+"' not found.");
                 disp("Available range variables:")
@@ -233,98 +224,61 @@ classdef Section < handle
                 loc = 0;
                 parent_loc = 1;
             end
-            error("Functionality not implemented.");
-            clib.neuron.nrn_pushsec(self.sec);
-            error("Functionality not implemented.");
-            clib.neuron.hoc_pushx(loc);
-            error("Functionality not implemented.");
-            clib.neuron.nrn_pushsec(parent_sec.get_sec());
-            error("Functionality not implemented.");
-            clib.neuron.hoc_pushx(parent_loc);
-            error("Functionality not implemented.");
-            clib.neuron.simpleconnectsection();
+            neuron_api('nrn_section_connect', self.sec, loc, parent_sec.sec, parent_loc);
         end
 
         function push(self)
         % Push self to Section stack.
         %   push()
-            error("Functionality not implemented.");
-            clib.neuron.nrn_pushsec(self.sec);
+            neuron_api('nrn_section_push', self.sec);
         end
 
         function addpoint(self, x, y, z, diam)
         % Add point to Section.
         %   addpoint(x, y, z, diam)            
             self.push();
-            error("Functionality not implemented.");
-            clib.neuron.hoc_pushx(x);
-            error("Functionality not implemented.");
-            clib.neuron.hoc_pushx(y);
-            error("Functionality not implemented.");
-            clib.neuron.hoc_pushx(z);
-            error("Functionality not implemented.");
-            clib.neuron.hoc_pushx(diam);
-            error("Functionality not implemented.");
-            sym = clib.neuron.hoc_lookup("pt3dadd");
-            error("Functionality not implemented.");
-            clib.neuron.hoc_call_func(sym, 4);
+            neuron_api('nrn_double_push', x);
+            neuron_api('nrn_double_push', y);
+            neuron_api('nrn_double_push', z);
+            neuron_api('nrn_double_push', diam);
+            neuron_api('nrn_function_call', 'pt3dadd', 4);
+            neuron.stack.hoc_pop('double'); % Since nrn_function_call leaves rvalue on stack
             neuron.stack.pop_sections(1);
         end
         function set.length(self, val)
         % Set length of Section.
-            error("Functionality not implemented.");
-            clib.neuron.set_dparam(self.sec, 2, val);
-            error("Functionality not implemented.");
-            clib.neuron.nrn_length_change(self.sec, val);
-            error("Functionality not implemented.");
-            clib.neuron.set_diam_changed(1);
-            self.sec.recalc_area_ = 1;
+            neuron_api('nrn_section_length_set', self.sec, val);
         end
         function value = get.length(self)
         % Get length of Section.
             % We cannot directly access self.sec.prop.dparam, because it
             % is a union, which Matlab does not understand.
-            error("Functionality not implemented.");
-            value = clib.neuron.get_dparam(self.sec, 2);
+            value = neuron_api('nrn_section_length_get', self.sec);
         end
         function value = get.name(self)
         % Get Section name.
-            error("Functionality not implemented.");
-            value = clib.neuron.secname(self.sec);
+            value = neuron_api('nrn_secname', self.sec);
         end
         function self = set.nseg(self, val)
         % Set the number of segments in the Section.
-            error("Functionality not implemented.");
-            clib.neuron.nrn_change_nseg(self.sec, val);
+            neuron_api('nrn_nseg_set', self.sec, val);
         end
         function value = get.nseg(self)
         % Get the number of segments in the Section.
-            value = self.sec.nnode - 1;
+            value = neuron_api('nrn_nseg_get', self.sec);
         end
         function self = set_diameter(self, val)
         % Set diameter of Section.
         %   set_diameter(val)
-
-            for i=1:self.nseg
-                x = double((double(i) - 0.5) / double(self.nseg));
-                error("Functionality not implemented.");
-                node = clib.neuron.node_exact(self.sec, x);
-                error("Functionality not implemented.");
-                clib.neuron.set_node_diam(node, val);
-            end
+            neuron_api('nrn_section_diam_set', self.sec, val);
 
         end
         function psection(self)
         % Print psection info
         %   psection()
-            error("Functionality not implemented.");
-            clib.neuron.nrn_pushsec(self.sec);
-            error("Functionality not implemented.");
-            sym = clib.neuron.hoc_lookup("psection");
-            error("Functionality not implemented.");
-            clib.neuron.hoc_call_func(sym, 0);
-            error("Functionality not implemented.");
-            clib.neuron.nrn_sec_pop();
+            neuron_api('nrn_section_push', self.sec);
+            neuron_api('nrn_function_call', 'psection', 0);
+            neuron_api('nrn_section_pop');
         end
         function pt3d = get_pt3d(self)
         % Get all 3D point information; returns a 5xN matrix for N 3D
@@ -338,7 +292,7 @@ classdef Section < handle
             z3d = double(clib.neuron.get_z3d(self.sec));
             error("Functionality not implemented.");
             arc3d = double(clib.neuron.get_arc3d(self.sec));
-            error("Functionality not implemented.");error("Functionality not implemented.");
+            error("Functionality not implemented.");
             d3d = double(clib.neuron.get_d3d(self.sec));
             pt3d = [x3d; y3d; z3d; arc3d; d3d];
         end
