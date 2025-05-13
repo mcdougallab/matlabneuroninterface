@@ -7,9 +7,6 @@ classdef FInitializeHandler < handle
     end
     methods
         function self = FInitializeHandler(type_or_func_handle, func_handle)
-            if clibConfiguration("neuron").ExecutionMode ~= "inprocess"
-                error("Neuron has to be run inprocess to be able to instantiate FInitializeHandler");
-            end
 
             % Instance id to be reference to this object from C++.
             persistent instance_id
@@ -35,12 +32,10 @@ classdef FInitializeHandler < handle
             % Random UUID used as we are polluting the hoc name space.
             uuid = replace(char(matlab.lang.internal.uuid()), "-", "_");
             func_name = "matlab_Neuron_" + uuid;
-            error("Functionality not implemented.");
-            self.hoc_object = clib.neuron.create_FInitializeHandler(type, func_name, string(instance_id));
+            self.hoc_object = neuron_api('create_FInitializeHandler', type, func_name, string(instance_id));
         end
         function delete(self)
-            error("Functionality not implemented.");
-            clib.neuron.hoc_obj_unref(self.hoc_object);
+            neuron_api('nrn_object_unref', self.hoc_object);
         end
     end
     methods(Static)
@@ -48,7 +43,7 @@ classdef FInitializeHandler < handle
         % Function sets handler value when 2 params are passed and calls handler value when 1 is passed.
         % Used by C++, not intended to be called through matlab.
             % Dict holding references to all the created FInitializeHandlers.
-            % Will be used from C++ to call the FInitializeHandlers func_handle's.
+            % Will be used from C++ to call the FInitializeHandlers func_handles.
             persistent handlers;
             if isempty(handlers)
                 handlers = dictionary();

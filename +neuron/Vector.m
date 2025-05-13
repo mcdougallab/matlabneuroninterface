@@ -57,8 +57,7 @@ classdef Vector < neuron.Object
         function nrnref = ref(self)
         % Get reference to vector data.
         %   nrnref = ref()
-            error("Functionality not implemented.");
-            nrnref = neuron.NrnRef(clib.neuron.get_vector_ref(self.obj, self.length()));
+            nrnref = neuron.NrnRef(neuron_api('nrn_vector_data_ref', self.obj, self.length()));
         end
 
         function vec = get_vec(self)
