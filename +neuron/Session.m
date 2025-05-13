@@ -167,7 +167,7 @@ classdef Session < dynamicprops
             catch  
                 % Check again if var/func exists; available functions can
                 % change due to importing .hoc files, for example.
-                disp("Refreshing dynamic properties.");
+                % disp("Refreshing dynamic properties.");
                 self.fill_dynamic_props();
                 [varargout{1:nargout}] = self.dynamic_call(S);
             end
@@ -239,11 +239,6 @@ classdef Session < dynamicprops
         % Call function by passing function name (func) to HOC lookup, along with its return type (returntype) and arguments (varargin).
         %   value = call_func_hoc(func, returntype, varargin)
 
-            % Save state & try/catch in case the call fails.
-            % error("Functionality not implemented.");
-            % clib.neuron.increase_try_catch_nest_depth();
-            % error("Functionality not implemented.");
-            % state = clib.neuron.SavedState();
             try
                 [nsecs, nargs] = neuron.stack.push_args(varargin{:});
                 % disp(nsecs);
@@ -257,20 +252,12 @@ classdef Session < dynamicprops
                 warning("'"+string(func)+"': caught error during call to Neuron function.");
                 % state.restore();
             end
-            % clibRelease(state);
-            % error("Functionality not implemented.");
-            % clib.neuron.decrease_try_catch_nest_depth();
 
         end
         function obj = hoc_new_obj(objtype, varargin)
         % Make object by providing object type (objtype) and constructor arguments (varargin).
         %   obj = hoc_new_obj(objtype, varargin)
 
-            % Save state & try/catch in case the call fails.
-            % error("Functionality not implemented.");
-            % clib.neuron.increase_try_catch_nest_depth();
-            % error("Functionality not implemented.");
-            % state = clib.neuron.SavedState();
             try
                 if (objtype == "Vector") && (numel(varargin) == 1) && (numel(varargin{:}) > 1)
                     % Special case: construct Vector from list.
@@ -302,9 +289,6 @@ classdef Session < dynamicprops
                 warning("'"+string(objtype)+"': number or type of arguments incorrect.");
                 % state.restore();
             end
-            % clibRelease(state);
-            % error("Functionality not implemented.");
-            % clib.neuron.decrease_try_catch_nest_depth();
 
         end
         function value = hoc_oc(str)
@@ -316,7 +300,7 @@ classdef Session < dynamicprops
         function nrnref = ref(sym)
         % Return an NrnRef containing a pointer to a top-level symbol (sym).
         %   nrnref = ref(sym)
-            nrnref = neuron.NrnRef(neuron_api('nrn_get_value', sym));
+            nrnref = neuron.NrnRef(neuron_api('nrn_get_value_ref', sym));
         end
         function reset_sections()
         % Reset topology.
@@ -335,7 +319,6 @@ classdef Session < dynamicprops
             if ~exist('section_list', 'var') % No input: get SectionList of all Sections.
                 section_list = neuron_api('nrn_section_list');
             elseif isa(section_list, 'neuron.Object') % Input is a 'n.SectionList'
-                error("Functionality not implemented.");
                 section_list = neuron_api('nrn_sectionlist_data', section_list.obj);
             elseif isa(section_list, 'clib.neuron.Object') % Input is a C++ NEURON object
                 if clibIsNull(section_list) % If NULL, get SectionList of all Sections.

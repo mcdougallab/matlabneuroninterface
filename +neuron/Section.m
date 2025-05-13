@@ -29,10 +29,6 @@ classdef Section < handle
             if (isa(value, "string") || isa(value, "char"))
                 name = value;
                 self.sec = neuron_api('nrn_section_new', name);
-            elseif isa(value, "clib.neuron.Section")
-                error("Functionality not implemented.");
-                sec = value;
-                self.sec = sec;
             else
                 error("Invalid input for Section constructor.")
             end
@@ -64,7 +60,6 @@ classdef Section < handle
         function delete_nrn_sec(self)
         % Destroy the Neuron Section.
         %   delete_nrn_sec()
-            % clib.neuron.section_unref(self.sec);  % Not necessary.
             self.push();
             neuron_api('nrn_hoc_call', '{delete_section()}');
             % neuron.stack.pop_sections(1);  % Not necessary.
@@ -192,12 +187,7 @@ classdef Section < handle
         % along the segment (loc) between 0 and 1.
         %   nrnref = ref(rangevar, loc) 
             if any(strcmp(self.range_list, rangevar))
-                double = neuron_api('nrn_rangevar_get', self.sec, rangevar, loc);
-                disp("double: "+double);
-                nrnref_ptr = uint64(double); % Interpret the double as a pointer
-                disp(nrnref_ptr);
-                error("Functionality not implemented.");
-                nrnref = neuron.NrnRef(nrnref_ptr); % Create an NrnRef object
+                nrnref = neuron.NrnRef(neuron_api('nrn_rangevar_get_ref', self.sec, rangevar, loc));
             else
                 warning("Range variable '"+rangevar+"' not found.");
                 disp("Available range variables:")
@@ -284,17 +274,19 @@ classdef Section < handle
         % Get all 3D point information; returns a 5xN matrix for N 3D
         % points, with rows [x, y, z, arc, d].
         %   pt3d = get_pt3d()
-            error("Functionality not implemented.");
-            x3d = double(clib.neuron.get_x3d(self.sec));
-            error("Functionality not implemented.");
-            y3d = double(clib.neuron.get_y3d(self.sec));
-            error("Functionality not implemented.");
-            z3d = double(clib.neuron.get_z3d(self.sec));
-            error("Functionality not implemented.");
-            arc3d = double(clib.neuron.get_arc3d(self.sec));
-            error("Functionality not implemented.");
-            d3d = double(clib.neuron.get_d3d(self.sec));
-            pt3d = [x3d; y3d; z3d; arc3d; d3d];
+            neuron_api('nrn_section_push', self.sec);
+            neuron_api('nrn_function_call', 'n3d', 0);
+            n3d = neuron.stack.hoc_pop('double');
+            pt3d = zeros(5, n3d);
+
+            fields = {'x3d', 'y3d', 'z3d', 'arc3d', 'diam3d'};
+            for i = 0:(n3d - 1)
+                for j = 1:numel(fields)
+                    neuron.stack.push_args(i);
+                    neuron_api('nrn_function_call', fields{j}, 1);
+                    pt3d(j, i + 1) = neuron.stack.hoc_pop('double');
+                end
+            end
         end
         function info(self)
         % Print section info
