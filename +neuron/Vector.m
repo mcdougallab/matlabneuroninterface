@@ -33,7 +33,7 @@ classdef Vector < neuron.Object
             % Assigning a Vector element by index.
             if (length(S) == 1 && S(1).type == "()")
                 element_id = S(1).subs{:};
-                self.call_method_hoc("set", "Object", element_id-1, varargin{:});
+                self.call_method_hoc('set', 'Object', element_id-1, varargin{:});
             % Are we trying to directly access a class property?
             elseif (isa(S(1).subs, "char") && length(S) == 1 && isprop(self, S(1).subs))
                 self.(S(1).subs) = varargin{:};
@@ -57,7 +57,8 @@ classdef Vector < neuron.Object
         function nrnref = ref(self)
         % Get reference to vector data.
         %   nrnref = ref()
-            nrnref = neuron.NrnRef(neuron_api('nrn_vector_data_ref', self.obj, self.length()));
+            nrnref = neuron_api('nrn_vector_data_ref', self.obj, self.length());
+            nrnref = neuron.NrnRef(nrnref);
         end
 
         function vec = get_vec(self)
@@ -70,7 +71,7 @@ classdef Vector < neuron.Object
         % Access Vector data.
         %   arr = data()
         %   element = data(index)
-            arr = neuron_api('nrn_vector_data', self.obj);
+            arr = neuron_api('nrn_vector_data', self.obj, self.length());
             
             if nargin == 2
                 arr = arr(index);

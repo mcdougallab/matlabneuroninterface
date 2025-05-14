@@ -292,7 +292,9 @@ classdef Section < handle
         % Print section info
         %   info()
             
-            npt3d = self.sec.npt3d;
+            neuron_api('nrn_section_push', self.sec);
+            neuron_api('nrn_function_call', 'n3d', 0);
+            npt3d = neuron.stack.hoc_pop('double');
             disp(self.name + " has length " + self.length + ".");
             disp(self.name + " has " + npt3d + " pt3d and " ...
                 + self.nseg + " segment(s).");
