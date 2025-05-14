@@ -6,6 +6,9 @@
 #include <tuple>
 #include <unordered_map>
 #include <string>
+#include <vector>
+#include <cstdint>
+#include <cstring>
 
 
 #ifdef _WIN32
@@ -35,11 +38,17 @@ void (*nrn_function_call_)(Symbol* sym, int narg) = nullptr;
 
 Symlist* (*nrn_global_symbol_table_)(void) = nullptr;
 Symlist* (*nrn_top_level_symbol_table_)(void) = nullptr;
+
 SymbolTableIterator* (*nrn_symbol_table_iterator_new_)(Symlist* my_symbol_table) = nullptr;
 void (*nrn_symbol_table_iterator_free_)(SymbolTableIterator* st) = nullptr;
 Symbol* (*nrn_symbol_table_iterator_next_)(SymbolTableIterator* st) = nullptr;
 int (*nrn_symbol_table_iterator_done_)(SymbolTableIterator* st) = nullptr;
 Symlist* (*nrn_symbol_table_)(Symbol* sym) = nullptr;
+
+SectionListIterator* (*nrn_sectionlist_iterator_new_)(nrn_Item*) = nullptr;
+void (*nrn_sectionlist_iterator_free_)(SectionListIterator*) = nullptr;
+Section* (*nrn_sectionlist_iterator_next_)(SectionListIterator*) = nullptr;
+int (*nrn_sectionlist_iterator_done_)(SectionListIterator*) = nullptr;
 
 Symbol* (*nrn_symbol_)(char const* const name) = nullptr;
 int (*nrn_symbol_type_)(const Symbol* sym) = nullptr;
@@ -396,8 +405,10 @@ void nrn_method_call(const mxArray* prhs[], mxArray* plhs[]) {
 void nrn_vector_data(const mxArray* prhs[], mxArray* plhs[]) {
     auto obj_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
     Object* vec = reinterpret_cast<Object*>(obj_ptr);
+    int len = static_cast<int>(mxGetScalar(prhs[2]));
     double* data = nrn_vector_data_(vec);
-    plhs[0] = mxCreateDoubleScalar(*data);
+    plhs[0] = mxCreateDoubleMatrix(1, len, mxREAL);
+    std::memcpy(mxGetPr(plhs[0]), data, len * sizeof(double));
 }
 
 void nrn_vector_data_ref(const mxArray* prhs[], mxArray* plhs[]) {
@@ -612,6 +623,39 @@ void nrn_get_value_ref(const mxArray* prhs[], mxArray* plhs[]) {
     }
 }
 
+void nrn_loop_sections(const mxArray* prhs[], mxArray* plhs[]) {
+    // Get the section list type (0 for allsec, 1 for specific SectionList)
+    int list_type = static_cast<int>(mxGetScalar(prhs[1]));
+
+    SectionListIterator* sli = nullptr;
+
+    if (list_type == 0) {
+        // Use allsec
+        sli = nrn_sectionlist_iterator_new_(nrn_allsec_());
+    } else if (list_type == 1) {
+        // Use specific SectionList
+        auto seclist_ptr = static_cast<uint64_t>(mxGetScalar(prhs[2]));
+        nrn_Item* seclist = reinterpret_cast<nrn_Item*>(seclist_ptr);
+        sli = nrn_sectionlist_iterator_new_(seclist);
+    }
+
+    // Create a MATLAB cell array to store section names
+    std::vector<std::string> section_names;
+
+    while (!nrn_sectionlist_iterator_done_(sli)) {
+        Section* sec = nrn_sectionlist_iterator_next_(sli);
+        section_names.push_back(nrn_secname_(sec));
+    }
+
+    nrn_sectionlist_iterator_free_(sli);
+
+    // Convert section names to MATLAB cell array
+    plhs[0] = mxCreateCellMatrix(section_names.size(), 1);
+    for (size_t i = 0; i < section_names.size(); ++i) {
+        mxSetCell(plhs[0], i, mxCreateString(section_names[i].c_str()));
+    }
+}
+
 
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
@@ -671,6 +715,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         nrn_symbol_table_iterator_free_ = (void (*)(SymbolTableIterator*)) DLL_GET_PROC(neuron_handle, "nrn_symbol_table_iterator_free");
         nrn_symbol_table_iterator_next_ = (Symbol* (*)(SymbolTableIterator*)) DLL_GET_PROC(neuron_handle, "nrn_symbol_table_iterator_next");
         nrn_symbol_table_iterator_done_ = (int (*)(SymbolTableIterator*)) DLL_GET_PROC(neuron_handle, "nrn_symbol_table_iterator_done");
+        nrn_sectionlist_iterator_new_ = (SectionListIterator* (*)(nrn_Item*)) DLL_GET_PROC(neuron_handle, "nrn_sectionlist_iterator_new");
+        nrn_sectionlist_iterator_free_ = (void (*)(SectionListIterator*)) DLL_GET_PROC(neuron_handle, "nrn_sectionlist_iterator_free");
+        nrn_sectionlist_iterator_next_ = (Section* (*)(SectionListIterator*)) DLL_GET_PROC(neuron_handle, "nrn_sectionlist_iterator_next");
+        nrn_sectionlist_iterator_done_ = (int (*)(SectionListIterator*)) DLL_GET_PROC(neuron_handle, "nrn_sectionlist_iterator_done");
+        function_map["nrn_loop_sections"] = nrn_loop_sections;
         nrn_symbol_ = (Symbol* (*)(char const* const)) DLL_GET_PROC(neuron_handle, "nrn_symbol");
         nrn_symbol_type_ = (int (*)(const Symbol*)) DLL_GET_PROC(neuron_handle, "nrn_symbol_type");
         nrn_symbol_subtype_ = (int (*)(const Symbol*)) DLL_GET_PROC(neuron_handle, "nrn_symbol_subtype");

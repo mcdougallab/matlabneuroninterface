@@ -318,53 +318,26 @@ classdef Session < dynamicprops
             % Deal with input.
             if ~exist('section_list', 'var') % No input: get SectionList of all Sections.
                 section_list = neuron_api('nrn_section_list');
+                disp("Size of section_list: " + numel(section_list));
             elseif isa(section_list, 'neuron.Object') % Input is a 'n.SectionList'
                 section_list = neuron_api('nrn_sectionlist_data', section_list.obj);
-            elseif isa(section_list, 'clib.neuron.Object') % Input is a C++ NEURON object
-                if clibIsNull(section_list) % If NULL, get SectionList of all Sections.
-                    error("Functionality not implemented.");
-                    section_list = neuron_api('nrn_section_list');
-                else  % Input is a fair dinkum NEURON SectionList
-                    error("Functionality not implemented.");
-                    section_list = neuron_api('nrn_sectionlist_data', section_list);
-                end
             end
 
             if ~exist('owner', 'var')
                 owner = false;
             end
 
-            section_iter = section_list.next;
-            error("Functionality not implemented.");
-            section = clib.neuron.get_hoc_item_element_sec(section_iter);
-            if clibIsNull(section)
-                all_sections = {};
-            else
-                all_sections = {neuron.Section(section, owner)};
-            
-                % Iterate using section_iter.next.
-                while true
-                    section_iter = section_iter.next;
-                    error("Functionality not implemented.");
-                    section = clib.neuron.get_hoc_item_element_sec(section_iter);
-                    if clibIsNull(section)
-                        % End of the section chain.
-                        break;
-                    else
-                        if clibIsNull(section.prop)
-                            % Invalidated section: do not append, delete and unref.
-                            error("Functionality not implemented.");
-                            clib.neuron.hoc_l_delete(section_iter);
-                            error("Functionality not implemented.");
-                            clib.neuron.section_unref(section);
-                        else
-                            % Valid section: append.
-                            all_sections{end+1} = neuron.Section(section, owner);
-                        end
-                    end
-                end
+            % Call the MEX function to get section pointers
+            section_names = neuron_api('nrn_loop_sections', 1, section_list);
+            disp("Section names: ");
+            disp(section_names);
+
+            % Convert section pointers to Section objects
+            all_sections = cell(size(section_names));
+            for i = 1:numel(section_names)
+                section_name = char(section_names{i});
+                all_sections{i} = neuron.Section(section_name, owner);
             end
         end
-
     end
 end

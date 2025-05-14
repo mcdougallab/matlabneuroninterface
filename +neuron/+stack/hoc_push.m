@@ -13,7 +13,7 @@ function hoc_push(value)
         neuron_api('nrn_double_ptr_push', value.obj);
     elseif isa(value, "clib.type.nullptr")
         error("Functionality not implemented.");
-       neuron_api('nrn_object_push', clib.type.nullptr);
+        neuron_api('nrn_object_push', clib.type.nullptr);
     else
         error("Input of type "+class(value)+" not allowed.");
     end
