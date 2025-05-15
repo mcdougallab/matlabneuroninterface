@@ -29,6 +29,9 @@ classdef Section < handle
             if (isa(value, "string") || isa(value, "char"))
                 name = value;
                 self.sec = neuron_api('nrn_section_new', name);
+            elseif isa(value, "uint64")
+                sec = value;
+                self.sec = sec;
             else
                 error("Invalid input for Section constructor.")
             end
@@ -58,7 +61,7 @@ classdef Section < handle
         end
         
         function delete_nrn_sec(self)
-        % Destroy the Neuron Section.
+        % Destroy the NEURON Section.
         %   delete_nrn_sec()
             self.push();
             neuron_api('nrn_hoc_call', '{delete_section()}');
@@ -69,7 +72,7 @@ classdef Section < handle
         % Destroy the Section object.
         %   delete()
             if self.owner
-                if ~clibIsNull(self.sec.prop)
+                if (neuron_api('nrn_section_is_alive', self.sec))
                     self.delete_nrn_sec();
                 else
                     warning('Attempting to delete Section that was already deleted.');
@@ -187,7 +190,8 @@ classdef Section < handle
         % along the segment (loc) between 0 and 1.
         %   nrnref = ref(rangevar, loc) 
             if any(strcmp(self.range_list, rangevar))
-                nrnref = neuron.NrnRef(neuron_api('nrn_rangevar_get_ref', self.sec, rangevar, loc));
+                % nrnref = neuron.NrnRef(neuron_api('nrn_rangevar_get_ref', self.sec, rangevar, loc));
+                disp(nrnref);
             else
                 warning("Range variable '"+rangevar+"' not found.");
                 disp("Available range variables:")
@@ -299,7 +303,8 @@ classdef Section < handle
             disp(self.name + " has " + npt3d + " pt3d and " ...
                 + self.nseg + " segment(s).");
             for i=1:npt3d
-                disp(self.sec.pt3d(i));
+                pt3d = self.get_pt3d();
+                disp(pt3d(:, i));
             end
             segments = self.segments();
             for i=1:self.nseg

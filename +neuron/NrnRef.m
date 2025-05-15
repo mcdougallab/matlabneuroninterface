@@ -14,16 +14,16 @@ classdef NrnRef < handle
         % Initialize NrnRef
         %   NrnRef(obj) constructs a Matlab wrapper for C++ NrnRef obj
             self.obj = obj;
-            disp(class(self.obj));
         end
         function value = get(self, ind)
         % Get value.
         %   value = get()
         %   value = get(index)
             if exist('ind', 'var')
-                value = self.obj.get_index(ind - 1);
+                value = neuron_api('nrnref_get_index', self.obj, ind - 1);
             else
-                value = self.obj.get();
+                disp(self.obj);
+                value = neuron_api('nrnref_get', self.obj);
             end
         end
         function self = set(self, value, ind)
@@ -31,16 +31,18 @@ classdef NrnRef < handle
         %   set(value)
         %   set(value, index)
             if exist('ind', 'var')
-                self.obj.set_index(value, ind - 1);
+                neuron_api('nrnref_set_index', self.obj, value, ind - 1);
             else
-                self.obj.set(value);
+                disp(self.obj);
+                neuron_api('nrnref_set', self.obj, value);
             end
         end
         function value = get.length(self)
-            value = self.obj.n_elements;
+            value = neuron_api('nrnref_get_n_elements', self.obj);
+            % Fix array thingy
         end
         function set.length(self, n)
-            self.obj.n_elements = n;
+            neuron_api('nrnref_set_n_elements', self.obj, n);
         end
         function sz = size(self)
             x = 1;

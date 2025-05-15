@@ -57,7 +57,7 @@ char const* (*nrn_symbol_name_)(const Symbol* sym) = nullptr;
 double* (*nrn_symbol_dataptr_)(Symbol* sym) = nullptr;
 
 Symbol* (*hoc_install_)(const char*, int, double, Symlist**) = nullptr;
-void (*nrn_register_function_)(void (*)(), const char*) = nullptr;
+void (*nrn_register_function_)(void (*)(), const char*, int type) = nullptr;
 char* (*hoc_gargstr_)(int) = nullptr;
 void (*hoc_ret_)(void) = nullptr;
 void (*hoc_pushx_)(double) = nullptr;
@@ -85,6 +85,7 @@ nrn_Item* (*nrn_allsec_)(void) = nullptr;
 nrn_Item* (*nrn_sectionlist_data_)(Object*) = nullptr;
 void (*nrn_mechanism_insert_)(Section*, const Symbol*) = nullptr;
 double (*nrn_rangevar_get_)(Symbol*, Section*, double) = nullptr;
+void (*nrn_rangevar_set_)(Symbol*, Section*, double, double) = nullptr;
 void (*nrn_section_connect_)(Section*, double, Section*, double) = nullptr;
 void (*nrn_section_length_set_)(Section*, double) = nullptr;
 double (*nrn_section_length_get_)(Section*) = nullptr;
@@ -92,6 +93,7 @@ const char* (*nrn_secname_)(Section*) = nullptr;
 int (*nrn_nseg_get_)(Section const*) = nullptr;
 void (*nrn_nseg_set_)(Section*, const int) = nullptr;
 void (*nrn_segment_diam_set_)(Section*, const double, const double) = nullptr;
+bool (*nrn_section_is_alive_)(Section*) = nullptr;
 
 double (*nrn_property_get_)(Object const*, const char*) = nullptr;
 double (*nrn_property_array_get_)(Object const*, const char*, int) = nullptr;
@@ -250,7 +252,7 @@ void nrnmatlab() {
 
 // Register nrnmatlab function in hoc.
 void setup_nrnmatlab(const mxArray* prhs[], mxArray* plhs[]) {
-    nrn_register_function_(nrnmatlab, "nrnmatlab");
+    nrn_register_function_(nrnmatlab, "nrnmatlab", 280);
 }
 
 // Used as hoc function with void return type and instance_id: string.
@@ -271,12 +273,17 @@ void create_FInitializeHandler(const mxArray* prhs[], mxArray* plhs[]) {
     char* func_name_c = const_cast<char*>(func_name.c_str());
     char* instance_id_c = const_cast<char*>(instance_id.c_str());
 
+    mexPrintf("func_name: %s\n", func_name.c_str());
+    mexPrintf("instance_id: %s\n", instance_id.c_str());
+
     // Register the the callback in hoc
-    nrn_register_function_(finitialize_callback, func_name_c);
+    nrn_register_function_(finitialize_callback, func_name_c, 280);
 
     // Create hoc command for calling the callback with instance_id
     std::string command = func_name + "(\"" + instance_id + "\")";
     char* command_c = const_cast<char*>(command.c_str());
+
+    mexPrintf("HOC command: %s\n", command.c_str());
 
     // Register FInitializeHandler object
     // calling the constructor with (type, command_c)
@@ -485,26 +492,13 @@ void nrn_mechanism_insert(const mxArray* prhs[], mxArray* plhs[]) {
 }
 
 void nrn_rangevar_get(const mxArray* prhs[], mxArray* plhs[]) {
-    auto sym_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
-    Symbol* sym = reinterpret_cast<Symbol*>(sym_ptr);
-    auto sec_ptr = static_cast<uint64_t>(mxGetScalar(prhs[2]));
-    Section* sec = reinterpret_cast<Section*>(sec_ptr);
-    auto [x] = extractParams<double>(prhs, 3);
-    double result = nrn_rangevar_get_(sym, sec, x);
-    plhs[0] = mxCreateDoubleScalar(result);
-}
-
-void nrn_rangevar_get_ref(const mxArray* prhs[], mxArray* plhs[]) {
     auto sec_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
     Section* sec = reinterpret_cast<Section*>(sec_ptr);
     auto sym_name = getStringFromMxArray(prhs[2]);
     Symbol* sym = nrn_symbol_(sym_name.c_str());
     auto [x] = extractParams<double>(prhs, 3);
     double result = nrn_rangevar_get_(sym, sec, x);
-    double* result_ptr = &result;
-    NrnRef* ref = new NrnRef(result_ptr);
-    plhs[0] = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
-    *(uint64_t*)mxGetData(plhs[0]) = reinterpret_cast<uint64_t>(ref);
+    plhs[0] = mxCreateDoubleScalar(result);
 }
 
 void nrn_section_connect(const mxArray* prhs[], mxArray* plhs[]) {
@@ -639,21 +633,110 @@ void nrn_loop_sections(const mxArray* prhs[], mxArray* plhs[]) {
         sli = nrn_sectionlist_iterator_new_(seclist);
     }
 
-    // Create a MATLAB cell array to store section names
-    std::vector<std::string> section_names;
+    // Create a MATLAB array to store section pointers
+    std::vector<uint64_t> section_pointers;
 
     while (!nrn_sectionlist_iterator_done_(sli)) {
         Section* sec = nrn_sectionlist_iterator_next_(sli);
-        section_names.push_back(nrn_secname_(sec));
+        section_pointers.push_back(reinterpret_cast<uint64_t>(sec));
     }
 
     nrn_sectionlist_iterator_free_(sli);
 
-    // Convert section names to MATLAB cell array
-    plhs[0] = mxCreateCellMatrix(section_names.size(), 1);
-    for (size_t i = 0; i < section_names.size(); ++i) {
-        mxSetCell(plhs[0], i, mxCreateString(section_names[i].c_str()));
+    // Convert section pointers to MATLAB numeric array
+    plhs[0] = mxCreateNumericMatrix(section_pointers.size(), 1, mxUINT64_CLASS, mxREAL);
+    std::memcpy(mxGetData(plhs[0]), section_pointers.data(), section_pointers.size() * sizeof(uint64_t));
+}
+
+void nrnref_get_index(const mxArray* prhs[], mxArray* plhs[]) {
+    // Extract the NrnRef pointer from prhs[1]
+    auto ref_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    NrnRef* ref = reinterpret_cast<NrnRef*>(ref_ptr);
+
+    // Extract the index from prhs[2]
+    size_t index = static_cast<size_t>(mxGetScalar(prhs[2]));
+
+    // Get the value at the specified index
+    double value = *(ref->ref + index);
+    plhs[0] = mxCreateDoubleScalar(value);
+}
+
+void nrnref_get(const mxArray* prhs[], mxArray* plhs[]) {
+    // Extract the NrnRef pointer from prhs[1]
+    auto ref_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    NrnRef* ref = reinterpret_cast<NrnRef*>(ref_ptr);
+
+    // Get the value
+    double value = *(ref->ref);
+    plhs[0] = mxCreateDoubleScalar(value);
+}
+
+void nrnref_set_index(const mxArray* prhs[], mxArray* plhs[]) {
+    // Extract the NrnRef pointer from prhs[1]
+    auto ref_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    NrnRef* ref = reinterpret_cast<NrnRef*>(ref_ptr);
+
+    // Extract the value and index from prhs[2] and prhs[3]
+    double value = mxGetScalar(prhs[2]);
+    size_t index = static_cast<size_t>(mxGetScalar(prhs[3]));
+
+    // Set the value at the specified index
+    try {
+        *(ref->ref + index) = value;
+    } catch (const std::out_of_range& e) {
+        mexErrMsgIdAndTxt("NrnRef:setIndexOutOfBounds", e.what());
     }
+}
+
+void nrnref_set(const mxArray* prhs[], mxArray* plhs[]) {
+    // Extract the NrnRef pointer from prhs[1]
+    auto ref_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    NrnRef* ref = reinterpret_cast<NrnRef*>(ref_ptr);
+
+    // Extract the value to set from prhs[2]
+    double value = mxGetScalar(prhs[2]);
+
+    // Set the value
+    *(ref->ref) = value;
+}
+
+void nrnref_get_n_elements(const mxArray* prhs[], mxArray* plhs[]) {
+    // Extract the NrnRef pointer from prhs[1]
+    auto ref_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    NrnRef* ref = reinterpret_cast<NrnRef*>(ref_ptr);
+
+    // Return the n_elements field
+    plhs[0] = mxCreateDoubleScalar(static_cast<double>(ref->n_elements));
+}
+
+void nrnref_set_n_elements(const mxArray* prhs[], mxArray* plhs[]) {
+    // Extract the NrnRef pointer from prhs[1]
+    auto ref_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    NrnRef* ref = reinterpret_cast<NrnRef*>(ref_ptr);
+
+    // Extract the new n_elements value from prhs[2]
+    size_t new_n_elements = static_cast<size_t>(mxGetScalar(prhs[2]));
+
+    // Update the n_elements field
+    ref->n_elements = new_n_elements;
+}
+
+void nrn_section_is_alive(const mxArray* prhs[], mxArray* plhs[]) {
+    auto sec_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    Section* sec = reinterpret_cast<Section*>(sec_ptr);
+    bool is_alive = nrn_section_is_alive_(sec);
+    plhs[0] = mxCreateLogicalScalar(is_alive);
+}
+
+void nrn_rangevar_set(const mxArray* prhs[], mxArray* plhs[]) {
+    auto sec_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    Section* sec = reinterpret_cast<Section*>(sec_ptr);
+    auto sym_ptr = static_cast<uint64_t>(mxGetScalar(prhs[2]));
+    Symbol* sym = reinterpret_cast<Symbol*>(sym_ptr);
+    double x = mxGetScalar(prhs[3]);
+    double value = mxGetScalar(prhs[4]);
+    mexPrintf("sec: %p, sym: %p, x: %f, value: %f\n", sec, sym, x, value);
+    nrn_rangevar_set_(sym, sec, x, value);
 }
 
 
@@ -725,9 +808,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         nrn_symbol_subtype_ = (int (*)(const Symbol*)) DLL_GET_PROC(neuron_handle, "nrn_symbol_subtype");
         nrn_symbol_name_ = (char const* (*)(const Symbol*)) DLL_GET_PROC(neuron_handle, "nrn_symbol_name");
         hoc_install_ = (Symbol* (*)(const char*, int, double, Symlist**)) DLL_GET_PROC(neuron_handle, "hoc_install");
-        nrn_register_function_ = (void (*)(void (*)(), const char*)) DLL_GET_PROC(neuron_handle, "nrn_register_function");
-        hoc_gargstr_ = (char* (*)(int)) DLL_GET_PROC(neuron_handle, "hoc_gargstr");
-        hoc_ret_ = (void (*)(void)) DLL_GET_PROC(neuron_handle, "hoc_ret");
+        nrn_register_function_ = (void (*)(void (*)(), const char*, int)) DLL_GET_PROC(neuron_handle, "nrn_register_function");
+        hoc_gargstr_ = (char* (*)(int)) DLL_GET_PROC(neuron_handle, "_Z11hoc_gargstri");  // TODO get rid of name mangling
+        hoc_ret_ = (void (*)(void)) DLL_GET_PROC(neuron_handle, "_Z7hoc_retv");  // TODO get rid of name mangling
         hoc_pushx_ = (void (*)(double)) DLL_GET_PROC(neuron_handle, "hoc_pushx");
         nrn_function_call_ = (void(*)(Symbol*,int)) DLL_GET_PROC(neuron_handle, "nrn_function_call");
         function_map["nrn_function_call"] = nrn_function_call;
@@ -802,7 +885,16 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         function_map["nrn_property_array_set"] = nrn_property_array_set;
         function_map["nrn_get_value_ref"] = nrn_get_value_ref;
         function_map["nrn_vector_data_ref"] = nrn_vector_data_ref;
-        function_map["nrn_rangevar_get_ref"] = nrn_rangevar_get_ref;
+        function_map["nrnref_get_index"] = nrnref_get_index;
+        function_map["nrnref_get"] = nrnref_get;
+        function_map["nrnref_set_index"] = nrnref_set_index;
+        function_map["nrnref_set"] = nrnref_set;
+        function_map["nrnref_get_n_elements"] = nrnref_get_n_elements;
+        function_map["nrnref_set_n_elements"] = nrnref_set_n_elements;
+        nrn_section_is_alive_ = (bool (*)(Section*)) DLL_GET_PROC(neuron_handle, "nrn_section_is_alive");
+        function_map["nrn_section_is_alive"] = nrn_section_is_alive;
+        nrn_rangevar_set_ = (void (*)(Symbol*, Section*, double, double)) DLL_GET_PROC(neuron_handle, "nrn_rangevar_set");
+        function_map["nrn_rangevar_set"] = nrn_rangevar_set;
         
         
         // Clean up
