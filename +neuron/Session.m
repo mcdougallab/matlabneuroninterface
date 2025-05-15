@@ -19,7 +19,8 @@ classdef Session < dynamicprops
             self = self@dynamicprops;
             self.fill_dynamic_props();
             self.null = clib.type.nullptr;
-            self.nrnmatlab_ready = false;
+            neuron_api('setup_nrnmatlab');
+            self.nrnmatlab_ready = true;
         end
     end
     methods
@@ -31,6 +32,7 @@ classdef Session < dynamicprops
             % disp(call_list);
 
             % Reset dynamic method lists.
+            self.var_list = string.empty;
             self.fn_double_list = string.empty;
             self.fn_void_list = string.empty;
             self.fn_string_list = string.empty;
@@ -112,16 +114,6 @@ classdef Session < dynamicprops
                         [varargout{1:nargout}] = neuron.Section(name);
                     elseif (func == "FInitializeHandler")
                         [varargout{1:nargout}] = neuron.FInitializeHandler(S(2).subs{:});
-                    elseif (func == "nrnmatlab")
-                        if clibConfiguration("neuron").ExecutionMode == "inprocess"
-                            if self.nrnmatlab_ready == false
-                                neuron_api('setup_nrnmatlab');
-                                self.nrnmatlab_ready = true;
-                            end
-                        else
-                            error("Neuron has to be run inprocess to be able to run nrnmatlab");
-                        end
-                        [varargout{1:nargout}] = self.call_func_hoc(func, "void", S(2).subs{:});
                     % Is the provided function listed as a Neuron class method?
                     elseif ismethod(self, func)
                         [varargout{1:nargout}] = builtin('subsref', self, S(1:2));
@@ -317,9 +309,10 @@ classdef Session < dynamicprops
 
             % Deal with input.
             if ~exist('section_list', 'var') % No input: get SectionList of all Sections.
+                list_type = 0;
                 section_list = neuron_api('nrn_section_list');
-                disp("Size of section_list: " + numel(section_list));
             elseif isa(section_list, 'neuron.Object') % Input is a 'n.SectionList'
+                list_type = 1; % Iterate over a specific SectionList
                 section_list = neuron_api('nrn_sectionlist_data', section_list.obj);
             end
 
@@ -328,15 +321,16 @@ classdef Session < dynamicprops
             end
 
             % Call the MEX function to get section pointers
-            section_names = neuron_api('nrn_loop_sections', 1, section_list);
-            disp("Section names: ");
-            disp(section_names);
+            if list_type == 0
+                section_ptrs = neuron_api('nrn_loop_sections', 0);
+            else
+                section_ptrs = neuron_api('nrn_loop_sections', 1, section_list);
+            end
 
             % Convert section pointers to Section objects
-            all_sections = cell(size(section_names));
-            for i = 1:numel(section_names)
-                section_name = char(section_names{i});
-                all_sections{i} = neuron.Section(section_name, owner);
+            all_sections = cell(size(section_ptrs));
+            for i = 1:numel(section_ptrs)
+                all_sections{i} = neuron.Section(section_ptrs(i), owner);
             end
         end
     end
