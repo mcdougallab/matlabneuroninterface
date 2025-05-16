@@ -100,6 +100,8 @@ double (*nrn_property_array_get_)(Object const*, const char*, int) = nullptr;
 void (*nrn_property_set_)(Object*, const char*, double) = nullptr;
 void (*nrn_property_array_set_)(Object*, const char*, int, double) = nullptr;
 
+ShapePlotInterface* (*get_plotshape_interface_)(Object*) = nullptr;
+
 bool has_inited = false;
 DLL_HANDLE neuron_handle = nullptr;
 std::unordered_map<std::string, void(*)(const mxArray**, mxArray**)> function_map;
@@ -406,6 +408,9 @@ void nrn_method_call(const mxArray* prhs[], mxArray* plhs[]) {
     auto sym_ptr = static_cast<uint64_t>(mxGetScalar(prhs[2]));
     Symbol* method_sym = reinterpret_cast<Symbol*>(sym_ptr);
     int narg = (int) mxGetScalar(prhs[3]);
+    mexPrintf("Calling on object: %p\n", obj);
+    mexPrintf("Calling method: %s\n", nrn_symbol_name_(method_sym));
+    mexPrintf("Number of arguments: %d\n", narg);
     nrn_method_call_(obj, method_sym, narg);
 }
 
@@ -444,11 +449,11 @@ void nrn_object_pop(const mxArray* prhs[], mxArray* plhs[]) {
 }
 
 void nrn_str_push(const mxArray* prhs[], mxArray* plhs[]) {
-    auto str = static_cast<char**>(mxCalloc(1, sizeof(char*)));
+    // This is a memory leak and we can only have one string at a time on the stack
+    static auto str = static_cast<char**>(mxCalloc(1, sizeof(char*)));
     *str = mxArrayToString(prhs[1]);
     nrn_str_push_(str);
-    mxFree(*str);
-    mxFree(str);
+    // mxFree(str);
 }
 
 void nrn_object_push(const mxArray* prhs[], mxArray* plhs[]) {
@@ -731,12 +736,19 @@ void nrn_section_is_alive(const mxArray* prhs[], mxArray* plhs[]) {
 void nrn_rangevar_set(const mxArray* prhs[], mxArray* plhs[]) {
     auto sec_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
     Section* sec = reinterpret_cast<Section*>(sec_ptr);
-    auto sym_ptr = static_cast<uint64_t>(mxGetScalar(prhs[2]));
-    Symbol* sym = reinterpret_cast<Symbol*>(sym_ptr);
+    auto sym_name = getStringFromMxArray(prhs[2]);
+    Symbol* sym = nrn_symbol_(sym_name.c_str());
     double x = mxGetScalar(prhs[3]);
     double value = mxGetScalar(prhs[4]);
-    mexPrintf("sec: %p, sym: %p, x: %f, value: %f\n", sec, sym, x, value);
     nrn_rangevar_set_(sym, sec, x, value);
+}
+
+void get_plotshape_interface(const mxArray* prhs[], mxArray* plhs[]) {
+    auto obj_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    Object* ps = reinterpret_cast<Object*>(obj_ptr);
+    ShapePlotInterface* interface = get_plotshape_interface_(ps);
+    plhs[0] = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
+    *(uint64_t*)mxGetData(plhs[0]) = reinterpret_cast<uint64_t>(interface);
 }
 
 
@@ -895,6 +907,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         function_map["nrn_section_is_alive"] = nrn_section_is_alive;
         nrn_rangevar_set_ = (void (*)(Symbol*, Section*, double, double)) DLL_GET_PROC(neuron_handle, "nrn_rangevar_set");
         function_map["nrn_rangevar_set"] = nrn_rangevar_set;
+        get_plotshape_interface_ = (ShapePlotInterface* (*)(Object*)) DLL_GET_PROC(neuron_handle, "get_plotshape_interface");
+        function_map["get_plotshape_interface"] = get_plotshape_interface;
         
         
         // Clean up

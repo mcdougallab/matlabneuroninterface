@@ -263,17 +263,18 @@ classdef Session < dynamicprops
                 else
                     % Generic case: push arguments to stack and create Object.
                     [nsecs, nargs] = neuron.stack.push_args(varargin{:});
-                    cppobj = neuron_api('nrn_object_new', 'Vector', nargs);
+                    cppobj = neuron_api('nrn_object_new', objtype, nargs);
                     if (objtype == "Vector")
                         obj = neuron.Vector(cppobj);
                     elseif (objtype == "PlotShape")
                         obj = neuron.PlotShape(cppobj);
                     elseif (objtype == "RangeVarPlot")
+                        disp("Creating RangeVarPlot object.");
                         obj = neuron.RangeVarPlot(cppobj);
                     else
                         obj = neuron.Object(cppobj);
                     end
-                    % neuron.stack.pop_sections(nsecs);
+                    neuron.stack.pop_sections(nsecs);
                 end
             catch e
                 obj = NaN;
@@ -328,6 +329,7 @@ classdef Session < dynamicprops
             end
 
             % Convert section pointers to Section objects
+            section_ptrs = section_ptrs(:).';
             all_sections = cell(size(section_ptrs));
             for i = 1:numel(section_ptrs)
                 all_sections{i} = neuron.Section(section_ptrs(i), owner);

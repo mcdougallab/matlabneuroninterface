@@ -13,8 +13,8 @@ classdef RangeVarPlot < neuron.Object
         function [x, y] = get_xy_data(self)
         % Get x, y data to plot.
         %   [x, y] = get_xy_data()
-            x = neuron.Session.hoc_new_obj("Vector");
-            y = neuron.Session.hoc_new_obj("Vector");
+            x = neuron.Session.hoc_new_obj('Vector');
+            y = neuron.Session.hoc_new_obj('Vector');
             self.call_method_hoc('to_vector', 'double', y, x);
         end
 
