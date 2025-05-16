@@ -43,8 +43,7 @@ classdef Segment < handle
                     n_processed = 2;  % Number of elements of S to process.
                 % Is it a Section range ref?
                 elseif any(strcmp(self.parent_sec.range_list, S(1).subs))
-                    value = neuron_api('nrn_rangevar_get', self.parent_sec.get_sec(), S(1).subs, self.x);
-                    disp(value);
+                    [varargout{1:nargout}] = neuron_api('nrn_rangevar_get', self.parent_sec.get_sec(), S(1).subs, self.x);
                     n_processed = 1;  % Number of elements of S to process.
                 else
                     error("Method/property "+S(1).subs+" not recognized.");
