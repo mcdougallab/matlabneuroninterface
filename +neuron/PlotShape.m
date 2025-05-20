@@ -17,12 +17,10 @@ classdef PlotShape < neuron.Object
             % Call n.define_shape() first
             neuron.Session.call_func_hoc('define_shape', 'double');
 
-            spi = neuron_api('get_plotshape_interface', self.obj);
+            spi = neuron_api('nrn_get_plotshape_interface', self.obj);
 
-            error("Functionality not implemented.");
-            section_plot_data = double(clib.neuron.get_plot_data(spi));
+            section_plot_data = neuron_api('get_plot_data', spi);
             section_plot_data = transpose(reshape(section_plot_data, 9, []));
-
             x = [section_plot_data(:, 1) section_plot_data(:, 2)];
             y = [section_plot_data(:, 3) section_plot_data(:, 4)];
             z = [section_plot_data(:, 5) section_plot_data(:, 6)];
@@ -31,8 +29,12 @@ classdef PlotShape < neuron.Object
             data = table(x, y, z, d, v, 'VariableNames', {'x', 'y', 'z', 'line_width', 'color'}); 
 
             % Normalize color value
-            data.color = data.color - spi.low();
-            data.color = data.color / (spi.high() - spi.low());
+            spi_low = neuron_api('nrn_get_plotshape_low', spi);
+            spi_high = neuron_api('nrn_get_plotshape_high', spi);
+            disp(spi_low);
+            disp(spi_high);
+            data.color = data.color - spi_low;
+            data.color = data.color / (spi_high - spi_low);
             data.color = min(max(data.color, 0), 1);
         end
 
@@ -43,7 +45,7 @@ classdef PlotShape < neuron.Object
 
             % Get data.
             data = self.get_plot_data();
-            spi = neuron_api('get_plotshape_interface', self.obj);
+            spi = neuron_api('nrn_get_plotshape_interface', self.obj);
 
             % Plot segments between 3d points.
             figure;
@@ -59,6 +61,7 @@ classdef PlotShape < neuron.Object
             for i=1:size(data, 1)
                 seg = data(i, :);
                 l(i).Color = cmap(indices(i), :);
+                disp(seg.line_width);
                 l(i).LineWidth = seg.line_width;
             end
 
