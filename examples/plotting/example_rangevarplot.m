@@ -4,7 +4,7 @@ n = neuron.launch();
 n.reset_sections();
 
 % Make section.
-dend = n.Section("dend");
+dend = n.Section('dend');
 dend.nseg = 100;
 dend.length = 6.28;
 
@@ -15,7 +15,7 @@ for i=1:numel(segments)
 end
 
 % Plot result with RangeVarPlot.
-rvp = n.RangeVarPlot(dend, "v", 0, 1);
+rvp = n.RangeVarPlot(dend, 'v', 0, 1);
 rvp.plot();
 xlabel('x');
 ylabel('v');

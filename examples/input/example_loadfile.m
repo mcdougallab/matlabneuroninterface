@@ -2,7 +2,7 @@
 clearvars -except testCase;  % Make sure testing params are not cleared.
 n = neuron.launch();
 n.reset_sections();
-soma = n.Section("soma");
+soma = n.Section('soma');
 
 % Load stdrun.hoc; run n.continuerun
 examples_path = fileparts(mfilename('fullpath'));

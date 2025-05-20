@@ -291,6 +291,7 @@ classdef Section < handle
                     pt3d(j, i + 1) = neuron.stack.hoc_pop('double');
                 end
             end
+            neuron_api('nrn_section_pop');
         end
         function info(self)
         % Print section info

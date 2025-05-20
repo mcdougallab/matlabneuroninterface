@@ -19,7 +19,9 @@ classdef Session < dynamicprops
             self = self@dynamicprops;
             self.fill_dynamic_props();
             self.null = clib.type.nullptr;
-            neuron_api('setup_nrnmatlab');
+            if ~self.nrnmatlab_ready
+                neuron_api('setup_nrnmatlab');
+            end
             self.nrnmatlab_ready = true;
         end
     end

@@ -27,7 +27,7 @@ classdef Object < dynamicprops
             method_str = neuron_api('get_class_methods', self.objtype);
             method_list = split(method_str, ";");
             method_list = method_list(1:end-1);
-            % disp(method_list);
+            disp(method_list);
 
             % Add dynamic properties.
             % See: doc/DEV_README.md#neuron-types
@@ -38,23 +38,23 @@ classdef Object < dynamicprops
                 % method_subtype = method_types(2);
                 if (method_type == "263" && method{1}(1) ~= 'x')  % steered property; we need to exclude Vector.x and Matrix.x to prevent errors.
                     self.attr_list = [self.attr_list method(1)];
-                    p = self.addprop(method(1));
-                    p.GetMethod = @(self)get_steered_prop(self, method(1));
-                    p.SetMethod = @(self, value)set_steered_prop(self, method(1), value);
+                    p = self.addprop(method{1});
+                    p.GetMethod = @(self)get_steered_prop(self, method{1});
+                    p.SetMethod = @(self, value)set_steered_prop(self, method{1}, value);
                 elseif (method_type == "310")  % point process property
-                    sym = neuron_api('nrn_method_symbol', self.obj, method(1));
-                    % disp(sym);
-                    if clibIsNull(sym.arayinfo)  % scalar property
+                    sym = neuron_api('nrn_method_symbol', self.obj, method{1});
+                    if (neuron_api('nrn_symbol_is_array', sym)) % scalar property
                         self.attr_list = [self.attr_list method(1)];
-                        p = self.addprop(method(1));
-                        p.GetMethod = @(self)get_pp_prop(self, method(1));
-                        p.SetMethod = @(self, value)set_pp_prop(self, method(1), value);
+                        p = self.addprop(method{1});
+                        p.GetMethod = @(self)get_pp_prop(self, method{1});
+                        p.SetMethod = @(self, value)set_pp_prop(self, method{1}, value);
                     else  % array property
-                        n = sym.arayinfo.sub.double();
-                        self.attr_array_map(method(1)) = n;
-                        p = self.addprop(method(1));
-                        p.GetMethod = @(self)get_pp_arr(self, method(1));
-                        p.SetMethod = @(self, value)set_pp_arr(self, method(1), value);
+                        disp("HI");
+                        % n = sym.arayinfo.sub.double();
+                        % self.attr_array_map(method(1)) = n;
+                        % p = self.addprop(method(1));
+                        % p.GetMethod = @(self)get_pp_arr(self, method(1));
+                        % p.SetMethod = @(self, value)set_pp_arr(self, method(1), value);
                     end
                 elseif (method_type == "270")
                     self.mt_double_list = [self.mt_double_list method(1)];
@@ -237,7 +237,7 @@ classdef Object < dynamicprops
         function value = get_steered_prop(self, propname)
         % Get dynamic property.
         %   value = get_prop(propname)
-            neuron_api('nrn_property_get', self.obj, propname);
+            value = neuron_api('nrn_property_get', self.obj, propname);
         end
 
         function nrnref = ref(self, propname, index)
