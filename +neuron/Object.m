@@ -27,7 +27,7 @@ classdef Object < dynamicprops
             method_str = neuron_api('get_class_methods', self.objtype);
             method_list = split(method_str, ";");
             method_list = method_list(1:end-1);
-            disp(method_list);
+            % disp(method_list);
 
             % Add dynamic properties.
             % See: doc/DEV_README.md#neuron-types
@@ -49,7 +49,6 @@ classdef Object < dynamicprops
                         p.GetMethod = @(self)get_pp_prop(self, method{1});
                         p.SetMethod = @(self, value)set_pp_prop(self, method{1}, value);
                     else  % array property
-                        disp("HI");
                         % n = sym.arayinfo.sub.double();
                         % self.attr_array_map(method(1)) = n;
                         % p = self.addprop(method(1));

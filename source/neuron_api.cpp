@@ -70,6 +70,7 @@ void (*nrn_object_unref_)(Object*) = nullptr;
 char const* (*nrn_class_name_)(const Object*) = nullptr;
 Symbol* (*nrn_method_symbol_)(Object*, char const* const) = nullptr;
 void (*nrn_method_call_)(Object*, Symbol*, int) = nullptr;
+int (*nrn_object_index_)(Object*) = nullptr;
 
 double* (*nrn_vector_data_)(Object*) = nullptr;
 
@@ -673,8 +674,6 @@ std::vector<double> get_section_plot_data(Section* sec, ShapePlotInterface* spi)
     nrn_function_call_(nrn_symbol_("n3d"), 0);
     auto ns = nrn_double_pop_();
 
-    mexPrintf("Number of 3D points: %d\n", (int) ns);
-
     std::vector<std::vector<double>> pt3d(5, std::vector<double>(ns, 0.0));
     std::vector<std::string> fields = {"x3d", "y3d", "z3d", "arc3d", "diam3d"};
 
@@ -701,11 +700,8 @@ std::vector<double> get_section_plot_data(Section* sec, ShapePlotInterface* spi)
         x_hi *= sec_length;
 
         auto segment_arc = get_segment_arc(sec, x_lo, x_hi, ns, pt3d);
-
-        mexPrintf("Variable name: %s\n", nrn_get_plotshape_varname_(spi));
         
-        // double seg_value = nrn_rangevar_get_(nrn_symbol_(nrn_get_plotshape_varname_(spi)), sec, x);
-        //mexPrintf("Segment arc: %f\n", seg_value);
+        double seg_value = nrn_rangevar_get_(nrn_symbol_(nrn_get_plotshape_varname_(spi)), sec, x);
 
         // Do one initial run
         result.push_back(interpolate_arrays(arcs, xs, segment_arc[0]));
@@ -716,7 +712,7 @@ std::vector<double> get_section_plot_data(Section* sec, ShapePlotInterface* spi)
         result.push_back(interpolate_arrays(arcs, zs, segment_arc[1]));
         result.push_back(interpolate_arrays(arcs, ds, segment_arc[0]));
         result.push_back(interpolate_arrays(arcs, ds, segment_arc[1]));
-        // result.push_back(seg_value);
+        result.push_back(seg_value);
         // Use initial run and reuse previously calculated values
         for (size_t j = 1; j < segment_arc.size() - 1; j++) {
             result.push_back(result[result.size() - 8]); // xs for segment j
@@ -727,7 +723,7 @@ std::vector<double> get_section_plot_data(Section* sec, ShapePlotInterface* spi)
             result.push_back(interpolate_arrays(arcs, zs, segment_arc[j + 1]));
             result.push_back(result[result.size() - 8]); // ds for segment j
             result.push_back(interpolate_arrays(arcs, ds, segment_arc[j + 1]));
-            // result.push_back(seg_value);
+            result.push_back(seg_value);
         }
     }
 
@@ -910,6 +906,35 @@ void nrn_get_plotshape_high(const mxArray* prhs[], mxArray* plhs[]) {
     plhs[0] = mxCreateDoubleScalar(static_cast<double>(high));
 }
 
+void nrn_symbol_type(const mxArray* prhs[], mxArray* plhs[]) {
+    auto sym_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    Symbol* sym = reinterpret_cast<Symbol*>(sym_ptr);
+    int type = nrn_symbol_type_(sym);
+    plhs[0] = mxCreateDoubleScalar(static_cast<double>(type));
+}
+
+void nrn_symbol(const mxArray* prhs[], mxArray* plhs[]) {
+    auto [name] = extractParams<std::string>(prhs, 1);
+    Symbol* sym = nrn_symbol_(name.c_str());
+    // Return the Symbol* by casting to uint64
+    plhs[0] = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
+    *(uint64_t*)mxGetData(plhs[0]) = reinterpret_cast<uint64_t>(sym);
+}
+
+void nrn_get_plotshape_varname(const mxArray* prhs[], mxArray* plhs[]) {
+    auto spi_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    ShapePlotInterface* spi = reinterpret_cast<ShapePlotInterface*>(spi_ptr);
+    const char* varname = nrn_get_plotshape_varname_(spi);
+    plhs[0] = mxCreateString(varname);
+}
+
+void nrn_object_index(const mxArray* prhs[], mxArray* plhs[]) {
+    auto obj_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    Object* obj = reinterpret_cast<Object*>(obj_ptr);
+    int index = nrn_object_index_(obj);
+    plhs[0] = mxCreateDoubleScalar(static_cast<double>(index));
+}
+
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     if (!neuron_handle) {
@@ -1078,6 +1103,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         function_map["nrn_get_plotshape_low"] = nrn_get_plotshape_low;
         nrn_get_plotshape_high_ = (float (*)(ShapePlotInterface*)) DLL_GET_PROC(neuron_handle, "nrn_get_plotshape_high");
         function_map["nrn_get_plotshape_high"] = nrn_get_plotshape_high;
+        function_map["nrn_symbol_type"] = nrn_symbol_type;
+        function_map["nrn_symbol"] = nrn_symbol;
+        function_map["nrn_get_plotshape_varname"] = nrn_get_plotshape_varname;
+        nrn_object_index_ = (int (*)(Object*)) DLL_GET_PROC(neuron_handle, "nrn_object_index");
+        function_map["nrn_object_index"] = nrn_object_index;
         
         // Clean up
         //DLL_FREE(wrapper_handle);
