@@ -1,13 +1,23 @@
 classdef PlotShape < neuron.Object
 % PlotShape Class making 3D colorplots.
 
+    properties
+        index % Unique index for this PlotShape instance
+    end
+
     methods
 
         function self = PlotShape(obj)
         % Initialize PlotShape
         %   PlotShape(obj) constructs a Matlab wrapper for a Neuron
         %   PlotShape.
+
+            % Call the superclass constructor
             self = self@neuron.Object(obj);
+
+            % Initialize the index
+            index = neuron_api('nrn_object_index', self.obj);
+            self.index = index;
         end
 
         function data = get_plot_data(self)
@@ -31,8 +41,6 @@ classdef PlotShape < neuron.Object
             % Normalize color value
             spi_low = neuron_api('nrn_get_plotshape_low', spi);
             spi_high = neuron_api('nrn_get_plotshape_high', spi);
-            disp(spi_low);
-            disp(spi_high);
             data.color = data.color - spi_low;
             data.color = data.color / (spi_high - spi_low);
             data.color = min(max(data.color, 0), 1);
@@ -61,7 +69,6 @@ classdef PlotShape < neuron.Object
             for i=1:size(data, 1)
                 seg = data(i, :);
                 l(i).Color = cmap(indices(i), :);
-                disp(seg.line_width);
                 l(i).LineWidth = seg.line_width;
             end
 
@@ -70,10 +77,26 @@ classdef PlotShape < neuron.Object
             xlabel('x');
             ylabel('y');
             zlabel('z');
-            title('PlotShape: ' + spi.varname());
+            varname = neuron_api('nrn_get_plotshape_varname', spi);
+            title(['PlotShape: ', varname]);
             view(3);
             hold off;
 
+        end
+
+        function var_data = variable(self, var_name)
+        % Set specific variable data for the PlotShape.
+        %   var_data = variable(var_name)
+        %   Example: ps_all.variable('diam')
+
+            var_symbol = neuron_api('nrn_symbol', var_name);
+            var_type = neuron_api('nrn_symbol_type', var_symbol);
+            
+            if var_type ~= 310
+                error('The variable "%s" is not valid. Expected var_type 310, but got %d.', var_name, var_type);
+            end
+
+            neuron_api('nrn_hoc_call', sprintf('PlotShape[%d].variable("%s")', self.index, var_name));
         end
 
     end
