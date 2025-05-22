@@ -7,9 +7,9 @@ n = neuron.launch();
 n.reset_sections();
 
 % Make sections.
-main = n.Section("main");
-branch1 = n.Section("branch1");
-branch2 = n.Section("branch2");
+main = n.Section('main');
+branch1 = n.Section('branch1');
+branch2 = n.Section('branch2');
 
 % Change number of segments.
 main.nseg = 3;
@@ -39,7 +39,7 @@ branch2.set_diameter(0.9);
 n.define_shape();
 
 % Set up simple simulation.
-main.insert_mechanism("pas");
+main.insert_mechanism('pas');
 iclamp = n.IClamp(main, 0);
 iclamp.del = 0;
 iclamp.dur = 10000;

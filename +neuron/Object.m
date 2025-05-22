@@ -1,9 +1,9 @@
 classdef Object < dynamicprops
-% Neuron Object Class
+% NEURON Object Class
 
     properties (SetAccess=protected, GetAccess=public)
-        obj             % C++ Neuron Object.
-        objtype         % Neuron Object type
+        obj             % C++ NEURON Object.
+        objtype         % NEURON Object type
         attr_list       % List of attributes of the C++ object.
         attr_array_map  % Map of array attributes of the C++ object.
                         % Keys are property names, values are array lengths.
@@ -16,7 +16,7 @@ classdef Object < dynamicprops
 
         function self = Object(obj)
         % Initialize Object
-        %   Object(obj) constructs a Matlab wrapper for Neuron Object obj
+        %   Object(obj) constructs a Matlab wrapper for NEURON Object obj
 
             self = self@dynamicprops;
             self.attr_array_map = containers.Map;
@@ -27,7 +27,7 @@ classdef Object < dynamicprops
             method_str = neuron_api('get_class_methods', self.objtype);
             method_list = split(method_str, ";");
             method_list = method_list(1:end-1);
-            % disp(method_list);
+            disp(method_list);
 
             % Add dynamic properties.
             % See: doc/DEV_README.md#neuron-types
@@ -43,17 +43,18 @@ classdef Object < dynamicprops
                     p.SetMethod = @(self, value)set_steered_prop(self, method{1}, value);
                 elseif (method_type == "310")  % point process property
                     sym = neuron_api('nrn_method_symbol', self.obj, method{1});
-                    if (neuron_api('nrn_symbol_is_array', sym)) % scalar property
+                    if ~neuron_api('nrn_symbol_is_array', sym) % scalar property
                         self.attr_list = [self.attr_list method(1)];
                         p = self.addprop(method{1});
                         p.GetMethod = @(self)get_pp_prop(self, method{1});
                         p.SetMethod = @(self, value)set_pp_prop(self, method{1}, value);
                     else  % array property
                         % n = sym.arayinfo.sub.double();
-                        % self.attr_array_map(method(1)) = n;
-                        % p = self.addprop(method(1));
-                        % p.GetMethod = @(self)get_pp_arr(self, method(1));
-                        % p.SetMethod = @(self, value)set_pp_arr(self, method(1), value);
+                        n = (neuron_api('nrn_symbol_array_length', sym));
+                        self.attr_array_map(method{1}) = n;
+                        p = self.addprop(method{1});
+                        p.GetMethod = @(self)get_pp_arr(self, method{1});
+                        p.SetMethod = @(self, value)set_pp_arr(self, method{1}, value);
                     end
                 elseif (method_type == "270")
                     self.mt_double_list = [self.mt_double_list method(1)];
@@ -90,7 +91,7 @@ classdef Object < dynamicprops
                 neuron.stack.pop_sections(nsecs);
             catch e
                 warning(e.message);
-                warning("'"+string(method)+"': caught error during call to Neuron function.");
+                warning("'"+string(method)+"': caught error during call to NEURON function.");
                 value = NaN;
                 % state.restore();
             end

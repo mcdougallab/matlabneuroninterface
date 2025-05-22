@@ -5,8 +5,8 @@ n.reset_sections();
 
 % If we try to find 'hd' mechanism here, we get:
 % Error: Insertable mechanism 'hd' not found. 
-% axon = n.Section("axon");
-% axon.insert_mechanism("hd");  % Error!
+% axon = n.Section('axon');
+% axon.insert_mechanism('hd');  % Error!
 
 % Compile mod file.
 examples_path = fileparts(mfilename('fullpath'));
@@ -42,8 +42,8 @@ catch
 end
 
 % Try to find 'hd' mechanism; now it should exist.
-axon = n.Section("axon");
-axon.insert_mechanism("hd");  % No error!
+axon = n.Section('axon');
+axon.insert_mechanism('hd');  % No error!
 
 % Try to find NMDA object.
 syn = n.NMDA(axon(0.5));

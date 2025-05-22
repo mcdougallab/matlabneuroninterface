@@ -10,13 +10,13 @@ n = neuron.launch();
 n.reset_sections();
 
 % setup for three simulations
-s1 = n.Section("s1");
-s2 = n.Section("s2");
-s3 = n.Section("s3");
+s1 = n.Section('s1');
+s2 = n.Section('s2');
+s3 = n.Section('s3');
 
 sections = n.allsec();
 for i=1:numel(sections)
-    sections{i}.insert_mechanism("hh");
+    sections{i}.insert_mechanism('hh');
     sections{i}.set_diameter(3);
     sections{i}.length = 3;
 end
@@ -34,7 +34,7 @@ c3.amp = [0, 0, 0];
 
 % record an action potential
 ap = n.Vector();
-ap.record(s1(0.5).ref("v"));
+ap.record(s1(0.5).ref('v'));
 n.finitialize(-65);
 while n.t < 1
     n.fadvance();
@@ -44,8 +44,8 @@ end
 apc = ap.c();  % unfortunately, cannot play into two variables, so clone it
 
 ap.play_remove();
-ap.play(c2.ref("amp1"), n.dt);
-apc.play(c3.ref("amp"), n.dt);
+ap.play(c2.ref('amp1'), n.dt);
+apc.play(c3.ref('amp'), n.dt);
 
 n.secondorder = 0;
 

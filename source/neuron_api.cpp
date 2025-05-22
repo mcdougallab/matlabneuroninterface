@@ -56,6 +56,7 @@ int (*nrn_symbol_subtype_)(const Symbol* sym) = nullptr;
 char const* (*nrn_symbol_name_)(const Symbol* sym) = nullptr;
 double* (*nrn_symbol_dataptr_)(Symbol* sym) = nullptr;
 bool (*nrn_symbol_is_array_)(Symbol*) = nullptr;
+int (*nrn_symbol_array_length_)(Symbol*) = nullptr;
 
 Symbol* (*hoc_install_)(const char*, int, double, Symlist**) = nullptr;
 void (*nrn_register_function_)(void (*)(), const char*, int type) = nullptr;
@@ -94,7 +95,12 @@ double (*nrn_section_length_get_)(Section*) = nullptr;
 const char* (*nrn_secname_)(Section*) = nullptr;
 int (*nrn_nseg_get_)(Section const*) = nullptr;
 void (*nrn_nseg_set_)(Section*, const int) = nullptr;
+double (*nrn_section_Ra_get_)(Section*) = nullptr;
+void (*nrn_section_Ra_set_)(Section*, double) = nullptr;
+double (*nrn_section_rallbranch_get_)(Section*) = nullptr;
+void (*nrn_section_rallbranch_set_)(Section*, double) = nullptr;
 void (*nrn_segment_diam_set_)(Section*, const double, const double) = nullptr;
+double (*nrn_segment_diam_get_)(Section* const, const double) = nullptr;
 bool (*nrn_section_is_active_)(Section*) = nullptr;
 
 double (*nrn_property_get_)(Object const*, const char*) = nullptr;
@@ -277,15 +283,12 @@ void finitialize_callback() {
 }
 
 void create_FInitializeHandler(const mxArray* prhs[], mxArray* plhs[]) {
-    auto [type, func_name, instance_id] = extractParams<int, std::string, std::string>(prhs, 1);
-    char* func_name_c = const_cast<char*>(func_name.c_str());
-    char* instance_id_c = const_cast<char*>(instance_id.c_str());
+    int type = static_cast<int>(mxGetScalar(prhs[1]));
+    std::string func_name = getStringFromMxArray(prhs[2]);
+    std::string instance_id = getStringFromMxArray(prhs[3]);
 
-    mexPrintf("func_name: %s\n", func_name.c_str());
-    mexPrintf("instance_id: %s\n", instance_id.c_str());
-
-    // Register the the callback in hoc
-    nrn_register_function_(finitialize_callback, func_name_c, 280);
+    // Register the callback in hoc
+    nrn_register_function_(finitialize_callback, func_name.c_str(), 280);
 
     // Create hoc command for calling the callback with instance_id
     std::string command = func_name + "(\"" + instance_id + "\")";
@@ -453,10 +456,13 @@ void nrn_object_pop(const mxArray* prhs[], mxArray* plhs[]) {
 
 void nrn_str_push(const mxArray* prhs[], mxArray* plhs[]) {
     // This is a memory leak and we can only have one string at a time on the stack
-    static auto str = static_cast<char**>(mxCalloc(1, sizeof(char*)));
-    *str = mxArrayToString(prhs[1]);
-    nrn_str_push_(str);
-    // mxFree(str);
+    // Allocate a static buffer to hold the string pointer
+    static char* str = nullptr;
+    static std::string temp_str;
+    temp_str = getStringFromMxArray(prhs[1]);
+    str = const_cast<char*>(temp_str.c_str());
+    nrn_str_push_(&str);
+    // Do not call mxFree(str); here!
 }
 
 void nrn_object_push(const mxArray* prhs[], mxArray* plhs[]) {
@@ -573,6 +579,17 @@ void nrn_section_diam_set(const mxArray* prhs[], mxArray* plhs[]) {
     }
 }
 
+void nrn_section_diam_get(const mxArray* prhs[], mxArray* plhs[]) {
+    auto sec_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    Section* sec = reinterpret_cast<Section*>(sec_ptr);
+
+    // Always use x=0.5 (center of section), just like HOC's default
+    double x = 0.5;
+    double diam = nrn_segment_diam_get_(sec, x);
+    plhs[0] = mxCreateDoubleScalar(diam);
+}
+
+
 void nrn_property_get(const mxArray* prhs[], mxArray* plhs[]) {
     auto obj_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
     Object* obj = reinterpret_cast<Object*>(obj_ptr);
@@ -600,7 +617,9 @@ void nrn_property_set(const mxArray* prhs[], mxArray* plhs[]) {
 void nrn_property_array_set(const mxArray* prhs[], mxArray* plhs[]) {
     auto obj_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
     Object* obj = reinterpret_cast<Object*>(obj_ptr);
-    auto [name, index, value] = extractParams<std::string, int, double>(prhs, 2);
+    auto name = getStringFromMxArray(prhs[2]);
+    double value = mxGetScalar(prhs[3]);
+    int index = (int) mxGetScalar(prhs[4]);
     nrn_property_array_set_(obj, name.c_str(), index, value);
 }
 
@@ -935,6 +954,42 @@ void nrn_object_index(const mxArray* prhs[], mxArray* plhs[]) {
     plhs[0] = mxCreateDoubleScalar(static_cast<double>(index));
 }
 
+void nrn_symbol_array_length(const mxArray* prhs[], mxArray* plhs[]) {
+    auto sym_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    Symbol* sym = reinterpret_cast<Symbol*>(sym_ptr);
+    int size = nrn_symbol_array_length_(sym);
+    plhs[0] = mxCreateDoubleScalar(static_cast<double>(size));
+}
+
+void nrn_section_Ra_get(const mxArray* prhs[], mxArray* plhs[]) {
+    auto sec_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    Section* sec = reinterpret_cast<Section*>(sec_ptr);
+    double val = nrn_section_Ra_get_(sec);
+    plhs[0] = mxCreateDoubleScalar(val);
+}
+
+void nrn_section_Ra_set(const mxArray* prhs[], mxArray* plhs[]) {
+    auto sec_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    Section* sec = reinterpret_cast<Section*>(sec_ptr);
+    double val = mxGetScalar(prhs[2]);
+    nrn_section_Ra_set_(sec, val);
+}
+
+void nrn_section_rallbranch_get(const mxArray* prhs[], mxArray* plhs[]) {
+    auto sec_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    Section* sec = reinterpret_cast<Section*>(sec_ptr);
+    double val = nrn_section_rallbranch_get_(sec);
+    plhs[0] = mxCreateDoubleScalar(val);
+}
+
+void nrn_section_rallbranch_set(const mxArray* prhs[], mxArray* plhs[]) {
+    auto sec_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    Section* sec = reinterpret_cast<Section*>(sec_ptr);
+    double val = mxGetScalar(prhs[2]);
+    nrn_section_rallbranch_set_(sec, val);
+}
+
+
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     if (!neuron_handle) {
@@ -1069,6 +1124,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         nrn_segment_diam_set_ = (void (*)(Section*, const double, const double)) DLL_GET_PROC(neuron_handle, "nrn_segment_diam_set");
         function_map["nrn_segment_diam_set"] = nrn_segment_diam_set;
         function_map["nrn_section_diam_set"] = nrn_section_diam_set;
+        nrn_segment_diam_get_ = (double (*)(Section* const, const double)) DLL_GET_PROC(neuron_handle, "nrn_segment_diam_get");
+        function_map["nrn_section_diam_get"] = nrn_section_diam_get;
         nrn_property_get_ = (double (*)(Object const*, const char*)) DLL_GET_PROC(neuron_handle, "nrn_property_get");
         function_map["nrn_property_get"] = nrn_property_get;
         nrn_property_array_get_ = (double (*)(Object const*, const char*, int)) DLL_GET_PROC(neuron_handle, "nrn_property_array_get");
@@ -1108,6 +1165,16 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         function_map["nrn_get_plotshape_varname"] = nrn_get_plotshape_varname;
         nrn_object_index_ = (int (*)(Object*)) DLL_GET_PROC(neuron_handle, "nrn_object_index");
         function_map["nrn_object_index"] = nrn_object_index;
+        nrn_symbol_array_length_ = (int (*)(Symbol*)) DLL_GET_PROC(neuron_handle, "nrn_symbol_array_length");
+        function_map["nrn_symbol_array_length"] = nrn_symbol_array_length;
+        nrn_section_Ra_get_ = (double (*)(Section*)) DLL_GET_PROC(neuron_handle, "nrn_section_Ra_get");
+        function_map["nrn_section_Ra_get"] = nrn_section_Ra_get;
+        nrn_section_Ra_set_ = (void (*)(Section*, double)) DLL_GET_PROC(neuron_handle, "nrn_section_Ra_set");
+        function_map["nrn_section_Ra_set"] = nrn_section_Ra_set;
+        nrn_section_rallbranch_get_ = (double (*)(Section*)) DLL_GET_PROC(neuron_handle, "nrn_section_rallbranch_get");
+        function_map["nrn_section_rallbranch_get"] = nrn_section_rallbranch_get;
+        nrn_section_rallbranch_set_ = (void (*)(Section*, double)) DLL_GET_PROC(neuron_handle, "nrn_section_rallbranch_set");
+        function_map["nrn_section_rallbranch_set"] = nrn_section_rallbranch_set;
         
         // Clean up
         //DLL_FREE(wrapper_handle);

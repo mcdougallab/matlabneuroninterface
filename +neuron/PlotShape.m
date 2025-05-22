@@ -84,6 +84,7 @@ classdef PlotShape < neuron.Object
 
         end
 
+        %{
         function var_data = variable(self, var_name)
         % Set specific variable data for the PlotShape.
         %   var_data = variable(var_name)
@@ -93,11 +94,12 @@ classdef PlotShape < neuron.Object
             var_type = neuron_api('nrn_symbol_type', var_symbol);
             
             if var_type ~= 310
-                error('The variable "%s" is not valid. Expected var_type 310, but got %d.', var_name, var_type);
+            error('The variable "%s" is not valid. Expected var_type 310, but got %d.', var_name, var_type);
             end
 
             neuron_api('nrn_hoc_call', sprintf('PlotShape[%d].variable("%s")', self.index, var_name));
         end
+        %}
 
     end
 end

@@ -11,8 +11,11 @@ classdef Section < handle
                     % trigger C++ object destruction.
     end
     properties (Dependent)
-        length      % Section length.
+        L           % Section length.
         nseg        % Number of segments.
+        Ra          % Axial resistance.
+        diam        % Diameter.
+        rallbranch  % Rall branch property.
         name        % Name of the section.
     end
     methods
@@ -59,12 +62,25 @@ classdef Section < handle
                 end
             end
         end
+
+        function disp(self)
+            try
+                if ~neuron_api('nrn_section_is_active', self.sec)
+                    error();
+                else
+                    builtin('disp', self);
+                end
+            catch
+                error("Section has been deleted.");
+            end
+        end
         
         function delete_nrn_sec(self)
         % Destroy the NEURON Section.
         %   delete_nrn_sec()
             self.push();
-            neuron_api('nrn_hoc_call', '{delete_section()}');
+            neuron_api('nrn_function_call', 'delete_section', 0);
+
             % neuron.stack.pop_sections(1);  % Not necessary.
         end
 
@@ -72,16 +88,23 @@ classdef Section < handle
         % Destroy the Section object.
         %   delete()
             if self.owner
-                if (neuron_api('nrn_section_is_alive', self.sec))
+                if (neuron_api('nrn_section_is_active', self.sec))
                     self.delete_nrn_sec();
-                else
-                    warning('Attempting to delete Section that was already deleted.');
                 end
             end
         end
 
         function self = subsasgn(self, S, varargin)
         % Implement assigning Section and Segment properties.
+
+            % Check if section has been deleted.
+            try
+                if ~neuron_api('nrn_section_is_active', self.sec)
+                    error();
+                end
+            catch
+                error("Section has been deleted.");
+            end
 
             % Are we trying to directly access a class property?
             if (isa(S(1).subs, "char") && length(S) == 1 && isprop(self, S(1).subs))
@@ -100,6 +123,14 @@ classdef Section < handle
             % S(1).subs is method (or property) name;
             % S(2).subs is a cell array containing arguments.
 
+            % Check if section has been deleted.
+            try
+                if ~neuron_api('nrn_section_is_active', self.sec)
+                    error();
+                end
+            catch
+                error("Section has been deleted.");
+            end
 
             if S(1).type == "."
                 % Are we trying to directly access a class property?
@@ -239,14 +270,12 @@ classdef Section < handle
             neuron.stack.hoc_pop('double'); % Since nrn_function_call leaves rvalue on stack
             neuron.stack.pop_sections(1);
         end
-        function set.length(self, val)
+        function set.L(self, val)
         % Set length of Section.
             neuron_api('nrn_section_length_set', self.sec, val);
         end
-        function value = get.length(self)
+        function value = get.L(self)
         % Get length of Section.
-            % We cannot directly access self.sec.prop.dparam, because it
-            % is a union, which Matlab does not understand.
             value = neuron_api('nrn_section_length_get', self.sec);
         end
         function value = get.name(self)
@@ -261,12 +290,33 @@ classdef Section < handle
         % Get the number of segments in the Section.
             value = neuron_api('nrn_nseg_get', self.sec);
         end
-        function self = set_diameter(self, val)
+        function self = set.Ra(self, val)
+        % Set axial resistance of Section.
+            neuron_api('nrn_section_Ra_set', self.sec, val);
+        end
+        function value = get.Ra(self)
+        % Get axial resistance of Section.
+            value = neuron_api('nrn_section_Ra_get', self.sec);
+        end
+        function self = set.rallbranch(self, val)
+        % Set rallbranch property of Section.
+            neuron_api('nrn_section_rallbranch_set', self.sec, val);
+        end
+        function value = get.rallbranch(self)
+        % Get rallbranch property of Section.
+            value = neuron_api('nrn_section_rallbranch_get', self.sec);
+        end
+        function self = set.diam(self, val)
         % Set diameter of Section.
         %   set_diameter(val)
             neuron_api('nrn_section_diam_set', self.sec, val);
-
         end
+        function value = get.diam(self)
+        % Set diameter of Section.
+        %   set_diameter(val)
+            value = neuron_api('nrn_section_diam_get', self.sec);
+        end
+        
         function psection(self)
         % Print psection info
         %   psection()
@@ -300,7 +350,7 @@ classdef Section < handle
             neuron_api('nrn_section_push', self.sec);
             neuron_api('nrn_function_call', 'n3d', 0);
             npt3d = neuron.stack.hoc_pop('double');
-            disp(self.name + " has length " + self.length + ".");
+            disp(self.name + " has length " + self.L + ".");
             disp(self.name + " has " + npt3d + " pt3d and " ...
                 + self.nseg + " segment(s).");
             for i=1:npt3d
