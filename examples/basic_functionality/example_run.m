@@ -7,13 +7,13 @@ n = neuron.launch();
 n.reset_sections();
 
 % Run HOC code.
-n.hoc_oc("create soma");
+n.hoc_oc('create soma');
 n.topology();
 n.finitialize(3.14);
-n.hoc_oc("print t, v");
+n.hoc_oc('print t, v');
 
 % Advance the simulation by one time step.
 n.fadvance();
 
 % Print time, voltage.
-n.hoc_oc("print t, v");
+n.hoc_oc('print t, v');

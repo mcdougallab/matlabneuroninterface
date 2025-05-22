@@ -14,6 +14,19 @@ classdef Segment < handle
             self.parent_sec = sec;
             self.x = x;
         end
+
+        function disp(self)
+            try
+                if ~neuron_api('nrn_section_is_active', self.parent_sec.get_sec())
+                    error();
+                else
+                    builtin('disp', self);
+                end
+            catch
+                error("Parent section has been deleted.");
+            end
+        end
+
         function push(self)
         % Push Segment to NEURON stack. 
         %   value = push()
@@ -32,6 +45,15 @@ classdef Segment < handle
 
         function varargout = subsref(self, S)
         % Call a class method or dynamic property.
+
+            try
+                if ~neuron_api('nrn_section_is_active', self.parent_sec.get_sec())
+                    error();
+                end
+            catch
+                error("Parent section has been deleted.");
+            end
+
             if S(1).type == "."
                 % Are we trying to directly access a class property?
                 if isprop(self, S(1).subs)
@@ -57,6 +79,15 @@ classdef Segment < handle
 
         function self = subsasgn(self, S, varargin)
         % Assign a (dynamic) property value.
+
+            try
+                if ~neuron_api('nrn_section_is_active', self.parent_sec.get_sec())
+                    error();
+                end
+            catch
+                error("Parent section has been deleted.");
+            end
+            
             % Are we trying to directly access a class property?
             if (isa(S(1).subs, "char") && length(S) == 1 && isprop(self, S(1).subs))
                 self.(S(1).subs) = varargin{:};

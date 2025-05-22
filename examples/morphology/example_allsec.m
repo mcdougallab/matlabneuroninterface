@@ -6,12 +6,12 @@ n.reset_sections();
 % Make sections.
 n.hoc_oc('create soma');
 dend1 = n.Section('dend1');
-dend1.length = 37;
+dend1.L = 37;
 clear dend1;  % Remove section.
 axon1 = n.Section('axon1');
 axon2 = n.Section('axon2');
 axon2 = n.Section('axon2');  % Overwrites previous section.
-axon2.length = 42;
+axon2.L = 42;
 n.topology();
 
 % Iterate over sections.
@@ -24,7 +24,7 @@ end
 soma_new = all_sections{1};
 axon1_new = all_sections{2};
 axon2_new = all_sections{3};
-disp("axon2_new length: " + axon2_new.length);
+disp("axon2_new length: " + axon2_new.L);
 
 % Iterate over all segments of a section
 soma_new.nseg = 5;

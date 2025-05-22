@@ -3,7 +3,7 @@ n = neuron.launch();
 disp("Initial state")
 disp("-------------------")
 global sec
-sec = n.Section("my_section");
+sec = n.Section('my_section');
 sec.nseg = 3;
 sec.info();
 

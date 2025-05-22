@@ -17,11 +17,9 @@ classdef Session < dynamicprops
         % Initialize the neuron session, if it has not been initialized before.
         %   Session()
             self = self@dynamicprops;
+            neuron_api('setup_nrnmatlab');
             self.fill_dynamic_props();
             self.null = clib.type.nullptr;
-            if ~self.nrnmatlab_ready
-                neuron_api('setup_nrnmatlab');
-            end
             self.nrnmatlab_ready = true;
         end
     end
@@ -54,14 +52,7 @@ classdef Session < dynamicprops
                 % disp("f_type: " + f_type);
                 switch f_type
                     case "263"  % Properties with get/set functionality.
-                        if f{1} == "secondorder" % special case secondorder
-                            if ~isprop(self, f{1})
-                                self.var_list = [self.var_list f{1}];
-                                p = self.addprop(f{1});
-                                p.GetMethod = @(self)get_secondorder(self);
-                                p.SetMethod = @(self, value)set_secondorder(self, value);
-                            end
-                        elseif f_subtype == "1" % int variable
+                        if f_subtype == "1" % int variable
                             if ~isprop(self, f{1})
                                 self.var_list = [self.var_list f{1}];
                                 p = self.addprop(f{1});
