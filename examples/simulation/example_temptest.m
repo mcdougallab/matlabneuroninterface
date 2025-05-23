@@ -6,8 +6,8 @@ n.load_file('stdrun.hoc');
 
 % squid like it cold
 n.celsius = 6.3;
-soma = n.Section("soma");
-soma.insert("hh");
+soma = n.Section('soma');
+soma.insert('hh');
 soma.nseg = 11;
 
 syn1 = n.Exp2Syn(soma(0.25));
@@ -24,11 +24,11 @@ nc.weight = 1;
 nc.delay = 0;
 
 t = n.Vector();
-t.record(n.ref("t"));
+t.record(n.ref('t'));
 v = n.Vector();
-v.record(soma(0.5).ref("v"));
+v.record(soma(0.5).ref('v'));
 
-nc_recorder = n.NetCon(soma(0.5).ref("v"), n.null);
+nc_recorder = n.NetCon(soma(0.5).ref('v'), n.null);
 t_spikes = n.Vector();
 nc_recorder.record(t_spikes);
 
