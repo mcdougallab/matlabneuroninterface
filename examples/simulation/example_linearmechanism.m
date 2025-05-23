@@ -4,8 +4,8 @@ n = neuron.launch();
 n.reset_sections();
 
 % Create section.
-soma = n.Section("soma");
-soma.insert_mechanism("hh");
+soma = n.Section('soma');
+soma.insert_mechanism('hh');
 
 % Test LinearMechanism
 c = n.Matrix(2, 2, 2);
@@ -18,9 +18,9 @@ b.set(1, 10);
 linmech = n.LinearMechanism(soma, c, g, y, b, 0.5);
 
 % Run simulation.
-% Results can be compared to n.load_file("test_lm.hoc").
+% Results can be compared to n.load_file('test_lm.hoc').
 n.finitialize(-65);
-v_ref = soma.ref("v", 0.5);
+v_ref = soma.ref('v', 0.5);
 disp(n.t + " " + y.double(1) + " " + y.double(2));
 for i=1:19
     n.fadvance();

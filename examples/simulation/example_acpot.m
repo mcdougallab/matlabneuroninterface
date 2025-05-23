@@ -7,29 +7,32 @@ n = neuron.launch();
 n.reset_sections();
 
 % Make axon.
-axon = n.Section("axon");
+axon = n.Section('axon');
 axon.nseg = 3;
-axon.set_diameter(50);
-axon.insert_mechanism("hh");
+axon.diam = 50;
+axon.insert_mechanism('hh');
 
 % Connect branch.
-branch = n.Section("branch1");
-branch.set_diameter(10);
+branch = n.Section('branch1');
+branch.diam = 10;
 branch.length = 1000;
 branch.connect(0, axon, 1);
 n.topology();
 
 % Track time with Vector t_vec.
 t_vec = n.Vector();
-t = n.ref("t");
+t = n.ref('t');
 t_vec.record(t);
 
 % Track voltage at two points.
 v1_vec = n.Vector();
-v1 = axon.ref("v", 0.5);
+v1 = axon.ref('v', 0.5);
+branch.nseg = 7;
+v1(1) = xyz
+
 v1_vec.record(v1);
 v2_vec = n.Vector();
-v2 = branch.ref("v", 1);
+v2 = branch.ref('v', 1);
 v2_vec.record(v2);
 
 % Insert current at start of axon.
@@ -45,8 +48,8 @@ while n.t < 10
 end
 
 % Display the number of active Vectors and IClamps.
-veclist = n.List("Vector");
-icllist = n.List("IClamp");
+veclist = n.List('Vector');
+icllist = n.List('IClamp');
 disp("Number of Vectors: " + veclist.count());
 disp("Number of IClamps: " + icllist.count());
 

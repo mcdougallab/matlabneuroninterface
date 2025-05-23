@@ -35,12 +35,12 @@ sec.info();
 
 function set_0_833_to_47()
     global sec;
-    sec_v = sec.ref("v", 0.833333);
+    sec_v = sec.ref('v', 0.833333);
     sec_v.set(47);
 end
 
 function set_0_166_to_20()
     global sec;
-    sec_v = sec.ref("v", 0.16667);
+    sec_v = sec.ref('v', 0.16667);
     sec_v.set(20);
 end

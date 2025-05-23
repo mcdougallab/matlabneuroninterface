@@ -5,6 +5,9 @@ function value = hoc_pop(returntype)
         value = neuron_api('nrn_double_pop');
     elseif (returntype=="string" || returntype=="char")
         value = neuron_api('nrn_pop_str');
+    elseif (returntype=="ref")
+        % For NrnRef objects.
+        value = neuron_api('nrn_double_ptr_pop');
     elseif (returntype=="Object")
         obj = neuron_api('nrn_object_pop');
         objtype = neuron_api('nrn_class_name', obj);

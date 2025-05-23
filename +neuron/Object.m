@@ -27,7 +27,7 @@ classdef Object < dynamicprops
             method_str = neuron_api('get_class_methods', self.objtype);
             method_list = split(method_str, ";");
             method_list = method_list(1:end-1);
-            disp(method_list);
+            % disp(method_list);
 
             % Add dynamic properties.
             % See: doc/DEV_README.md#neuron-types
@@ -85,6 +85,7 @@ classdef Object < dynamicprops
             
             try
                 [nsecs, nargs] = neuron.stack.push_args(varargin{:});
+                % disp("For method "+method+" push_args returned "+string(nsecs)+" sections and "+string(nargs)+" arguments and "+self.obj+" object.");
                 sym = neuron_api('nrn_method_symbol', self.obj, method);
                 neuron_api('nrn_method_call', self.obj, sym, nargs);
                 value = neuron.stack.hoc_pop(returntype);

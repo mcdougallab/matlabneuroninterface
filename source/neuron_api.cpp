@@ -65,6 +65,7 @@ void (*hoc_ret_)(void) = nullptr;
 void (*hoc_pushx_)(double) = nullptr;
 double (*hoc_xpop_)(void) = nullptr;
 void (*hoc_call_ob_proc_)(Object*, Symbol*, int) = nullptr;
+void (*nrn_symbol_push_)(Symbol*) = nullptr;
 
 Object* (*nrn_object_new_)(Symbol* sym, int narg) = nullptr;
 void (*nrn_object_unref_)(Object*) = nullptr;
@@ -78,11 +79,13 @@ double* (*nrn_vector_data_)(Object*) = nullptr;
 void (*nrn_section_pop_)(void) = nullptr;
 char** (*nrn_pop_str_)(void) = nullptr;
 Object* (*nrn_object_pop_)(void) = nullptr;
+double* (*nrn_double_ptr_pop_)(void) = nullptr;
 
 void (*nrn_str_push_)(char**) = nullptr;
 void (*nrn_object_push_)(Object*) = nullptr;
 void (*nrn_double_ptr_push_)(double*) = nullptr;
 void (*nrn_section_push_)(Section*) = nullptr;
+void (*nrn_rangevar_push_)(Symbol*, Section*, double) = nullptr;
 
 nrn_Item* (*nrn_allsec_)(void) = nullptr;
 nrn_Item* (*nrn_sectionlist_data_)(Object*) = nullptr;
@@ -433,10 +436,8 @@ void nrn_vector_data_ref(const mxArray* prhs[], mxArray* plhs[]) {
     auto obj_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
     Object* vec = reinterpret_cast<Object*>(obj_ptr);
     double* data = nrn_vector_data_(vec);
-    int len = static_cast<int>(mxGetScalar(prhs[2]));
-    NrnRef* ref = new NrnRef(data, len);
     plhs[0] = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
-    *(uint64_t*)mxGetData(plhs[0]) = reinterpret_cast<uint64_t>(ref);
+    *(uint64_t*)mxGetData(plhs[0]) = reinterpret_cast<uint64_t>(data);
 }
 
 void nrn_section_pop(const mxArray* prhs[], mxArray* plhs[]) {
@@ -472,8 +473,10 @@ void nrn_object_push(const mxArray* prhs[], mxArray* plhs[]) {
 }
 
 void nrn_double_ptr_push(const mxArray* prhs[], mxArray* plhs[]) {
-    auto addr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
-    double* ptr = reinterpret_cast<double*>(addr);
+    auto ref_ptr = static_cast<uinnt64_t>(mxGetScalar(prhs[1]));
+    NrnRef* ref = reinterpret_cast<NrnRef*>(ref_ptr);
+    double* ptr = ref->ref;
+    mexPrintf("ptr: %p\n", ptr);
     nrn_double_ptr_push_(ptr);
 }
 
@@ -513,6 +516,16 @@ void nrn_rangevar_get(const mxArray* prhs[], mxArray* plhs[]) {
     auto [x] = extractParams<double>(prhs, 3);
     double result = nrn_rangevar_get_(sym, sec, x);
     plhs[0] = mxCreateDoubleScalar(result);
+}
+
+void nrn_get_ref(const mxArray* prhs[], mxArray* plhs[]) {
+    auto value_ptr = reinterpret_cast<double*>(static_cast<uint64_t>(mxGetScalar(prhs[1])));
+    NrnRef* ref = nullptr;
+    size_t length = static_cast<size_t>(mxGetScalar(prhs[2]));
+    ref = new NrnRef(value_ptr, length);
+    mexPrintf("value_ptr: %p\n", value_ptr);
+    plhs[0] = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
+    *(uint64_t*)mxGetData(plhs[0]) = reinterpret_cast<uint64_t>(ref);
 }
 
 void nrn_section_connect(const mxArray* prhs[], mxArray* plhs[]) {
@@ -989,6 +1002,45 @@ void nrn_section_rallbranch_set(const mxArray* prhs[], mxArray* plhs[]) {
     nrn_section_rallbranch_set_(sec, val);
 }
 
+void nrn_rangevar_push(const mxArray* prhs[], mxArray* plhs[]) {
+    auto sec_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    Section* sec = reinterpret_cast<Section*>(sec_ptr);
+    auto sym_name = getStringFromMxArray(prhs[2]);
+    Symbol* sym = nrn_symbol_(sym_name.c_str());
+    double x = mxGetScalar(prhs[3]);
+    nrn_rangevar_push_(sym, sec, x);
+}
+
+void nrn_double_ptr_pop(const mxArray* prhs[], mxArray* plhs[]) {
+    double* ptr = nrn_double_ptr_pop_();
+    plhs[0] = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
+    *(uint64_t*)mxGetData(plhs[0]) = reinterpret_cast<uint64_t>(ptr);
+}
+
+void nrn_symbol_dataptr(const mxArray* prhs[], mxArray* plhs[]) {
+    auto [name] = extractParams<std::string>(prhs, 1);
+    Symbol* sym = nrn_symbol_(name.c_str());
+    double* dataptr = nrn_symbol_dataptr_(sym);
+    plhs[0] = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
+    *(uint64_t*)mxGetData(plhs[0]) = reinterpret_cast<uint64_t>(dataptr);
+}
+
+void nrn_get_ref_from_symbol(const mxArray* prhs[], mxArray* plhs[]) {
+    auto [name] = extractParams<std::string>(prhs, 1);
+    size_t length = static_cast<size_t>(mxGetScalar(prhs[2]));
+    Symbol* sym = nrn_symbol_(name.c_str());
+    double* ptr = nrn_symbol_dataptr_(sym);
+    NrnRef* ref = new NrnRef(ptr, length);
+    plhs[0] = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
+    *(uint64_t*)mxGetData(plhs[0]) = reinterpret_cast<uint64_t>(ref);
+}
+
+void nrn_symbol_push(const mxArray* prhs[], mxArray* plhs[]) {
+    auto [name] = extractParams<std::string>(prhs, 1);
+    Symbol* sym = nrn_symbol_(name.c_str());
+    nrn_symbol_push_(sym);
+}
+
 
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
@@ -1175,6 +1227,17 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         function_map["nrn_section_rallbranch_get"] = nrn_section_rallbranch_get;
         nrn_section_rallbranch_set_ = (void (*)(Section*, double)) DLL_GET_PROC(neuron_handle, "nrn_section_rallbranch_set");
         function_map["nrn_section_rallbranch_set"] = nrn_section_rallbranch_set;
+        function_map["nrn_get_ref"] = nrn_get_ref;
+        nrn_rangevar_push_ = (void (*)(Symbol*, Section*, double)) DLL_GET_PROC(neuron_handle, "nrn_rangevar_push");
+        function_map["nrn_rangevar_push"] = nrn_rangevar_push;
+        nrn_double_ptr_pop_ = (double* (*)(void)) DLL_GET_PROC(neuron_handle, "nrn_double_ptr_pop");
+        function_map["nrn_double_ptr_pop"] = nrn_double_ptr_pop;
+        function_map["nrn_symbol_dataptr"] = nrn_symbol_dataptr;
+        function_map["nrn_get_ref_from_symbol"] = nrn_get_ref_from_symbol;
+        nrn_symbol_push_ = (void (*)(Symbol*)) DLL_GET_PROC(neuron_handle, "nrn_symbol_push");
+        function_map["nrn_symbol_push"] = nrn_symbol_push;
+        
+
         
         // Clean up
         //DLL_FREE(wrapper_handle);

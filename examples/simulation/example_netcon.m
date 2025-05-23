@@ -4,13 +4,13 @@ n = neuron.launch();
 n.reset_sections();
 
 % Make section and vectors
-soma = n.Section("soma");
-soma.insert_mechanism("hh");
-v = soma(0.5).ref("v");  % Equivalent to: v = soma.ref("v", 0.5);
+soma = n.Section('soma');
+soma.insert_mechanism('hh');
+v = soma(0.5).ref('v');  % Equivalent to: v = soma.ref('v', 0.5);
 v_vec = n.Vector();
 v_vec.record(v);
 t_vec = n.Vector();
-t = n.ref("t");
+t = n.ref('t');
 t_vec.record(t);
 
 % NetStim object

@@ -221,8 +221,9 @@ classdef Section < handle
         % along the segment (loc) between 0 and 1.
         %   nrnref = ref(rangevar, loc) 
             if any(strcmp(self.range_list, rangevar))
-                % nrnref = neuron.NrnRef(neuron_api('nrn_rangevar_get_ref', self.sec, rangevar, loc));
-                disp(nrnref);
+                neuron_api('nrn_rangevar_push', self.sec, rangevar, loc);
+                range_ref = neuron.stack.hoc_pop('ref');
+                nrnref = neuron.NrnRef(neuron_api('nrn_get_ref', range_ref, 1));
             else
                 warning("Range variable '"+rangevar+"' not found.");
                 disp("Available range variables:")

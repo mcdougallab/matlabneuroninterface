@@ -5,7 +5,7 @@
 clearvars -except testCase;  % Make sure testing params are not cleared.
 n = neuron.launch();
 n.reset_sections();
-n.hoc_oc("create soma");
+n.hoc_oc('create soma');
 n.topology();
 
 % Try vector.
@@ -17,7 +17,18 @@ disp(v.double());
 disp("----------");
 
 % Track time in vector.
-v.record(n.ref("t"));
+
+% neuron_api('nrn_symbol_push', 't') % pushes a double star
+% sym = neuron_api('nrn_method_symbol', self.obj, 'record');
+% neuron_api('nrn_method_call', self.obj, sym, 1);
+
+% nrnref = neuron_api('nrn_get_ref', neuron_api('nrn_symbol_dataptr', 't'), 1) % sym is t (get a ref to t)
+% neuron_api('nrn_double_ptr_push', nrnref.obj); % nrnref.obj is the double*
+% sym = neuron_api('nrn_method_symbol', self.obj, 'record'); % sym is record
+% neuron_api('nrn_method_call', self.obj, sym, 1);
+
+
+v.record(n.ref('t'));
 n.finitialize(-65);
 disp("Tracking 10 time steps with Vector.record()...");
 for i = 1:4
