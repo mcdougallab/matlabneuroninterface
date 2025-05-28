@@ -1,12 +1,12 @@
 classdef Section < handle
-% Section Class for manipulating Neuron sections.
+% Section Class for manipulating NEURON sections.
     properties (Access=private)
         sec         % C++ Section object.
     end
     properties (SetAccess=protected, GetAccess=public)
         mech_list   % List of allowed insertable mechanisms.
         range_list  % List of allowed range variables.
-        owner       % Set to false if Matlab section does not own Neuron section, 
+        owner       % Set to false if Matlab section does not own NEURON section, 
                     % i.e., if destroying the Matlab object should not
                     % trigger C++ object destruction.
     end
@@ -20,7 +20,7 @@ classdef Section < handle
     end
     methods
         function self = Section(value, owner)
-        % Initialize a new Section by providing a name or Neuron section
+        % Initialize a new Section by providing a name or NEURON section
         % object. The optional 'owner' argument is a boolean - if set to true
         % (default value) the C++ Section object is destroyed upon
         % destroying the Matlab Section; if set to false, the C++ Section
@@ -221,9 +221,10 @@ classdef Section < handle
         % along the segment (loc) between 0 and 1.
         %   nrnref = ref(rangevar, loc) 
             if any(strcmp(self.range_list, rangevar))
-                neuron_api('nrn_rangevar_push', self.sec, rangevar, loc);
-                range_ref = neuron.stack.hoc_pop('ref');
-                nrnref = neuron.NrnRef(neuron_api('nrn_get_ref', range_ref, 1));
+                nrnref = neuron.NrnRef(neuron_api('nrn_rangevar_nrnref', self.sec, rangevar, loc));
+                % neuron_api('nrn_rangevar_push', self.sec, rangevar, loc);
+                % range_ref = neuron.stack.hoc_pop('ref');
+                % nrnref = neuron.NrnRef(neuron_api('nrn_get_ref', range_ref, 1));
             else
                 warning("Range variable '"+rangevar+"' not found.");
                 disp("Available range variables:")

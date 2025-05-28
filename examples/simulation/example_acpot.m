@@ -28,7 +28,6 @@ t_vec.record(t);
 v1_vec = n.Vector();
 v1 = axon.ref('v', 0.5);
 branch.nseg = 7;
-v1(1) = xyz
 
 v1_vec.record(v1);
 v2_vec = n.Vector();

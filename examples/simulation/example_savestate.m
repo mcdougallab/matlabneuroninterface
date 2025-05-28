@@ -2,7 +2,7 @@
 clearvars -except testCase;  % Make sure testing params are not cleared.
 n = neuron.launch();
 n.reset_sections();
-soma = n.Section("soma");
+soma = n.Section('soma');
 n.finitialize(-65);
 
 % Save initial state.

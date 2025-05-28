@@ -17,8 +17,8 @@ s3 = n.Section('s3');
 sections = n.allsec();
 for i=1:numel(sections)
     sections{i}.insert_mechanism('hh');
-    sections{i}.set_diameter(3);
-    sections{i}.length = 3;
+    sections{i}.diam = 3;
+    sections{i}.L = 3;
 end
 
 c1 = n.IClamp(s1(0.5));

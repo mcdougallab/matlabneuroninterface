@@ -6,12 +6,12 @@ n.reset_sections();
 % Make section.
 dend = n.Section('dend');
 dend.nseg = 100;
-dend.length = 6.28;
+dend.L = 6.28;
 
 % Set voltage; also set explicitly at start and end points.
 segments = dend.allseg();  % allseg gives segments with endpoints included.
 for i=1:numel(segments)
-    segments{i}.v = sin(segments{i}.x * dend.length);
+    segments{i}.v = sin(segments{i}.x * dend.L);
 end
 
 % Plot result with RangeVarPlot.

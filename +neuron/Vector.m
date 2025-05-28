@@ -57,7 +57,8 @@ classdef Vector < neuron.Object
         function nrnref = ref(self)
         % Get reference to vector data.
         %   nrnref = ref()
-            nrnref = neuron.NrnRef(neuron_api('nrn_get_ref', neuron_api('nrn_vector_data_ref', self.obj), self.length));
+            nrnref = neuron.NrnRef(neuron_api('nrn_vector_nrnref', self.obj, self.length()));
+            % nrnref = neuron.NrnRef(neuron_api('nrn_get_ref', neuron_api('nrn_vector_data_ref', self.obj), self.length));
         end
 
         function vec = get_vec(self)

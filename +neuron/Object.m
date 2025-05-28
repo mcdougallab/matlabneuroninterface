@@ -85,7 +85,6 @@ classdef Object < dynamicprops
             
             try
                 [nsecs, nargs] = neuron.stack.push_args(varargin{:});
-                % disp("For method "+method+" push_args returned "+string(nsecs)+" sections and "+string(nargs)+" arguments and "+self.obj+" object.");
                 sym = neuron_api('nrn_method_symbol', self.obj, method);
                 neuron_api('nrn_method_call', self.obj, sym, nargs);
                 value = neuron.stack.hoc_pop(returntype);
@@ -246,11 +245,9 @@ classdef Object < dynamicprops
         %   nrnref = ref(prop_name)
         %   nrnref = ref(prop_arr_name, index)
             if ~exist('index', 'var')
-                error("Functionality not implemented.");
-                nrnref = clib.neuron.ref_pp_property(self.obj, propname);
+                nrnref = neuron.NrnRef(neuron_api('nrn_pp_property_nrnref', self.obj, propname));
             else
-                error("Functionality not implemented.");
-                nrnref = clib.neuron.ref_pp_property(self.obj, propname, index-1);
+                nrnref = neuron.NrnRef(neuron_api('nrn_pp_property_array_nrnref', self.obj, propname, index-1));
             end
         end
     end

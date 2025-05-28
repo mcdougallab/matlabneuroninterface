@@ -1,5 +1,5 @@
 function n = launch()
-% Start a Neuron session.
+% Start a NEURON session.
 %   n = neuron.launch()
     neuron_api();
 
