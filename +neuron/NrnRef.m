@@ -1,11 +1,13 @@
 classdef NrnRef < handle
-% Neuron reference (NrnRef) wrapper class. The referenced value can be
+% NEURON reference (NrnRef) wrapper class. The referenced value can be
 % accessed by indexing, e.g. ```t = n.ref('t'); disp(t(1));```.
 
-    properties (SetAccess=protected, GetAccess=public)
+    properties (SetAccess=protected, GetAccess=public, Hidden)
         obj             % C++ NrnRef object.
     end
-    properties (Dependent)
+    properties (Dependent, SetAccess=protected)
+        ref             % Name of what is referenced.
+        ref_class       % Class of what is referenced.
         length          % Data length.
     end
     
@@ -20,10 +22,25 @@ classdef NrnRef < handle
         %   value = get()
         %   value = get(index)
             if exist('ind', 'var')
-                value = neuron_api('nrnref_get_index', self.obj, ind - 1);
+                if strcmp(self.ref_class, "Vector")
+                    value = neuron_api('nrnref_vector_get', self.obj, ind - 1);
+                elseif strcmp(self.ref_class, "Symbol")
+                    value = neuron_api('nrnref_symbol_get', self.obj, ind - 1);
+                elseif strcmp(self.ref_class, "ObjectProp")
+                    value = neuron_api('nrnref_property_get', self.obj, ind - 1);
+                elseif strcmp(self.ref_class, "RangeVar")
+                    value = neuron_api('nrnref_rangevar_get', self.obj, ind - 1);
+                end
             else
-                disp(self.obj);
-                value = neuron_api('nrnref_get', self.obj);
+                if strcmp(self.ref_class, "Vector")
+                    value = neuron_api('nrnref_vector_get', self.obj, 0);
+                elseif strcmp(self.ref_class, "Symbol")
+                    value = neuron_api('nrnref_symbol_get', self.obj, 0);
+                elseif strcmp(self.ref_class, "ObjectProp")
+                    value = neuron_api('nrnref_property_get', self.obj, 0);
+                elseif strcmp(self.ref_class, "RangeVar")
+                    value = neuron_api('nrnref_rangevar_get', self.obj, 0);
+                end
             end
         end
         function self = set(self, value, ind)
@@ -31,18 +48,35 @@ classdef NrnRef < handle
         %   set(value)
         %   set(value, index)
             if exist('ind', 'var')
-                neuron_api('nrnref_set_index', self.obj, value, ind - 1);
+                if strcmp(self.ref_class, "Vector")
+                    neuron_api('nrnref_vector_set', self.obj, value, ind - 1);
+                elseif strcmp(self.ref_class, "Symbol")
+                    neuron_api('nrnref_symbol_set', self.obj, value, ind - 1);
+                elseif strcmp(self.ref_class, "ObjectProp")
+                    neuron_api('nrnref_property_set', self.obj, value, ind - 1);
+                elseif strcmp(self.ref_class, "RangeVar")
+                    neuron_api('nrnref_rangevar_set', self.obj, value, ind - 1);
+                end
             else
-                disp(self.obj);
-                neuron_api('nrnref_set', self.obj, value);
+                if strcmp(self.ref_class, "Vector")
+                    neuron_api('nrnref_vector_set', self.obj, value, 0);
+                elseif strcmp(self.ref_class, "Symbol")
+                    neuron_api('nrnref_symbol_set', self.obj, value, 0);
+                elseif strcmp(self.ref_class, "ObjectProp")
+                    neuron_api('nrnref_property_set', self.obj, value, 0);
+                elseif strcmp(self.ref_class, "RangeVar")
+                    neuron_api('nrnref_rangevar_set', self.obj, value, 0);
+                end
             end
         end
         function value = get.length(self)
             value = neuron_api('nrnref_get_n_elements', self.obj);
-            % Fix array thingy
         end
-        function set.length(self, n)
-            neuron_api('nrnref_set_n_elements', self.obj, n);
+        function value = get.ref(self)
+            value = neuron_api('nrnref_get_name', self.obj);
+        end
+        function value = get.ref_class(self)
+            value = neuron_api('nrnref_get_class', self.obj);
         end
         function sz = size(self)
             x = 1;

@@ -86,6 +86,8 @@ void (*nrn_object_push_)(Object*) = nullptr;
 void (*nrn_double_ptr_push_)(double*) = nullptr;
 void (*nrn_section_push_)(Section*) = nullptr;
 void (*nrn_rangevar_push_)(Symbol*, Section*, double) = nullptr;
+void (*nrn_property_push_)(Object*, const char*) = nullptr;
+void (*nrn_property_array_push_)(Object*, const char*, int) = nullptr;
 
 nrn_Item* (*nrn_allsec_)(void) = nullptr;
 nrn_Item* (*nrn_sectionlist_data_)(Object*) = nullptr;
@@ -152,18 +154,57 @@ std::string getStringFromMxArray(const mxArray* mxStr) {
 
 // Helper class for MATLAB interface.
 struct NrnRef {
-    double* ref;
-    size_t n_elements;
+    enum class RefClass { Vector, Symbol, RangeVar, ObjectProp, Unknown };
+    RefClass ref_class = RefClass::Unknown;
+    std::string name;
+    Object* obj = nullptr;
+    Symbol* sym = nullptr;
+    Section* sec = nullptr;
+    double x = 0.0;
+    size_t n_elements = 1;
+    int index = -1; // For ObjectProp references
 
-    NrnRef(double* x) {
-        this->ref = x;
-        this->n_elements = 1;
+    // Vector reference
+    NrnRef(Object* o, int n_elems) {
+        ref_class = RefClass::Vector;
+        obj = o;
+        n_elements = n_elems;
     }
 
-    NrnRef(double* x, size_t size) {
-        this->ref = x;
-        this->n_elements = size;
+    // Symbol reference
+    NrnRef(Symbol* s, const std::string& n = "") {
+        ref_class = RefClass::Symbol;
+        sym = s;
+        name = n;
+        n_elements = 1;
     }
+
+    // Range variable reference
+    NrnRef(Symbol* s, Section* sc, double xx, const std::string& n = "") {
+        ref_class = RefClass::RangeVar;
+        sym = s;
+        sec = sc;
+        x = xx;
+        name = n;
+        n_elements = 1;
+    }
+
+    // ObjectProp reference
+    NrnRef(Object* o, const std::string& n = "", int idx = -1) {
+        ref_class = RefClass::ObjectProp;
+        obj = o;
+        name = n;
+        index = idx;
+        n_elements = 1;
+    }
+
+    // Raw pointer reference (default, for backward compatibility)
+    NrnRef(size_t size) {
+        ref_class = RefClass::Unknown;
+        n_elements = size;
+    }
+
+    NrnRef() = default;
 };
 
 template <typename... Args>
@@ -253,6 +294,149 @@ void get_nrn_functions(const mxArray* prhs[], mxArray* plhs[]) {
 
     // Return the result as a MATLAB string
     plhs[0] = mxCreateString(result.c_str());
+}
+
+void nrn_symbol_nrnref(const mxArray* prhs[], mxArray* plhs[]) {
+    // Get the symbol name from the first argument
+    std::string sym_name = getStringFromMxArray(prhs[1]);
+    Symbol* sym = nrn_symbol_(sym_name.c_str());
+   
+    // If not an array, return 1
+    NrnRef* ref = new NrnRef(sym, sym_name);
+    plhs[0] = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
+    *(uint64_t*)mxGetData(plhs[0]) = reinterpret_cast<uint64_t>(ref);
+}
+
+void nrn_vector_nrnref(const mxArray* prhs[], mxArray* plhs[]) {
+    // Get the vector object from the first argument
+    auto obj_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    Object* vec = reinterpret_cast<Object*>(obj_ptr);
+    int n = static_cast<int>(mxGetScalar(prhs[2]));
+    
+    // Create a NrnRef for the vector
+    NrnRef* ref = new NrnRef(vec, n);
+    
+    // Return the NrnRef as a uint64_t
+    plhs[0] = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
+    *(uint64_t*)mxGetData(plhs[0]) = reinterpret_cast<uint64_t>(ref);
+}   
+
+void nrn_rangevar_nrnref(const mxArray* prhs[], mxArray* plhs[]) {
+    // Get the range variable name, section, and x value from the arguments
+    auto sec_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    Section* sec = reinterpret_cast<Section*>(sec_ptr);
+    std::string var_name = getStringFromMxArray(prhs[2]);
+    Symbol* sym = nrn_symbol_(var_name.c_str());
+    double x = mxGetScalar(prhs[3]);
+
+    // Create a NrnRef for the range variable
+    NrnRef* ref = new NrnRef(sym, sec, x, var_name);
+
+    // Return the NrnRef as a uint64_t
+    plhs[0] = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
+    *(uint64_t*)mxGetData(plhs[0]) = reinterpret_cast<uint64_t>(ref);
+}
+
+void nrn_pp_property_nrnref(const mxArray* prhs[], mxArray* plhs[]) {
+    // Get the object pointer and property name from the arguments
+    auto obj_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    Object* obj = reinterpret_cast<Object*>(obj_ptr);
+    std::string prop_name = getStringFromMxArray(prhs[2]);
+
+    // Create a NrnRef for the property
+    NrnRef* ref = new NrnRef(obj, prop_name);
+
+    // Return the NrnRef as a uint64_t
+    plhs[0] = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
+    *(uint64_t*)mxGetData(plhs[0]) = reinterpret_cast<uint64_t>(ref);
+}
+
+void nrn_pp_property_array_nrnref(const mxArray* prhs[], mxArray* plhs[]) {
+    // Get the object pointer, property name, and index from the arguments
+    auto obj_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    Object* obj = reinterpret_cast<Object*>(obj_ptr);
+    std::string prop_name = getStringFromMxArray(prhs[2]);
+    int index = static_cast<int>(mxGetScalar(prhs[3]));
+
+    // Create a NrnRef for the property array
+    NrnRef* ref = new NrnRef(obj, prop_name, index);
+
+    // Return the NrnRef as a uint64_t
+    plhs[0] = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
+    *(uint64_t*)mxGetData(plhs[0]) = reinterpret_cast<uint64_t>(ref);
+}
+
+void nrnref_property_get(const mxArray* prhs[], mxArray* plhs[]) {
+    // Get the NrnRef pointer from the first argument
+    auto ref_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    NrnRef* ref = reinterpret_cast<NrnRef*>(ref_ptr);
+
+    int index = static_cast<int>(mxGetScalar(prhs[2]));
+    if (index >= ref->n_elements) {
+        mexErrMsgIdAndTxt("nrnref_property_get:IndexOutOfBounds", "Index %d out of bounds for symbol with %zu elements.", index+1, ref->n_elements);
+    }
+
+    if (ref->index >= 0) {
+        // If it's an array property, get the value at the specified index
+        double value = nrn_property_array_get_(ref->obj, ref->name.c_str(), ref->index);
+        plhs[0] = mxCreateDoubleScalar(value);
+        return;
+    } else {
+        double value = nrn_property_get_(ref->obj, ref->name.c_str());
+        plhs[0] = mxCreateDoubleScalar(value);
+    }
+}
+
+void nrnref_property_set(const mxArray* prhs[], mxArray* plhs[]) {
+    // Get the NrnRef pointer and new value from the arguments
+    auto ref_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    NrnRef* ref = reinterpret_cast<NrnRef*>(ref_ptr);
+    double new_value = mxGetScalar(prhs[2]);
+
+    int index = static_cast<int>(mxGetScalar(prhs[3]));
+    if (index >= ref->n_elements) {
+        mexErrMsgIdAndTxt("nrnref_property_set:IndexOutOfBounds", "Index %d out of bounds for symbol with %zu elements.", index+1, ref->n_elements);
+    }
+
+    if (ref->index >= 0) {
+        // If it's an array property, set the value at the specified index
+        nrn_property_array_set_(ref->obj, ref->name.c_str(), ref->index, new_value);
+        return;
+    } else {
+        nrn_property_set_(ref->obj, ref->name.c_str(), new_value);
+    }
+}
+
+
+
+void nrnref_symbol_push(const mxArray* prhs[], mxArray* plhs[]) {
+    auto ref_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    NrnRef* ref = reinterpret_cast<NrnRef*>(ref_ptr);
+    nrn_symbol_push_(ref->sym);
+}
+
+void nrnref_object_push(const mxArray* prhs[], mxArray* plhs[]) {
+    auto ref_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    NrnRef* ref = reinterpret_cast<NrnRef*>(ref_ptr);
+    nrn_object_push_(ref->obj);
+}
+
+void nrnref_rangevar_push(const mxArray* prhs[], mxArray* plhs[]) {
+    auto ref_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    NrnRef* ref = reinterpret_cast<NrnRef*>(ref_ptr);
+    nrn_rangevar_push_(ref->sym, ref->sec, ref->x);
+}
+
+void nrnref_property_push(const mxArray* prhs[], mxArray* plhs[]) {
+    auto ref_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    NrnRef* ref = reinterpret_cast<NrnRef*>(ref_ptr);
+    if (ref->index >= 0) {
+        // If it's an array property, push the value at the specified index
+        nrn_property_array_push_(ref->obj, ref->name.c_str(), ref->index);
+        return;
+    } else {
+        nrn_property_push_(ref->obj, ref->name.c_str());
+    }
 }
 
 // Function to be called through hoc to run arbitrary matlab code
@@ -472,13 +656,13 @@ void nrn_object_push(const mxArray* prhs[], mxArray* plhs[]) {
     nrn_object_push_(obj);
 }
 
-void nrn_double_ptr_push(const mxArray* prhs[], mxArray* plhs[]) {
-    auto ref_ptr = static_cast<uinnt64_t>(mxGetScalar(prhs[1]));
-    NrnRef* ref = reinterpret_cast<NrnRef*>(ref_ptr);
-    double* ptr = ref->ref;
-    mexPrintf("ptr: %p\n", ptr);
-    nrn_double_ptr_push_(ptr);
-}
+// void nrn_double_ptr_push(const mxArray* prhs[], mxArray* plhs[]) {
+//     auto ref_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+//     NrnRef* ref = reinterpret_cast<NrnRef*>(ref_ptr);
+//     double* ptr = ref->ref;
+//     mexPrintf("ptr: %p\n", ptr);
+//     nrn_double_ptr_push_(ptr);
+// }
 
 void nrn_section_list(const mxArray* prhs[], mxArray* plhs[]) {
     nrn_Item* allsec = nrn_allsec_();
@@ -518,15 +702,15 @@ void nrn_rangevar_get(const mxArray* prhs[], mxArray* plhs[]) {
     plhs[0] = mxCreateDoubleScalar(result);
 }
 
-void nrn_get_ref(const mxArray* prhs[], mxArray* plhs[]) {
-    auto value_ptr = reinterpret_cast<double*>(static_cast<uint64_t>(mxGetScalar(prhs[1])));
-    NrnRef* ref = nullptr;
-    size_t length = static_cast<size_t>(mxGetScalar(prhs[2]));
-    ref = new NrnRef(value_ptr, length);
-    mexPrintf("value_ptr: %p\n", value_ptr);
-    plhs[0] = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
-    *(uint64_t*)mxGetData(plhs[0]) = reinterpret_cast<uint64_t>(ref);
-}
+// void nrn_get_ref(const mxArray* prhs[], mxArray* plhs[]) {
+//     auto value_ptr = reinterpret_cast<double*>(static_cast<uint64_t>(mxGetScalar(prhs[1])));
+//     NrnRef* ref = nullptr;
+//     size_t length = static_cast<size_t>(mxGetScalar(prhs[2]));
+//     ref = new NrnRef(value_ptr, length);
+//     mexPrintf("value_ptr: %p\n", value_ptr);
+//     plhs[0] = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
+//     *(uint64_t*)mxGetData(plhs[0]) = reinterpret_cast<uint64_t>(ref);
+// }
 
 void nrn_section_connect(const mxArray* prhs[], mxArray* plhs[]) {
     auto child_sec_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
@@ -636,27 +820,27 @@ void nrn_property_array_set(const mxArray* prhs[], mxArray* plhs[]) {
     nrn_property_array_set_(obj, name.c_str(), index, value);
 }
 
-void nrn_get_value_ref(const mxArray* prhs[], mxArray* plhs[]) {
-    // Get string name
-    std::string propname = getStringFromMxArray(prhs[1]);
+// void nrn_get_value_ref(const mxArray* prhs[], mxArray* plhs[]) {
+//     // Get string name
+//     std::string propname = getStringFromMxArray(prhs[1]);
 
-    // Lookup symbol in top-level HOC context
-    Symbol* sym = nrn_symbol_(propname.c_str());
+//     // Lookup symbol in top-level HOC context
+//     Symbol* sym = nrn_symbol_(propname.c_str());
 
-    if (nrn_symbol_subtype_(sym) == 1) {
-        // If subtype is 2, cast to int* and create NrnRef
-        int* int_ptr = reinterpret_cast<int*>(nrn_symbol_dataptr_(sym));
-        NrnRef* ref = new NrnRef(reinterpret_cast<double*>(int_ptr));
-        plhs[0] = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
-        *(uint64_t*)mxGetData(plhs[0]) = reinterpret_cast<uint64_t>(ref);
-    } else {
-        // Otherwise, treat as double and create NrnRef
-        double* value_ptr = nrn_symbol_dataptr_(sym);
-        NrnRef* ref = new NrnRef(value_ptr);
-        plhs[0] = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
-        *(uint64_t*)mxGetData(plhs[0]) = reinterpret_cast<uint64_t>(ref);
-    }
-}
+//     if (nrn_symbol_subtype_(sym) == 1) {
+//         // If subtype is 2, cast to int* and create NrnRef
+//         int* int_ptr = reinterpret_cast<int*>(nrn_symbol_dataptr_(sym));
+//         NrnRef* ref = new NrnRef(reinterpret_cast<double*>(int_ptr));
+//         plhs[0] = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
+//         *(uint64_t*)mxGetData(plhs[0]) = reinterpret_cast<uint64_t>(ref);
+//     } else {
+//         // Otherwise, treat as double and create NrnRef
+//         double* value_ptr = nrn_symbol_dataptr_(sym);
+//         NrnRef* ref = new NrnRef(value_ptr);
+//         plhs[0] = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
+//         *(uint64_t*)mxGetData(plhs[0]) = reinterpret_cast<uint64_t>(ref);
+//     }
+// }
 
 std::vector<double> get_segment_arc(Section* sec, double low, double high, double ns, std::vector<std::vector<double>>& pt3d) {
 
@@ -819,45 +1003,45 @@ void nrn_loop_sections(const mxArray* prhs[], mxArray* plhs[]) {
     std::memcpy(mxGetData(plhs[0]), section_pointers.data(), section_pointers.size() * sizeof(uint64_t));
 }
 
-void nrnref_get_index(const mxArray* prhs[], mxArray* plhs[]) {
-    // Extract the NrnRef pointer from prhs[1]
-    auto ref_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
-    NrnRef* ref = reinterpret_cast<NrnRef*>(ref_ptr);
+// void nrnref_get_index(const mxArray* prhs[], mxArray* plhs[]) {
+//     // Extract the NrnRef pointer from prhs[1]
+//     auto ref_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+//     NrnRef* ref = reinterpret_cast<NrnRef*>(ref_ptr);
 
-    // Extract the index from prhs[2]
-    size_t index = static_cast<size_t>(mxGetScalar(prhs[2]));
+//     // Extract the index from prhs[2]
+//     size_t index = static_cast<size_t>(mxGetScalar(prhs[2]));
 
-    // Get the value at the specified index
-    double value = *(ref->ref + index);
-    plhs[0] = mxCreateDoubleScalar(value);
-}
+//     // Get the value at the specified index
+//     double value = *(ref->ref + index);
+//     plhs[0] = mxCreateDoubleScalar(value);
+// }
 
-void nrnref_get(const mxArray* prhs[], mxArray* plhs[]) {
-    // Extract the NrnRef pointer from prhs[1]
-    auto ref_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
-    NrnRef* ref = reinterpret_cast<NrnRef*>(ref_ptr);
+// void nrnref_get(const mxArray* prhs[], mxArray* plhs[]) {
+//     // Extract the NrnRef pointer from prhs[1]
+//     auto ref_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+//     NrnRef* ref = reinterpret_cast<NrnRef*>(ref_ptr);
 
-    // Get the value
-    double value = *(ref->ref);
-    plhs[0] = mxCreateDoubleScalar(value);
-}
+//     // Get the value
+//     double value = *(ref->ref);
+//     plhs[0] = mxCreateDoubleScalar(value);
+// }
 
-void nrnref_set_index(const mxArray* prhs[], mxArray* plhs[]) {
-    // Extract the NrnRef pointer from prhs[1]
-    auto ref_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
-    NrnRef* ref = reinterpret_cast<NrnRef*>(ref_ptr);
+// void nrnref_set_index(const mxArray* prhs[], mxArray* plhs[]) {
+//     // Extract the NrnRef pointer from prhs[1]
+//     auto ref_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+//     NrnRef* ref = reinterpret_cast<NrnRef*>(ref_ptr);
 
-    // Extract the value and index from prhs[2] and prhs[3]
-    double value = mxGetScalar(prhs[2]);
-    size_t index = static_cast<size_t>(mxGetScalar(prhs[3]));
+//     // Extract the value and index from prhs[2] and prhs[3]
+//     double value = mxGetScalar(prhs[2]);
+//     size_t index = static_cast<size_t>(mxGetScalar(prhs[3]));
 
-    // Set the value at the specified index
-    try {
-        *(ref->ref + index) = value;
-    } catch (const std::out_of_range& e) {
-        mexErrMsgIdAndTxt("NrnRef:setIndexOutOfBounds", e.what());
-    }
-}
+//     // Set the value at the specified index
+//     try {
+//         *(ref->ref + index) = value;
+//     } catch (const std::out_of_range& e) {
+//         mexErrMsgIdAndTxt("NrnRef:setIndexOutOfBounds", e.what());
+//     }
+// }
 
 void nrnref_set(const mxArray* prhs[], mxArray* plhs[]) {
     // Extract the NrnRef pointer from prhs[1]
@@ -868,7 +1052,7 @@ void nrnref_set(const mxArray* prhs[], mxArray* plhs[]) {
     double value = mxGetScalar(prhs[2]);
 
     // Set the value
-    *(ref->ref) = value;
+    // *(ref->ref) = value;
 }
 
 void nrnref_get_n_elements(const mxArray* prhs[], mxArray* plhs[]) {
@@ -878,6 +1062,59 @@ void nrnref_get_n_elements(const mxArray* prhs[], mxArray* plhs[]) {
 
     // Return the n_elements field
     plhs[0] = mxCreateDoubleScalar(static_cast<double>(ref->n_elements));
+}
+
+void nrnref_get_name(const mxArray* prhs[], mxArray* plhs[]) {
+    auto ref_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    NrnRef* ref = reinterpret_cast<NrnRef*>(ref_ptr);
+    plhs[0] = mxCreateString(ref->name.c_str());
+}
+
+void nrnref_get_class(const mxArray* prhs[], mxArray* plhs[]) {
+    auto ref_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    NrnRef* ref = reinterpret_cast<NrnRef*>(ref_ptr);
+    const char* class_str = "Unknown";
+    switch (ref->ref_class) {
+        case NrnRef::RefClass::Vector:   class_str = "Vector"; break;
+        case NrnRef::RefClass::Symbol:   class_str = "Symbol"; break;
+        case NrnRef::RefClass::RangeVar: class_str = "RangeVar"; break;
+        case NrnRef::RefClass::ObjectProp:  class_str = "ObjectProp"; break;
+        default: break;
+    }
+    plhs[0] = mxCreateString(class_str);
+}
+
+void nrnref_get_symbol(const mxArray* prhs[], mxArray* plhs[]) {
+    auto ref_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    NrnRef* ref = reinterpret_cast<NrnRef*>(ref_ptr);
+    if (ref->sym) {
+        plhs[0] = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
+        *(uint64_t*)mxGetData(plhs[0]) = reinterpret_cast<uint64_t>(ref->sym);
+    } else {
+        plhs[0] = mxCreateDoubleMatrix(0, 0, mxREAL);
+    }
+}
+
+void nrnref_get_section(const mxArray* prhs[], mxArray* plhs[]) {
+    auto ref_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    NrnRef* ref = reinterpret_cast<NrnRef*>(ref_ptr);
+    if (ref->sec) {
+        plhs[0] = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
+        *(uint64_t*)mxGetData(plhs[0]) = reinterpret_cast<uint64_t>(ref->sec);
+    } else {
+        plhs[0] = mxCreateDoubleMatrix(0, 0, mxREAL);
+    }
+}
+
+void nrnref_get_object(const mxArray* prhs[], mxArray* plhs[]) {
+    auto ref_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    NrnRef* ref = reinterpret_cast<NrnRef*>(ref_ptr);
+    if (ref->obj) {
+        plhs[0] = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
+        *(uint64_t*)mxGetData(plhs[0]) = reinterpret_cast<uint64_t>(ref->obj);
+    } else {
+        plhs[0] = mxCreateDoubleMatrix(0, 0, mxREAL);
+    }
 }
 
 void nrnref_set_n_elements(const mxArray* prhs[], mxArray* plhs[]) {
@@ -1025,15 +1262,83 @@ void nrn_symbol_dataptr(const mxArray* prhs[], mxArray* plhs[]) {
     *(uint64_t*)mxGetData(plhs[0]) = reinterpret_cast<uint64_t>(dataptr);
 }
 
-void nrn_get_ref_from_symbol(const mxArray* prhs[], mxArray* plhs[]) {
-    auto [name] = extractParams<std::string>(prhs, 1);
-    size_t length = static_cast<size_t>(mxGetScalar(prhs[2]));
-    Symbol* sym = nrn_symbol_(name.c_str());
-    double* ptr = nrn_symbol_dataptr_(sym);
-    NrnRef* ref = new NrnRef(ptr, length);
-    plhs[0] = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
-    *(uint64_t*)mxGetData(plhs[0]) = reinterpret_cast<uint64_t>(ref);
+void nrnref_symbol_get(const mxArray* prhs[], mxArray* plhs[]) {
+    auto ref_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    NrnRef* ref = reinterpret_cast<NrnRef*>(ref_ptr);
+    int index = static_cast<int>(mxGetScalar(prhs[2]));
+    if (index >= ref->n_elements) {
+        mexErrMsgIdAndTxt("nrnref_symbol_get:IndexOutOfBounds", "Index %d out of bounds for symbol with %zu elements.", index+1, ref->n_elements);
+    }
+    double* dataptr = nrn_symbol_dataptr_(ref->sym);
+    plhs[0] = mxCreateDoubleScalar(*(dataptr + index));
 }
+
+void nrnref_symbol_set(const mxArray* prhs[], mxArray* plhs[]) {
+    auto ref_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    NrnRef* ref = reinterpret_cast<NrnRef*>(ref_ptr);
+    double value = mxGetScalar(prhs[2]);
+    int index = static_cast<int>(mxGetScalar(prhs[3]));
+    if (index >= ref->n_elements) {
+        mexErrMsgIdAndTxt("nrnref_symbol_set:IndexOutOfBounds", "Index %d out of bounds for symbol with %zu elements.", index+1, ref->n_elements);
+    }
+    double* dataptr = nrn_symbol_dataptr_(ref->sym);
+    *(dataptr + index) = value;
+}  
+
+void nrnref_vector_get(const mxArray* prhs[], mxArray* plhs[]) {
+    auto ref_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    NrnRef* ref = reinterpret_cast<NrnRef*>(ref_ptr);
+    int index = static_cast<int>(mxGetScalar(prhs[2]));
+    if (index >= ref->n_elements) {
+        mexErrMsgIdAndTxt("nrnref_vector_get:IndexOutOfBounds", "Index %d out of bounds for vector with %zu elements.", index+1, ref->n_elements);
+    }
+    double* data = nrn_vector_data_(ref->obj);
+    plhs[0] = mxCreateDoubleScalar(*(data + index));
+}
+
+void nrnref_vector_set(const mxArray* prhs[], mxArray* plhs[]) {
+    auto ref_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    NrnRef* ref = reinterpret_cast<NrnRef*>(ref_ptr);
+    double value = mxGetScalar(prhs[2]);
+    int index = static_cast<int>(mxGetScalar(prhs[3]));
+    if (index >= ref->n_elements) {
+        mexErrMsgIdAndTxt("nrnref_vector_set:IndexOutOfBounds", "Index %d out of bounds for vector with %zu elements.", index+1, ref->n_elements);
+    }
+    double* data = nrn_vector_data_(ref->obj);
+    *(data + index) = value;
+}
+
+void nrnref_rangevar_get(const mxArray* prhs[], mxArray* plhs[]) {
+    auto ref_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    NrnRef* ref = reinterpret_cast<NrnRef*>(ref_ptr);
+    int index = static_cast<int>(mxGetScalar(prhs[2]));
+    if (index >= ref->n_elements) {
+        mexErrMsgIdAndTxt("nrnref_rangevar_get:IndexOutOfBounds", "Index %d out of bounds for range variable with %zu elements.", index+1, ref->n_elements);
+    }
+    double value = nrn_rangevar_get_(ref->sym, ref->sec, ref->x);
+    plhs[0] = mxCreateDoubleScalar(value);
+}
+
+void nrnref_rangevar_set(const mxArray* prhs[], mxArray* plhs[]) {
+    auto ref_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    NrnRef* ref = reinterpret_cast<NrnRef*>(ref_ptr);
+    double value = mxGetScalar(prhs[2]);
+    int index = static_cast<int>(mxGetScalar(prhs[3]));
+    if (index >= ref->n_elements) {
+        mexErrMsgIdAndTxt("nrnref_rangevar_set:IndexOutOfBounds", "Index %d out of bounds for range variable with %zu elements.", index+1, ref->n_elements);
+    }
+    nrn_rangevar_set_(ref->sym, ref->sec, ref->x, value);
+}
+
+// void nrn_get_ref_from_symbol(const mxArray* prhs[], mxArray* plhs[]) {
+//     auto [name] = extractParams<std::string>(prhs, 1);
+//     size_t length = static_cast<size_t>(mxGetScalar(prhs[2]));
+//     Symbol* sym = nrn_symbol_(name.c_str());
+//     double* ptr = nrn_symbol_dataptr_(sym);
+//     NrnRef* ref = new NrnRef(ptr, length);
+//     plhs[0] = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
+//     *(uint64_t*)mxGetData(plhs[0]) = reinterpret_cast<uint64_t>(ref);
+// }
 
 void nrn_symbol_push(const mxArray* prhs[], mxArray* plhs[]) {
     auto [name] = extractParams<std::string>(prhs, 1);
@@ -1148,7 +1453,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         nrn_object_push_ = (void (*)(Object*)) DLL_GET_PROC(neuron_handle, "nrn_object_push");
         function_map["nrn_object_push"] = nrn_object_push;
         nrn_double_ptr_push_ = (void (*)(double*)) DLL_GET_PROC(neuron_handle, "nrn_double_ptr_push");
-        function_map["nrn_double_ptr_push"] = nrn_double_ptr_push;
+        // function_map["nrn_double_ptr_push"] = nrn_double_ptr_push;
         nrn_allsec_ = (nrn_Item* (*)(void)) DLL_GET_PROC(neuron_handle, "nrn_allsec");
         function_map["nrn_section_list"] = nrn_section_list;
         nrn_sectionlist_data_ = (nrn_Item* (*)(Object*)) DLL_GET_PROC(neuron_handle, "nrn_sectionlist_data");
@@ -1187,11 +1492,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         function_map["nrn_property_set"] = nrn_property_set;
         nrn_property_array_set_ = (void (*)(Object*, const char*, int, double)) DLL_GET_PROC(neuron_handle, "nrn_property_array_set");
         function_map["nrn_property_array_set"] = nrn_property_array_set;
-        function_map["nrn_get_value_ref"] = nrn_get_value_ref;
+        // function_map["nrn_get_value_ref"] = nrn_get_value_ref;
         function_map["nrn_vector_data_ref"] = nrn_vector_data_ref;
-        function_map["nrnref_get_index"] = nrnref_get_index;
-        function_map["nrnref_get"] = nrnref_get;
-        function_map["nrnref_set_index"] = nrnref_set_index;
+        // function_map["nrnref_get_index"] = nrnref_get_index;
+        // function_map["nrnref_get"] = nrnref_get;
+        // function_map["nrnref_set_index"] = nrnref_set_index;
         function_map["nrnref_set"] = nrnref_set;
         function_map["nrnref_get_n_elements"] = nrnref_get_n_elements;
         function_map["nrnref_set_n_elements"] = nrnref_set_n_elements;
@@ -1227,18 +1532,36 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         function_map["nrn_section_rallbranch_get"] = nrn_section_rallbranch_get;
         nrn_section_rallbranch_set_ = (void (*)(Section*, double)) DLL_GET_PROC(neuron_handle, "nrn_section_rallbranch_set");
         function_map["nrn_section_rallbranch_set"] = nrn_section_rallbranch_set;
-        function_map["nrn_get_ref"] = nrn_get_ref;
+        // function_map["nrn_get_ref"] = nrn_get_ref;
         nrn_rangevar_push_ = (void (*)(Symbol*, Section*, double)) DLL_GET_PROC(neuron_handle, "nrn_rangevar_push");
         function_map["nrn_rangevar_push"] = nrn_rangevar_push;
+        nrn_property_push_ = (void (*)(Object*, const char*)) DLL_GET_PROC(neuron_handle, "nrn_property_push");
+        function_map["nrnref_property_push"] = nrnref_property_push;
+        nrn_property_array_push_ = (void (*)(Object*, const char*, int)) DLL_GET_PROC(neuron_handle, "nrn_property_array_push");
         nrn_double_ptr_pop_ = (double* (*)(void)) DLL_GET_PROC(neuron_handle, "nrn_double_ptr_pop");
         function_map["nrn_double_ptr_pop"] = nrn_double_ptr_pop;
         function_map["nrn_symbol_dataptr"] = nrn_symbol_dataptr;
-        function_map["nrn_get_ref_from_symbol"] = nrn_get_ref_from_symbol;
+        // function_map["nrn_get_ref_from_symbol"] = nrn_get_ref_from_symbol;
         nrn_symbol_push_ = (void (*)(Symbol*)) DLL_GET_PROC(neuron_handle, "nrn_symbol_push");
         function_map["nrn_symbol_push"] = nrn_symbol_push;
-        
-
-        
+        function_map["nrn_symbol_nrnref"] = nrn_symbol_nrnref;
+        function_map["nrnref_get_name"] = nrnref_get_name;
+        function_map["nrnref_get_class"] = nrnref_get_class;
+        function_map["nrnref_symbol_get"] = nrnref_symbol_get;        
+        function_map["nrnref_symbol_set"] = nrnref_symbol_set;
+        function_map["nrn_vector_nrnref"] = nrn_vector_nrnref;
+        function_map["nrnref_vector_get"] = nrnref_vector_get; 
+        function_map["nrnref_vector_set"] = nrnref_vector_set; 
+        function_map["nrn_rangevar_nrnref"] = nrn_rangevar_nrnref;   
+        function_map["nrnref_symbol_push"] = nrnref_symbol_push;     
+        function_map["nrnref_rangevar_get"] = nrnref_rangevar_get;
+        function_map["nrnref_rangevar_set"] = nrnref_rangevar_set;
+        function_map["nrnref_property_get"] = nrnref_property_get;
+        function_map["nrnref_property_set"] = nrnref_property_set;
+        function_map["nrn_pp_property_nrnref"] = nrn_pp_property_nrnref;
+        function_map["nrn_pp_property_array_nrnref"] = nrn_pp_property_array_nrnref;
+        function_map["nrnref_rangevar_push"] = nrnref_rangevar_push;
+       
         // Clean up
         //DLL_FREE(wrapper_handle);
         //DLL_FREE(neuron_handle);

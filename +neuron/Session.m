@@ -1,20 +1,20 @@
 classdef Session < dynamicprops
-% Class for initializing a Neuron session and running generic Neuron
+% Class for initializing a NEURON session and running generic NEURON
 % functions. Initialize using neuron.launch().
 
     properties (SetAccess=protected, GetAccess=public)
-        var_list        % List of top-level Neuron variables.
-        fn_double_list  % List of top-level Neuron functions returning a double.
-        fn_string_list  % List of top-level Neuron functions returning a string.
-        fn_void_list    % List of top-level Neuron functions returning nothing.
-        object_list     % List of Neuron Objects.
+        var_list        % List of top-level NEURON variables.
+        fn_double_list  % List of top-level NEURON functions returning a double.
+        fn_string_list  % List of top-level NEURON functions returning a string.
+        fn_void_list    % List of top-level NEURON functions returning nothing.
+        object_list     % List of NEURON Objects.
         null            % clib.type.nullptr
         nrnmatlab_ready % Indicates if setup_nrnmatlab has been called.
     end
 
     methods(Access=private)
         function self = Session()
-        % Initialize the neuron session, if it has not been initialized before.
+        % Initialize the NEURON session, if it has not been initialized before.
         %   Session()
             self = self@dynamicprops;
             neuron_api('setup_nrnmatlab');
@@ -49,7 +49,6 @@ classdef Session < dynamicprops
                 % the variable/function as a property (by adding it with 
                 % self.addprop) or as a method (by adding it to one of the 
                 % various self.*_list arrays).
-                % disp("f_type: " + f_type);
                 switch f_type
                     case "263"  % Properties with get/set functionality.
                         if f_subtype == "1" % int variable
@@ -78,7 +77,6 @@ classdef Session < dynamicprops
                     case "325" % object (e.g., Vector, PlotShape, RangeVarPlot)
                         self.object_list = [self.object_list f{1}];
                     otherwise
-                        % disp("Unknown type: " + f_type + f{1});
                         % We ignore all other types; they will either be
                         % implemented at a later point, or they are internal 
                         % NEURON types that we do not need to interface with.
@@ -152,13 +150,12 @@ classdef Session < dynamicprops
             catch  
                 % Check again if var/func exists; available functions can
                 % change due to importing .hoc files, for example.
-                % disp("Refreshing dynamic properties.");
                 self.fill_dynamic_props();
                 [varargout{1:nargout}] = self.dynamic_call(S);
             end
         end
         function list_functions(self)
-        % List all available top-level functions from Neuron.
+        % List all available top-level functions from NEURON.
         %   list_functions()
             disp("Available variables:")
             for i=1:self.var_list.length()
@@ -196,9 +193,9 @@ classdef Session < dynamicprops
             neuron_api('nrn_set_value', propname, value);
         end
         function quit(self)
-        % Quit neuron and close matlab.
+        % Quit NEURON and close matlab.
             if ismac || isunix
-                warn("Calling Neuron's quit() can lead to errors on linux or mac.");
+                warn("Calling NEURON's quit() can lead to errors on linux or mac.");
             end
             self.call_func_hoc("quit", "double");
         end
@@ -213,7 +210,7 @@ classdef Session < dynamicprops
             %         % to do an munlock (see issue #95).
             persistent uniqueInstance
             if isempty(uniqueInstance)
-                disp("Creating new neuron session.");
+                disp("Creating new NEURON session.");
                 self = neuron.Session();
                 uniqueInstance = self;
             else
@@ -226,15 +223,13 @@ classdef Session < dynamicprops
 
             try
                 [nsecs, nargs] = neuron.stack.push_args(varargin{:});
-                % disp(nsecs);
-                % disp(nargs);
                 neuron_api('nrn_function_call', func, nargs);
                 value = neuron.stack.hoc_pop(returntype);
                 neuron.stack.pop_sections(nsecs);
             catch e
                 value = NaN;
                 warning(e.message);
-                warning("'"+string(func)+"': caught error during call to Neuron function.");
+                warning("'"+string(func)+"': caught error during call to NEURON function.");
                 % state.restore();
             end
 
@@ -262,7 +257,6 @@ classdef Session < dynamicprops
                     elseif (objtype == "PlotShape")
                         obj = neuron.PlotShape(cppobj);
                     elseif (objtype == "RangeVarPlot")
-                        disp("Creating RangeVarPlot object.");
                         obj = neuron.RangeVarPlot(cppobj);
                     else
                         obj = neuron.Object(cppobj);
@@ -286,7 +280,8 @@ classdef Session < dynamicprops
         function nrnref = ref(sym)
         % Return an NrnRef containing a pointer to a top-level symbol (sym).
         %   nrnref = ref(sym)
-            nrnref = neuron.NrnRef(neuron_api('nrn_get_ref', neuron_api('nrn_symbol_dataptr', sym), 1));
+            nrnref = neuron.NrnRef(neuron_api('nrn_symbol_nrnref', sym));
+            % nrnref = neuron.NrnRef(neuron_api('nrn_get_ref', neuron_api('nrn_symbol_dataptr', sym), 1));
         end
         function reset_sections()
         % Reset topology.
