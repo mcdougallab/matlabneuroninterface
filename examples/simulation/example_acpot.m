@@ -15,7 +15,7 @@ axon.insert_mechanism('hh');
 % Connect branch.
 branch = n.Section('branch1');
 branch.diam = 10;
-branch.length = 1000;
+branch.L = 1000;
 branch.connect(0, axon, 1);
 n.topology();
 

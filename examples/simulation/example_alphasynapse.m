@@ -9,7 +9,7 @@ soma = n.Section('soma');
 soma.insert_mechanism('hh');
 soma.nseg = 11;
 soma.diam = 11;
-soma.length = 11;
+soma.L = 11;
 
 % Note: AlphaSynapse defines an alpha function conductance
 % at a pre-chosen time; it does not work with NetCon objects.
