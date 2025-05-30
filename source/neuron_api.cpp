@@ -164,13 +164,14 @@ struct NrnRef {
     Section* sec = nullptr;
     double x = 0.0;
     size_t n_elements = 1;
-    int index = -1; // For ObjectProp references
+    int index = -1; // For ObjectProp and Vector indices
 
     // Vector reference
-    NrnRef(Object* o, int n_elems) {
+    NrnRef(Object* o, int n_elems, int idx = 0) {
         ref_class = RefClass::Vector;
         obj = o;
         n_elements = n_elems;
+        index = idx;
     }
 
     // Symbol reference
@@ -312,16 +313,23 @@ void nrn_symbol_nrnref(const mxArray* prhs[], mxArray* plhs[]) {
 void nrn_vector_nrnref(const mxArray* prhs[], mxArray* plhs[]) {
     // Get the vector object from the first argument
     auto obj_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
-    Object* vec = reinterpret_cast<Object*>(obj_ptr);
     int n = static_cast<int>(mxGetScalar(prhs[2]));
-    
+    int index = static_cast<int>(mxGetScalar(prhs[3]));
+    Object* vec = reinterpret_cast<Object*>(obj_ptr);
+
+    // Check if the index is valid
+    if (index < 0 || index >= n) {
+        mexErrMsgIdAndTxt("nrn_vector_nrnref:IndexOutOfBounds", "Index %d out of bounds for vector with %d elements.", index + 1, n);
+    }
+
     // Create a NrnRef for the vector
-    NrnRef* ref = new NrnRef(vec, n);
-    
+    NrnRef* ref = new NrnRef(vec, n - index, index);
+
     // Return the NrnRef as a uint64_t
     plhs[0] = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
     *(uint64_t*)mxGetData(plhs[0]) = reinterpret_cast<uint64_t>(ref);
-}   
+
+} 
 
 void nrn_rangevar_nrnref(const mxArray* prhs[], mxArray* plhs[]) {
     // Get the range variable name, section, and x value from the arguments
@@ -417,10 +425,10 @@ void nrnref_symbol_push(const mxArray* prhs[], mxArray* plhs[]) {
     nrn_symbol_push_(ref->sym);
 }
 
-void nrnref_object_push(const mxArray* prhs[], mxArray* plhs[]) {
+void nrnref_vector_push(const mxArray* prhs[], mxArray* plhs[]) {
     auto ref_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
     NrnRef* ref = reinterpret_cast<NrnRef*>(ref_ptr);
-    nrn_object_push_(ref->obj);
+    nrn_object_push_(ref->obj); 
 }
 
 void nrnref_rangevar_push(const mxArray* prhs[], mxArray* plhs[]) {
@@ -1295,9 +1303,10 @@ void nrnref_symbol_set(const mxArray* prhs[], mxArray* plhs[]) {
 void nrnref_vector_get(const mxArray* prhs[], mxArray* plhs[]) {
     auto ref_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
     NrnRef* ref = reinterpret_cast<NrnRef*>(ref_ptr);
-    int index = static_cast<int>(mxGetScalar(prhs[2]));
-    if (index >= ref->n_elements) {
-        mexErrMsgIdAndTxt("nrnref_vector_get:IndexOutOfBounds", "Index %d out of bounds for vector with %zu elements.", index+1, ref->n_elements);
+    int index = static_cast<int>(mxGetScalar(prhs[2])) + ref->index;
+    mexPrintf("nrnref_vector_get: ref index %d, n_elements %zu\n", index, ref->n_elements + ref->index);
+    if (index >= ref->n_elements + ref->index || index - ref->index < 0) {
+        mexErrMsgIdAndTxt("nrnref_vector_get:IndexOutOfBounds", "Index %d out of bounds for vector with %zu elements.", index+1-ref->index, ref->n_elements);
     }
     double* data = nrn_vector_data_(ref->obj);
     plhs[0] = mxCreateDoubleScalar(*(data + index));
@@ -1307,9 +1316,9 @@ void nrnref_vector_set(const mxArray* prhs[], mxArray* plhs[]) {
     auto ref_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
     NrnRef* ref = reinterpret_cast<NrnRef*>(ref_ptr);
     double value = mxGetScalar(prhs[2]);
-    int index = static_cast<int>(mxGetScalar(prhs[3]));
-    if (index >= ref->n_elements) {
-        mexErrMsgIdAndTxt("nrnref_vector_set:IndexOutOfBounds", "Index %d out of bounds for vector with %zu elements.", index+1, ref->n_elements);
+    int index = static_cast<int>(mxGetScalar(prhs[3])) + ref->index;
+    if (index >= ref->n_elements + ref->index || index - ref->index < 0) {
+        mexErrMsgIdAndTxt("nrnref_vector_set:IndexOutOfBounds", "Index %d out of bounds for vector with %zu elements.", index+1-ref->index, ref->n_elements);
     }
     double* data = nrn_vector_data_(ref->obj);
     *(data + index) = value;
@@ -1585,6 +1594,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         nrn_section_unref_ = (void (*)(Section*)) DLL_GET_PROC(neuron_handle, "nrn_section_unref");
         function_map["nrn_section_ref"] = nrn_section_ref;
         function_map["nrn_section_unref"] = nrn_section_unref;
+        function_map["nrnref_vector_push"] = nrnref_vector_push;
        
         // Clean up
         //DLL_FREE(wrapper_handle);

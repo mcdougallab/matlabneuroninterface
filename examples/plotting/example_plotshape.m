@@ -28,7 +28,7 @@ n.topology();
 % Make PlotShape of all Sections.
 ps_all = n.PlotShape(false);
 ps_all.variable('diam');
-ps_all.scale(0, 8);
+ps_all.scale(5, 8);
 ps_all.plot();
 
 % Make PlotShape of some Sections.

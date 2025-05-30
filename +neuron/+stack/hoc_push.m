@@ -11,7 +11,7 @@ function hoc_push(value)
         neuron_api('nrn_object_push', value.obj);
     elseif isa(value, "neuron.NrnRef")
         if strcmp(value.ref_class, "Vector")
-            neuron_api('nrnref_object_push', value.obj);
+            neuron_api('nrnref_vector_push', value.obj);
         elseif strcmp(value.ref_class, "Symbol")
             neuron_api('nrnref_symbol_push', value.obj);
         elseif strcmp(value.ref_class, "ObjectProp")
