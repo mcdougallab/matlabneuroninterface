@@ -107,6 +107,8 @@ void (*nrn_section_rallbranch_set_)(Section*, double) = nullptr;
 void (*nrn_segment_diam_set_)(Section*, const double, const double) = nullptr;
 double (*nrn_segment_diam_get_)(Section* const, const double) = nullptr;
 bool (*nrn_section_is_active_)(Section*) = nullptr;
+void (*nrn_section_ref_)(Section*) = nullptr;
+void (*nrn_section_unref_)(Section*) = nullptr;
 
 double (*nrn_property_get_)(Object const*, const char*) = nullptr;
 double (*nrn_property_array_get_)(Object const*, const char*, int) = nullptr;
@@ -481,8 +483,6 @@ void create_FInitializeHandler(const mxArray* prhs[], mxArray* plhs[]) {
     std::string command = func_name + "(\"" + instance_id + "\")";
     char* command_c = const_cast<char*>(command.c_str());
 
-    mexPrintf("HOC command: %s\n", command.c_str());
-
     // Register FInitializeHandler object
     // calling the constructor with (type, command_c)
     int n_args = 2;
@@ -815,8 +815,14 @@ void nrn_property_array_set(const mxArray* prhs[], mxArray* plhs[]) {
     auto obj_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
     Object* obj = reinterpret_cast<Object*>(obj_ptr);
     auto name = getStringFromMxArray(prhs[2]);
+    Symbol* sym = nrn_method_symbol_(obj, name.c_str());
+    mexPrintf("sym: %p, name: %s\n", sym, name.c_str());    
     double value = mxGetScalar(prhs[3]);
     int index = (int) mxGetScalar(prhs[4]);
+    int max_index = nrn_symbol_array_length_(sym);
+    if (index >= max_index) {
+        mexErrMsgIdAndTxt("nrn_property_array_set:IndexOutOfBounds", "Index %d out of bounds for symbol with %zu elements.", index+1, nrn_symbol_array_length_(sym));
+    }
     nrn_property_array_set_(obj, name.c_str(), index, value);
 }
 
@@ -993,6 +999,7 @@ void nrn_loop_sections(const mxArray* prhs[], mxArray* plhs[]) {
 
     while (!nrn_sectionlist_iterator_done_(sli)) {
         Section* sec = nrn_sectionlist_iterator_next_(sli);
+        
         section_pointers.push_back(reinterpret_cast<uint64_t>(sec));
     }
 
@@ -1346,6 +1353,19 @@ void nrn_symbol_push(const mxArray* prhs[], mxArray* plhs[]) {
     nrn_symbol_push_(sym);
 }
 
+void nrn_section_ref(const mxArray* prhs[], mxArray* plhs[]) {
+    auto sec_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    Section* sec = reinterpret_cast<Section*>(sec_ptr);
+    nrn_section_ref_(sec);
+}
+
+void nrn_section_unref(const mxArray* prhs[], mxArray* plhs[]) {
+    auto sec_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    Section* sec = reinterpret_cast<Section*>(sec_ptr);
+    nrn_section_unref_(sec);
+}
+
+
 
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
@@ -1561,6 +1581,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         function_map["nrn_pp_property_nrnref"] = nrn_pp_property_nrnref;
         function_map["nrn_pp_property_array_nrnref"] = nrn_pp_property_array_nrnref;
         function_map["nrnref_rangevar_push"] = nrnref_rangevar_push;
+        nrn_section_ref_ = (void (*)(Section*)) DLL_GET_PROC(neuron_handle, "nrn_section_ref");
+        nrn_section_unref_ = (void (*)(Section*)) DLL_GET_PROC(neuron_handle, "nrn_section_unref");
+        function_map["nrn_section_ref"] = nrn_section_ref;
+        function_map["nrn_section_unref"] = nrn_section_unref;
        
         // Clean up
         //DLL_FREE(wrapper_handle);
