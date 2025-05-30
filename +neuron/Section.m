@@ -108,12 +108,18 @@ classdef Section < handle
 
             % Are we trying to directly access a class property?
             if (isa(S(1).subs, "char") && length(S) == 1 && isprop(self, S(1).subs))
+                % Prevent assignment to read-only properties
+                if any(strcmp(S(1).subs, {'mech_list', 'range_list', 'owner', 'sec'}))
+                    error("Property '%s' is read-only and cannot be set after construction.", S(1).subs);
+                end
                 self.(S(1).subs) = varargin{:};
             % Assign a segment property value.
             elseif (S(1).type == "()" && length(S) == 2)
                 x = S(1).subs{:};
                 seg = neuron.Segment(self, x);
                 seg.(S(2).subs) = varargin{:};
+            else
+                error("Section.%s not found.", string(S(1).subs));
             end
         end
 

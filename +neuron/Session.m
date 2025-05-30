@@ -178,14 +178,14 @@ classdef Session < dynamicprops
                 disp("    "+self.object_list(i));
             end
         end
-        function value = get_prop(~, propname)
+        function value = get_prop(self, propname)
         % Get dynamic property.
         %   get_prop(propname)
             % TODO: this method does not work as GetMethod if we move
             % it to methods(Static)... why?
             value = neuron_api('nrn_get_value', propname);
         end
-        function set_prop(~, propname, value)
+        function set_prop(self, propname, value)
         % Set dynamic property.
         %   set_prop(propname, value)
             % TODO: this method does not work as SetMethod if we move
@@ -195,9 +195,9 @@ classdef Session < dynamicprops
         function quit(self)
         % Quit NEURON and close matlab.
             if ismac || isunix
-                warn("Calling NEURON's quit() can lead to errors on linux or mac.");
+                warning("Calling NEURON's quit() can lead to errors on linux or mac.");
             end
-            self.call_func_hoc("quit", "double");
+            self.call_func_hoc('quit', "double");
         end
 
     end
@@ -281,7 +281,6 @@ classdef Session < dynamicprops
         % Return an NrnRef containing a pointer to a top-level symbol (sym).
         %   nrnref = ref(sym)
             nrnref = neuron.NrnRef(neuron_api('nrn_symbol_nrnref', sym));
-            % nrnref = neuron.NrnRef(neuron_api('nrn_get_ref', neuron_api('nrn_symbol_dataptr', sym), 1));
         end
         function reset_sections()
         % Reset topology.

@@ -36,7 +36,13 @@ classdef Vector < neuron.Object
                 self.call_method_hoc('set', 'Object', element_id-1, varargin{:});
             % Are we trying to directly access a class property?
             elseif (isa(S(1).subs, "char") && length(S) == 1 && isprop(self, S(1).subs))
+                if any(strcmp(S(1).subs, {'obj', 'objtype', 'attr_list', 'attr_array_map', ...
+                                          'mt_double_list', 'mt_object_list', 'mt_string_list'}))
+                    error("Property '%s' is read-only and cannot be set after construction.", S(1).subs);
+                end
                 self.(S(1).subs) = varargin{:};
+            else
+                self = subsasgn@neuron.Object(self, S, varargin{:});
             end
         end
 
@@ -126,7 +132,8 @@ classdef Vector < neuron.Object
             else
                 warning("Built-in function '"+varargin{1}+"' not found.");
                 disp("Available built-in functions:")
-                for i=1:self.apply_func_list.length()
+                disp(self.apply_func_list);
+                for i = 1:numel(self.apply_func_list)
                     disp("    "+self.apply_func_list(i));
                 end
             end

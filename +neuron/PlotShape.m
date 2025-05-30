@@ -20,6 +20,23 @@ classdef PlotShape < neuron.Object
             self.index = index;
         end
 
+        function self = subsasgn(self, S, varargin)
+        % Assigning a PlotShape element by index.
+            if (isa(S(1).subs, "char") && length(S) == 1 && isprop(self, S(1).subs))
+                if any(strcmp(S(1).subs, {'obj', 'objtype', 'attr_list', 'attr_array_map', ...
+                                          'mt_double_list', 'mt_object_list', 'mt_string_list'}))
+                    error("Property '%s' is read-only and cannot be set after construction.", S(1).subs);
+                end
+                self.(S(1).subs) = varargin{:};
+            else
+                self = subsasgn@neuron.Object(self, S, varargin{:});
+            end
+        end
+
+        function varargout = subsref(self, S)
+            [varargout{1:nargout}] = subsref@neuron.Object(self, S);
+        end
+
         function data = get_plot_data(self)
         % Get PlotShape data; a table with data to plot.
         %   data = get_plot_data()

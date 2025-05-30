@@ -78,12 +78,13 @@ classdef NrnRef < handle
         function value = get.ref_class(self)
             value = neuron_api('nrnref_get_class', self.obj);
         end
+        
         function sz = size(self)
             x = 1;
             y = self.length;
             sz = [x y];
         end
-        function value = numel(self)
+        function value = numel(self, varargin)
             value = self.length;
         end
         % Allow for access by index.
@@ -113,6 +114,9 @@ classdef NrnRef < handle
             if S(1).type == "()"
                 self.set(varargin{:}, S(1).subs{:});
             elseif S(1).type == "."
+                if any(strcmp(S(1).subs, {'obj', 'ref', 'ref_class', 'length'}))
+                    error("Property '%s' is read-only and cannot be set after construction.", S(1).subs);
+                end
                 self = builtin('subsasgn', self, S, varargin{:});
             else
                 % Other indexing type ({}) not supported.

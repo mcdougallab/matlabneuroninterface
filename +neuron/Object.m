@@ -129,12 +129,19 @@ classdef Object < dynamicprops
 
         function self = subsasgn(self, S, varargin)
         % Assign a (dynamic) property value.
+            % Assign a (dynamic) property value.
             % Are we trying to directly assign a class property?
             if (isa(S(1).subs, "char") && length(S) == 1 && isprop(self, S(1).subs))
+                if any(strcmp(S(1).subs, {'obj', 'objtype', 'attr_list', 'attr_array_map', ...
+                                          'mt_double_list', 'mt_object_list', 'mt_string_list'}))
+                    error("Property '%s' is read-only and cannot be set after construction.", S(1).subs);
+                end
                 self.(S(1).subs) = varargin{:};
             % Are we trying to directly assign a class property array?
             elseif (isa(S(1).subs, "char") && length(S) == 2 && isprop(self, S(1).subs))
                 self.set_pp_arr_element(S(1).subs, varargin{:}, S(2).subs{:});
+            else
+                error("'%s': not found; call Object.list_methods() to see all available methods and attributes.", string(S(1).subs));
             end
         end
 

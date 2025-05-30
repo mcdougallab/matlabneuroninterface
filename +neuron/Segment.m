@@ -53,7 +53,6 @@ classdef Segment < handle
             catch
                 error("Parent section has been deleted.");
             end
-
             if S(1).type == "."
                 % Are we trying to directly access a class property?
                 if isprop(self, S(1).subs)
@@ -90,9 +89,17 @@ classdef Segment < handle
             
             % Are we trying to directly access a class property?
             if (isa(S(1).subs, "char") && length(S) == 1 && isprop(self, S(1).subs))
+                if any(strcmp(S(1).subs, {'parent_sec', 'x', 'parent_name'}))
+                    error("Property '%s' is read-only and cannot be set after construction.", S(1).subs);
+                end
                 self.(S(1).subs) = varargin{:};
             elseif (isa(S(1).subs, "char") && length(S) == 1)
-                neuron_api('nrn_rangevar_set', self.parent_sec.get_sec(), S(1).subs, self.x, varargin{:});
+                % Only set if it is a valid range variable
+                if any(strcmp(self.parent_sec.range_list, S(1).subs))
+                    neuron_api('nrn_rangevar_set', self.parent_sec.get_sec(), S(1).subs, self.x, varargin{:});
+                else
+                    error("'%s' is not a valid range variable for this section.", S(1).subs);
+                end
             end
         end
 
