@@ -1082,7 +1082,17 @@ void nrnref_get_n_elements(const mxArray* prhs[], mxArray* plhs[]) {
 void nrnref_get_name(const mxArray* prhs[], mxArray* plhs[]) {
     auto ref_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
     NrnRef* ref = reinterpret_cast<NrnRef*>(ref_ptr);
-    plhs[0] = mxCreateString(ref->name.c_str());
+
+    if (ref->ref_class == NrnRef::RefClass::Vector) {
+        // For Vectors, call label function to get the name
+        nrn_method_call_(ref->obj, nrn_method_symbol_(ref->obj, "label"), 0);
+        char** result = nrn_pop_str_();
+        mexPrintf("nrnref_get_name: result: %s\n", *result);
+        plhs[0] = mxCreateString(*result);
+    }
+    else {
+        plhs[0] = mxCreateString(ref->name.c_str());
+    }
 }
 
 void nrnref_get_class(const mxArray* prhs[], mxArray* plhs[]) {
@@ -1304,7 +1314,6 @@ void nrnref_vector_get(const mxArray* prhs[], mxArray* plhs[]) {
     auto ref_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
     NrnRef* ref = reinterpret_cast<NrnRef*>(ref_ptr);
     int index = static_cast<int>(mxGetScalar(prhs[2])) + ref->index;
-    mexPrintf("nrnref_vector_get: ref index %d, n_elements %zu\n", index, ref->n_elements + ref->index);
     if (index >= ref->n_elements + ref->index || index - ref->index < 0) {
         mexErrMsgIdAndTxt("nrnref_vector_get:IndexOutOfBounds", "Index %d out of bounds for vector with %zu elements.", index+1-ref->index, ref->n_elements);
     }
