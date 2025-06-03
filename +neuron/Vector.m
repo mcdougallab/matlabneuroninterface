@@ -60,11 +60,18 @@ classdef Vector < neuron.Object
             end
         end
 
-        function nrnref = ref(self)
-        % Get reference to vector data.
-        %   nrnref = ref()
-            nrnref = neuron.NrnRef(neuron_api('nrn_vector_nrnref', self.obj, self.length()));
-            % nrnref = neuron.NrnRef(neuron_api('nrn_get_ref', neuron_api('nrn_vector_data_ref', self.obj), self.length));
+        function nrnref = ref(self, varargin)
+        % Get reference to vector data or a specific index.
+        %   nrnref = ref()           % reference to entire vector
+        %   nrnref = ref(index)      % reference to specific index
+            if nargin == 1
+                nrnref = neuron.NrnRef(neuron_api('nrn_vector_nrnref', self.obj, self.length(), 0));
+            elseif nargin == 2
+                index = varargin{1};
+                nrnref = neuron.NrnRef(neuron_api('nrn_vector_nrnref', self.obj, self.length(), index-1));
+            else
+                error('Invalid number of arguments to ref().');
+            end
         end
 
         function vec = get_vec(self)

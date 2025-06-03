@@ -47,6 +47,7 @@ classdef PlotShape < neuron.Object
             spi = neuron_api('nrn_get_plotshape_interface', self.obj);
 
             section_plot_data = neuron_api('get_plot_data', spi);
+            disp(section_plot_data);
             section_plot_data = transpose(reshape(section_plot_data, 9, []));
             x = [section_plot_data(:, 1) section_plot_data(:, 2)];
             y = [section_plot_data(:, 3) section_plot_data(:, 4)];
@@ -82,10 +83,15 @@ classdef PlotShape < neuron.Object
             indices = round(interp1(linspace(0, 1, length(cmap)), 1:length(cmap), values, 'linear', 'extrap'));
 
             l = plot3(transpose(data.x), transpose(data.y), transpose(data.z));
+            varname = neuron_api('nrn_get_plotshape_varname', spi);
 
             for i=1:size(data, 1)
                 seg = data(i, :);
-                l(i).Color = cmap(indices(i), :);
+                 if strcmp(varname, 'no variable specified')
+                    l(i).Color = [0 0 0]; % Default color if no variable specified
+                else
+                    l(i).Color = cmap(indices(i), :);
+                end
                 l(i).LineWidth = seg.line_width;
             end
 
@@ -94,7 +100,6 @@ classdef PlotShape < neuron.Object
             xlabel('x');
             ylabel('y');
             zlabel('z');
-            varname = neuron_api('nrn_get_plotshape_varname', spi);
             title(['PlotShape: ', varname]);
             view(3);
             hold off;

@@ -30,9 +30,9 @@ n.pt3dadd(201, 2, 3, 1);
 n.pop_section();
 
 % Set abstract morphology info for branches.
-branch1.length = 100;
+branch1.L = 100;
 branch1.diam = 1;
-branch2.length = 150;
+branch2.L = 150;
 branch2.diam = 0.9;
 
 % Construct 3D points for branches.

@@ -22,7 +22,7 @@ classdef test_RangeVarPlot < matlab.unittest.TestCase
             if ~any(strcmp(s.mech_list, 'pas'))
                 s.insert_mechanism('pas');
             end
-            rvp = n.RangeVarPlot(s, 'v');
+            rvp = n.RangeVarPlot(s, 'v', 0, 1);
             [x, y] = rvp.get_xy_data();
             testCase.verifyClass(x, 'neuron.Vector');
             testCase.verifyClass(y, 'neuron.Vector');

@@ -73,7 +73,12 @@ classdef NrnRef < handle
             value = neuron_api('nrnref_get_n_elements', self.obj);
         end
         function value = get.ref(self)
-            value = neuron_api('nrnref_get_name', self.obj);
+            name = neuron_api('nrnref_get_name', self.obj);
+            if ~isempty(name)
+                value = name;
+            elseif (self.ref_class == "Vector")
+                value = 'no label assigned';
+            end
         end
         function value = get.ref_class(self)
             value = neuron_api('nrnref_get_class', self.obj);

@@ -234,7 +234,7 @@ classdef Section < handle
             else
                 warning("Range variable '"+rangevar+"' not found.");
                 disp("Available range variables:")
-                for i=1:self.range_list.length()
+                for i=1:numel(self.range_list)
                     disp("    "+self.range_list(i));
                 end
             end
