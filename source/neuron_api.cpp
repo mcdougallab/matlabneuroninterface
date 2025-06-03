@@ -930,8 +930,17 @@ std::vector<double> get_section_plot_data(Section* sec, ShapePlotInterface* spi)
         x_hi *= sec_length;
 
         auto segment_arc = get_segment_arc(sec, x_lo, x_hi, ns, pt3d);
+
+        const char* varname = nrn_get_plotshape_varname_(spi);
+        double seg_value = 0.0;
+        if (!varname || varname[0] == '\0') {
+            // If no variable name is specified, use the section length
+            seg_value = std::numeric_limits<double>::quiet_NaN();
+        } else {
+            // Otherwise, get the value of the specified variable
+            seg_value = nrn_rangevar_get_(nrn_symbol_(varname), sec, x);
+        }
         
-        double seg_value = nrn_rangevar_get_(nrn_symbol_(nrn_get_plotshape_varname_(spi)), sec, x);
 
         // Do one initial run
         result.push_back(interpolate_arrays(arcs, xs, segment_arc[0]));
@@ -1219,6 +1228,9 @@ void nrn_get_plotshape_varname(const mxArray* prhs[], mxArray* plhs[]) {
     auto spi_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
     ShapePlotInterface* spi = reinterpret_cast<ShapePlotInterface*>(spi_ptr);
     const char* varname = nrn_get_plotshape_varname_(spi);
+    if (!varname || varname[0] == '\0') {
+        varname = "no variable specified";
+    }
     plhs[0] = mxCreateString(varname);
 }
 

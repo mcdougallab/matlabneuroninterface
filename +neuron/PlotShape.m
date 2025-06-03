@@ -78,14 +78,21 @@ classdef PlotShape < neuron.Object
             if nargin < 2
                 cmap = colormap;
             end
+            disp(table2array(data));
             values = table2array(data(:, 'color'));
             indices = round(interp1(linspace(0, 1, length(cmap)), 1:length(cmap), values, 'linear', 'extrap'));
+            disp(values);
 
             l = plot3(transpose(data.x), transpose(data.y), transpose(data.z));
+            varname = neuron_api('nrn_get_plotshape_varname', spi);
 
             for i=1:size(data, 1)
                 seg = data(i, :);
-                l(i).Color = cmap(indices(i), :);
+                 if strcmp(varname, 'no variable specified')
+                    l(i).Color = [0 0 0]; % Default color if no variable specified
+                else
+                    l(i).Color = cmap(indices(i), :);
+                end
                 l(i).LineWidth = seg.line_width;
             end
 
@@ -94,7 +101,6 @@ classdef PlotShape < neuron.Object
             xlabel('x');
             ylabel('y');
             zlabel('z');
-            varname = neuron_api('nrn_get_plotshape_varname', spi);
             title(['PlotShape: ', varname]);
             view(3);
             hold off;
