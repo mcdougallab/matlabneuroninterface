@@ -824,7 +824,6 @@ void nrn_property_array_set(const mxArray* prhs[], mxArray* plhs[]) {
     Object* obj = reinterpret_cast<Object*>(obj_ptr);
     auto name = getStringFromMxArray(prhs[2]);
     Symbol* sym = nrn_method_symbol_(obj, name.c_str());
-    mexPrintf("sym: %p, name: %s\n", sym, name.c_str());    
     double value = mxGetScalar(prhs[3]);
     int index = (int) mxGetScalar(prhs[4]);
     int max_index = nrn_symbol_array_length_(sym);
