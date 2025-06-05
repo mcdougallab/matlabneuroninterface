@@ -3,10 +3,10 @@ clearvars -except testCase;  % Make sure testing params are not cleared.
 n = neuron.launch();
 n.reset_sections();
 
-% n.load_file('stdrun.hoc');
+n.load_file('stdrun.hoc');
 
 soma = n.Section('soma');
-% soma.insert_mechanism('hh');
+soma.insert_mechanism('hh');
 soma.nseg = 11;
 soma.diam = 11;
 soma.L = 11;

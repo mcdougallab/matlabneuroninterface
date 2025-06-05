@@ -47,7 +47,6 @@ classdef PlotShape < neuron.Object
             spi = neuron_api('nrn_get_plotshape_interface', self.obj);
 
             section_plot_data = neuron_api('get_plot_data', spi);
-            disp(section_plot_data);
             section_plot_data = transpose(reshape(section_plot_data, 9, []));
             x = [section_plot_data(:, 1) section_plot_data(:, 2)];
             y = [section_plot_data(:, 3) section_plot_data(:, 4)];

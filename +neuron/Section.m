@@ -332,6 +332,58 @@ classdef Section < handle
             neuron_api('nrn_function_call', 'psection', 0);
             neuron_api('nrn_section_pop');
         end
+        function n3d = n3d(self)
+        % Get number of 3D points in Section.
+        %   n3d = n3d()
+            neuron_api('nrn_section_push', self.sec);
+            neuron_api('nrn_function_call', 'n3d', 0);
+            n3d = neuron.stack.hoc_pop('double');
+            neuron_api('nrn_section_pop');
+        end
+        function val = x3d(self, idx)
+        % Get x3d value at index idx (0-based).
+            neuron_api('nrn_section_push', self.sec);
+            neuron.stack.push_args(idx);
+            neuron_api('nrn_function_call', 'x3d', 1);
+            val = neuron.stack.hoc_pop('double');
+            neuron_api('nrn_section_pop');
+        end
+
+        function val = y3d(self, idx)
+        % Get y3d value at index idx (0-based).
+            neuron_api('nrn_section_push', self.sec);
+            neuron.stack.push_args(idx);
+            neuron_api('nrn_function_call', 'y3d', 1);
+            val = neuron.stack.hoc_pop('double');
+            neuron_api('nrn_section_pop');
+        end
+
+        function val = z3d(self, idx)
+        % Get z3d value at index idx (0-based).
+            neuron_api('nrn_section_push', self.sec);
+            neuron.stack.push_args(idx);
+            neuron_api('nrn_function_call', 'z3d', 1);
+            val = neuron.stack.hoc_pop('double');
+            neuron_api('nrn_section_pop');
+        end
+
+        function val = arc3d(self, idx)
+        % Get arc3d value at index idx (0-based).
+            neuron_api('nrn_section_push', self.sec);
+            neuron.stack.push_args(idx);
+            neuron_api('nrn_function_call', 'arc3d', 1);
+            val = neuron.stack.hoc_pop('double');
+            neuron_api('nrn_section_pop');
+        end
+
+        function val = diam3d(self, idx)
+        % Get diam3d value at index idx (0-based).
+            neuron_api('nrn_section_push', self.sec);
+            neuron.stack.push_args(idx);
+            neuron_api('nrn_function_call', 'diam3d', 1);
+            val = neuron.stack.hoc_pop('double');
+            neuron_api('nrn_section_pop');
+        end
         function pt3d = get_pt3d(self)
         % Get all 3D point information; returns a 5xN matrix for N 3D
         % points, with rows [x, y, z, arc, d].

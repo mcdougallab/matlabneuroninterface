@@ -799,7 +799,12 @@ void nrn_property_get(const mxArray* prhs[], mxArray* plhs[]) {
     auto obj_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
     Object* obj = reinterpret_cast<Object*>(obj_ptr);
     auto [name] = extractParams<std::string>(prhs, 2);
-    double result = nrn_property_get_(obj, name.c_str());
+    mexPrintf("obj_ptr: %llu\n", obj_ptr);
+    mexPrintf("obj: %p\n", obj);
+    mexPrintf("nrn_property_get: %s\n", name.c_str());
+    const char* obj_name = nrn_class_name_(obj);
+    mexPrintf("Object class name: %s\n", obj_name);
+    double result = nrn_property_get_(obj, name.c_str()); // This is where it ERRORS
     plhs[0] = mxCreateDoubleScalar(result);
 }
 

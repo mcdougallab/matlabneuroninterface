@@ -302,6 +302,7 @@ classdef Session < dynamicprops
             elseif isa(section_list, 'neuron.Object') % Input is a 'n.SectionList'
                 list_type = 1; % Iterate over a specific SectionList
                 section_list = neuron_api('nrn_sectionlist_data', section_list.obj);
+                disp(section_list)
             end
 
             if ~exist('owner', 'var')

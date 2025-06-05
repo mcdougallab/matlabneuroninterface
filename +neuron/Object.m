@@ -47,6 +47,7 @@ classdef Object < dynamicprops
                         self.attr_list = [self.attr_list method(1)];
                         p = self.addprop(method{1});
                         p.GetMethod = @(self)get_pp_prop(self, method{1});
+                        disp("Is this really there?");
                         p.SetMethod = @(self, value)set_pp_prop(self, method{1}, value);
                     else  % array property
                         % n = sym.arayinfo.sub.double();
@@ -69,20 +70,24 @@ classdef Object < dynamicprops
         function delete(self)
         % Decrease refcount by 1.
         %   delete()
+            disp("delete");
             neuron_api('nrn_object_unref', self.obj);
+            disp("deleted");
 
         end
 
         function obj = get_obj(self)
         % Access C++ Object.
         %   obj = get_obj()
+            disp("get obj");
             obj = self.obj;
+            disp("got obj");
         end
 
         function value = call_method_hoc(self, method, returntype, varargin)
         % Call method by passing method name (method) to HOC lookup, along with its return type (returntype) and method arguments (varargin).
         %   value = call_method_double(method, varargin)
-            
+            disp("call method hoc");
             try
                 [nsecs, nargs] = neuron.stack.push_args(varargin{:});
                 sym = neuron_api('nrn_method_symbol', self.obj, method);
@@ -101,6 +106,7 @@ classdef Object < dynamicprops
         function list_methods(self)
         % List all available methods to be called using HOC lookup.
         %   list_methods()
+            disp("list_methods");
             if ~isempty(self.attr_list)
                 disp("Available attributes:")
                 for i=1:length(self.attr_list)
@@ -131,6 +137,7 @@ classdef Object < dynamicprops
         % Assign a (dynamic) property value.
             % Assign a (dynamic) property value.
             % Are we trying to directly assign a class property?
+            disp("subsasgn");
             if (isa(S(1).subs, "char") && length(S) == 1 && isprop(self, S(1).subs))
                 if any(strcmp(S(1).subs, {'obj', 'objtype', 'attr_list', 'attr_array_map', ...
                                           'mt_double_list', 'mt_object_list', 'mt_string_list'}))
@@ -150,6 +157,7 @@ classdef Object < dynamicprops
 
             % S(1).subs is method name;
             % S(2).subs is a cell array containing arguments.
+            disp("subsref");
             method = S(1).subs;
 
             if S(1).type == "."
@@ -200,18 +208,24 @@ classdef Object < dynamicprops
         function set_pp_prop(self, propname, value)
         % Set dynamic property.
         %   set_pp_prop(propname, value)
+            disp("set_pp_prop");
             neuron_api('nrn_property_set', self.obj, propname, value);
         end
 
         function value = get_pp_prop(self, propname)
         % Get dynamic property.
         %   value = get_pp_prop(propname)
-            value = neuron_api('nrn_property_get', self.obj, propname);
+            disp("get_pp_prop");
+            disp(self.obj); % gives valid obj ptr
+            disp(propname); % also valid
+            value = neuron_api('nrn_property_get', self.obj, propname); % THIS IS WHERE IT ERRORS
+            disp("got_pp_prop");
         end
 
         function value = get_pp_arr(self, propname)
         % Get dynamic property array.
         %   value = get_pp_arr(propname)
+            disp("get_pp_arr");
             n = self.attr_array_map(propname);
             value = zeros(1, n);
             for i=1:n
@@ -222,6 +236,7 @@ classdef Object < dynamicprops
         function set_pp_arr(self, propname, value)
         % Set dynamic property array.
         %   set_pp_arr(propname, value)
+            disp("set_pp_arr");
             n = self.attr_array_map(propname);
             assert(length(value) == n);
             for i=1:n
@@ -232,18 +247,21 @@ classdef Object < dynamicprops
         function set_pp_arr_element(self, propname, value, i)
         % Set dynamic property array element.
         %   set_pp_arr_element(propname, value, index)
+            disp("set_pp_arr_element");
             neuron_api('nrn_property_array_set', self.obj, propname, value, i-1);
         end
 
         function set_steered_prop(self, propname, value)
         % Set dynamic property.
         %   set_prop(propname, value)
+            disp("set_steered_prop");
             neuron_api('nrn_property_set', self.obj, propname, value);
         end
 
         function value = get_steered_prop(self, propname)
         % Get dynamic property.
         %   value = get_prop(propname)
+            disp("get_steered_prop");
             value = neuron_api('nrn_property_get', self.obj, propname);
         end
 
@@ -251,6 +269,7 @@ classdef Object < dynamicprops
         % Get reference to property or property array element.
         %   nrnref = ref(prop_name)
         %   nrnref = ref(prop_arr_name, index)
+            disp("ref");
             if ~exist('index', 'var')
                 nrnref = neuron.NrnRef(neuron_api('nrn_pp_property_nrnref', self.obj, propname));
             else
