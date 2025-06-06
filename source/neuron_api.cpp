@@ -1422,7 +1422,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
             return;
         }
     
-        static std::array<const char*, 4> argv = {"hh_sim", "-nogui", "-nopython", nullptr};
+        static std::array<const char*, 4> argv = {"NEURON", "-nogui", "-nopython", nullptr};
         auto nrn_init = (int (*)(int, const char**)) DLL_GET_PROC(neuron_handle, "nrn_init");
     
         if (nrn_init) {
