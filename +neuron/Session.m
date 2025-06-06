@@ -146,12 +146,28 @@ classdef Session < dynamicprops
         %   n = neuron.launch();
         %   n.t, n.dt, n.GAMMA, n.PHI, etc.
             try
-                [varargout{1:nargout}] = self.dynamic_call(S);
+                if strcmp(S(1).type, '()')
+                    % Allow n('create soma') to call n.hoc('create soma')
+                    [varargout{1:nargout}] = self.hoc(S(1).subs{:});
+                    % Handle chained calls if present
+                    if numel(S) > 1
+                        [varargout{1:nargout}] = neuron.chained_method(varargout, S, 1);
+                    end
+                else
+                    [varargout{1:nargout}] = self.dynamic_call(S);
+                end
             catch  
                 % Check again if var/func exists; available functions can
                 % change due to importing .hoc files, for example.
                 self.fill_dynamic_props();
-                [varargout{1:nargout}] = self.dynamic_call(S);
+                if strcmp(S(1).type, '()')
+                    [varargout{1:nargout}] = self.hoc(S(1).subs{:});
+                    if numel(S) > 1
+                        [varargout{1:nargout}] = neuron.chained_method(varargout, S, 1);
+                    end
+                else
+                    [varargout{1:nargout}] = self.dynamic_call(S);
+                end
             end
         end
         function list_functions(self)
