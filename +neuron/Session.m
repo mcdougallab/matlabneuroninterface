@@ -258,6 +258,8 @@ classdef Session < dynamicprops
                         obj = neuron.PlotShape(cppobj);
                     elseif (objtype == "RangeVarPlot")
                         obj = neuron.RangeVarPlot(cppobj);
+                    elseif (objtype == "SectionList")
+                        obj = neuron.SectionList(cppobj, varargin{:});
                     else
                         obj = neuron.Object(cppobj);
                     end
