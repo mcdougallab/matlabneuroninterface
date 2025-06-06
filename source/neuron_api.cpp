@@ -109,6 +109,7 @@ double (*nrn_segment_diam_get_)(Section* const, const double) = nullptr;
 bool (*nrn_section_is_active_)(Section*) = nullptr;
 void (*nrn_section_ref_)(Section*) = nullptr;
 void (*nrn_section_unref_)(Section*) = nullptr;
+Section* (*nrn_cas_)(void) = nullptr;
 
 double (*nrn_property_get_)(Object const*, const char*) = nullptr;
 double (*nrn_property_array_get_)(Object const*, const char*, int) = nullptr;
@@ -1399,6 +1400,12 @@ void nrn_section_unref(const mxArray* prhs[], mxArray* plhs[]) {
     nrn_section_unref_(sec);
 }
 
+void nrn_cas(const mxArray* prhs[], mxArray* plhs[]) {
+    Section* sec = nrn_cas_();
+    plhs[0] = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
+    *(uint64_t*)mxGetData(plhs[0]) = reinterpret_cast<uint64_t>(sec);
+}
+
 
 
 
@@ -1620,6 +1627,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         function_map["nrn_section_ref"] = nrn_section_ref;
         function_map["nrn_section_unref"] = nrn_section_unref;
         function_map["nrnref_vector_push"] = nrnref_vector_push;
+        nrn_cas_ = (Section* (*)(void)) DLL_GET_PROC(neuron_handle, "nrn_cas");
+        function_map["nrn_cas"] = nrn_cas;
        
         // Clean up
         //DLL_FREE(wrapper_handle);

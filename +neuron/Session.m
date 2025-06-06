@@ -305,6 +305,15 @@ classdef Session < dynamicprops
         %   reset_sections()
             neuron_api('nrn_hoc_call', 'forall delete_section()');
         end
+        function sec = cas()
+        % Return the currently accessed section as a neuron.Section object.
+            sec_ptr = neuron_api('nrn_cas');
+            if isempty(sec_ptr) || sec_ptr == 0 || sec_ptr == clib.type.nullptr
+                warning("No section currently accessed.");
+            else
+                sec = neuron.Section(sec_ptr);
+            end
+        end
         function all_sections = allsec(section_list, owner)
         % Return cell array containing all sections, or all sections in a NEURON
         % SectionList section_list (optional).
