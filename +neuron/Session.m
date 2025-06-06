@@ -273,9 +273,9 @@ classdef Session < dynamicprops
             end
 
         end
-        function value = hoc_oc(str)
-        % Pass string to hoc_oc.
-        %   hoc_oc()
+        function value = hoc(str)
+        % Pass string to hoc.
+        %   hoc()
             neuron_api('nrn_hoc_call', str);
             value = true;
         end
