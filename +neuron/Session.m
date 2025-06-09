@@ -264,6 +264,28 @@ classdef Session < dynamicprops
                         temp = obj.append(vector_data(i));
                         clear temp;
                     end
+                elseif (objtype == "SectionList")
+                    % Accept cell array or list of neuron.Section objects
+                    sections = {};
+                    for i = 1:numel(varargin)
+                        if iscell(varargin{i})
+                            sections = [sections, varargin{i}];
+                        else
+                            sections = [sections, varargin(i)];
+                        end
+                    end
+                    [nsecs, nargs] = neuron.stack.push_args(sections{:});
+                    cppobj = neuron_api('nrn_object_new', objtype, nargs);
+                    if ~isempty(sections)
+                        % Check all are neuron.Section
+                        if ~all(cellfun(@(x) isa(x, 'neuron.Section'), sections))
+                            error('All arguments to SectionList must be valid Section objects.');
+                        end
+                        obj = neuron.SectionList(cppobj, sections{:});
+                    else
+                        % No sections provided, just create empty SectionList
+                        obj = neuron.SectionList(cppobj);
+                    end
                 else
                     % Generic case: push arguments to stack and create Object.
                     [nsecs, nargs] = neuron.stack.push_args(varargin{:});
@@ -274,8 +296,6 @@ classdef Session < dynamicprops
                         obj = neuron.PlotShape(cppobj);
                     elseif (objtype == "RangeVarPlot")
                         obj = neuron.RangeVarPlot(cppobj);
-                    elseif (objtype == "SectionList")
-                        obj = neuron.SectionList(cppobj, varargin{:});
                     else
                         obj = neuron.Object(cppobj);
                     end

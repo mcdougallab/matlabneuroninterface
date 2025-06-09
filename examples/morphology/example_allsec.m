@@ -4,7 +4,7 @@ n = neuron.launch();
 n.reset_sections();
 
 % Make sections.
-n.hoc_oc('create soma');
+n.hoc('create soma');
 dend1 = n.Section('dend1');
 dend1.L = 37;
 clear dend1;  % Remove section.
@@ -48,7 +48,7 @@ end
 
 % Remove a section; check that it does not show up in allsec(sl).
 clear axon1;
-ultimate_sections = n.allsec(sl);
+ultimate_sections = n.allsec(sl, true);
 for i=1:width(ultimate_sections)
     disp(i + " " + ultimate_sections{i}.name);
 end

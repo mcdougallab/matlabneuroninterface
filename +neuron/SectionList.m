@@ -9,6 +9,7 @@ classdef SectionList < neuron.Object
             self = self@neuron.Object(obj);
             self.Sections = {};
             for i = 1:numel(varargin)
+                self.Sections{end+1} = neuron.Section(varargin{i}.name);
                 self.call_method_hoc('append', 'double', varargin{i});
             end
             
