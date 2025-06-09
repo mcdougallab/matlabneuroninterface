@@ -311,7 +311,7 @@ classdef Session < dynamicprops
             if isempty(sec_ptr) || sec_ptr == 0 || sec_ptr == clib.type.nullptr
                 warning("No section currently accessed.");
             else
-                sec = neuron.Section(sec_ptr);
+                sec = neuron.Section(sec_ptr, false);
             end
         end
         function all_sections = allsec(section_list, owner)
