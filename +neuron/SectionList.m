@@ -9,7 +9,7 @@ classdef SectionList < neuron.Object
             end
             
         end
-
+        
         function n = numel(self, varargin)
             sections_arr = self.allsec();
             n = numel(sections_arr);
@@ -29,7 +29,6 @@ classdef SectionList < neuron.Object
             if (length(S) == 1 && S(1).type == "()")
                 element_id = S(1).subs{:};
                 sections_arr = self.allsec();
-                disp("subsref index: " + element_id + ", section name: " + sections_arr{element_id}.name)
                 if ~isempty(sections_arr)
                     [varargout{1:nargout}] = sections_arr{element_id};
                 else

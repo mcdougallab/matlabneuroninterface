@@ -270,6 +270,8 @@ classdef Session < dynamicprops
                     for i = 1:numel(varargin)
                         if iscell(varargin{i})
                             sections = [sections, varargin{i}];
+                        elseif isa(varargin{i}, 'neuron.SectionList')
+                            sections = [sections, varargin{i}.allsec()];
                         else
                             sections = [sections, varargin(i)];
                         end
@@ -279,7 +281,7 @@ classdef Session < dynamicprops
                     if ~isempty(sections)
                         % Check all are neuron.Section
                         if ~all(cellfun(@(x) isa(x, 'neuron.Section'), sections))
-                            error('All arguments to SectionList must be valid Section objects.');
+                            error('All arguments to SectionList must be valid Section or SectionList objects.');
                         end
                         obj = neuron.SectionList(cppobj, sections{:});
                     else
