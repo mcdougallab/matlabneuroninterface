@@ -1406,6 +1406,35 @@ void nrn_cas(const mxArray* prhs[], mxArray* plhs[]) {
     *(uint64_t*)mxGetData(plhs[0]) = reinterpret_cast<uint64_t>(sec);
 }
 
+void nrn_sectionlist_iterator_new(const mxArray* prhs[], mxArray* plhs[]) {
+    auto item_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    nrn_Item* item = reinterpret_cast<nrn_Item*>(item_ptr);
+    SectionListIterator* iter = nrn_sectionlist_iterator_new_(item);
+    plhs[0] = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
+    *(uint64_t*)mxGetData(plhs[0]) = reinterpret_cast<uint64_t>(iter);
+}
+
+void nrn_sectionlist_iterator_free(const mxArray* prhs[], mxArray* plhs[]) {
+    auto iter_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    SectionListIterator* iter = reinterpret_cast<SectionListIterator*>(iter_ptr);
+    nrn_sectionlist_iterator_free_(iter);
+}
+
+void nrn_sectionlist_iterator_next(const mxArray* prhs[], mxArray* plhs[]) {
+    auto iter_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    SectionListIterator* iter = reinterpret_cast<SectionListIterator*>(iter_ptr);
+    Section* sec = nrn_sectionlist_iterator_next_(iter);
+    plhs[0] = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
+    *(uint64_t*)mxGetData(plhs[0]) = reinterpret_cast<uint64_t>(sec);
+}
+
+void nrn_sectionlist_iterator_done(const mxArray* prhs[], mxArray* plhs[]) {
+    auto iter_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    SectionListIterator* iter = reinterpret_cast<SectionListIterator*>(iter_ptr);
+    int done = nrn_sectionlist_iterator_done_(iter);
+    plhs[0] = mxCreateLogicalScalar(done != 0);
+}
+
 
 
 
@@ -1629,6 +1658,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         function_map["nrnref_vector_push"] = nrnref_vector_push;
         nrn_cas_ = (Section* (*)(void)) DLL_GET_PROC(neuron_handle, "nrn_cas");
         function_map["nrn_cas"] = nrn_cas;
+        function_map["nrn_sectionlist_iterator_free"] = nrn_sectionlist_iterator_free;
+        function_map["nrn_sectionlist_iterator_new"] = nrn_sectionlist_iterator_new;
+        function_map["nrn_sectionlist_iterator_next"] = nrn_sectionlist_iterator_next;
+        function_map["nrn_sectionlist_iterator_done"] = nrn_sectionlist_iterator_done;
        
         // Clean up
         //DLL_FREE(wrapper_handle);

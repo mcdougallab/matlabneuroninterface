@@ -167,7 +167,7 @@ classdef Object < dynamicprops
                     if ismethod(self, method)
                         [varargout{1:nargout}] = builtin('subsref', self, S(1:2));
                     % Are we trying to directly access a class property array element?
-                    elseif ((S(2).type == "()") && isprop(self, method))
+                    elseif ((S(2).type == "()") && any(isprop(self, method)))
                         [varargout{1:nargout}] = self.(method)(S(2).subs{:});
                     % Are we trying to directly access a class property in a chained call?
                     elseif isprop(self, method)
