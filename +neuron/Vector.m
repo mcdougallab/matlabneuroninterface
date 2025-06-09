@@ -129,6 +129,14 @@ classdef Vector < neuron.Object
             end
         end
 
+        function value = max(self)
+            value = self.call_method_hoc('max', 'double');
+        end
+
+        function value = min(self)
+            value = self.call_method_hoc('min', 'double');
+        end
+
         function value = apply(self, varargin)
         % Apply built-in function to vector.
         %   value = apply(varargin)
