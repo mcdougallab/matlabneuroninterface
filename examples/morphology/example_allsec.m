@@ -48,7 +48,7 @@ end
 
 % Remove a section; check that it does not show up in allsec(sl).
 clear axon1;
-ultimate_sections = n.allsec(sl, true);
+ultimate_sections = n.allsec(sl);
 for i=1:width(ultimate_sections)
     disp(i + " " + ultimate_sections{i}.name);
 end

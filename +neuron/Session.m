@@ -346,11 +346,9 @@ classdef Session < dynamicprops
 
             % Deal with input.
             if ~exist('section_list', 'var') % No input: get SectionList of all Sections.
-                list_type = 0;
                 section_list = neuron_api('nrn_section_list');
             elseif isa(section_list, 'neuron.Object') % Input is a 'n.SectionList'
-                list_type = 1; % Iterate over a specific SectionList
-                section_list = neuron_api('nrn_sectionlist_data', section_list.obj);
+                section_list.allsec();
             end
 
             if ~exist('owner', 'var')
@@ -358,11 +356,7 @@ classdef Session < dynamicprops
             end
 
             % Call the MEX function to get section pointers
-            if list_type == 0
-                section_ptrs = neuron_api('nrn_loop_sections', 0);
-            else
-                section_ptrs = neuron_api('nrn_loop_sections', 1, section_list);
-            end
+            section_ptrs = neuron_api('nrn_loop_sections', 0);
 
             % Convert section pointers to Section objects
             section_ptrs = section_ptrs(:).';

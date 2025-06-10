@@ -1,10 +1,6 @@
 classdef PlotShape < neuron.Object
 % PlotShape Class making 3D colorplots.
 
-    properties
-        index % Unique index for this PlotShape instance
-    end
-
     methods
 
         function self = PlotShape(obj)
@@ -14,10 +10,6 @@ classdef PlotShape < neuron.Object
 
             % Call the superclass constructor
             self = self@neuron.Object(obj);
-
-            % Initialize the index
-            index = neuron_api('nrn_object_index', self.obj);
-            self.index = index;
         end
 
         function self = subsasgn(self, S, varargin)

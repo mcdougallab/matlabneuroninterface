@@ -72,7 +72,7 @@ void (*nrn_object_unref_)(Object*) = nullptr;
 char const* (*nrn_class_name_)(const Object*) = nullptr;
 Symbol* (*nrn_method_symbol_)(Object*, char const* const) = nullptr;
 void (*nrn_method_call_)(Object*, Symbol*, int) = nullptr;
-int (*nrn_object_index_)(Object*) = nullptr;
+bool (*nrn_prop_exists_)(const Object*) = nullptr;
 
 double* (*nrn_vector_data_)(Object*) = nullptr;
 
@@ -800,12 +800,8 @@ void nrn_property_get(const mxArray* prhs[], mxArray* plhs[]) {
     auto obj_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
     Object* obj = reinterpret_cast<Object*>(obj_ptr);
     auto [name] = extractParams<std::string>(prhs, 2);
-    mexPrintf("obj_ptr: %llu\n", obj_ptr);
-    mexPrintf("obj: %p\n", obj);
-    mexPrintf("nrn_property_get: %s\n", name.c_str());
     const char* obj_name = nrn_class_name_(obj);
-    mexPrintf("Object class name: %s\n", obj_name);
-    double result = nrn_property_get_(obj, name.c_str()); // This is where it ERRORS
+    double result = nrn_property_get_(obj, name.c_str());
     plhs[0] = mxCreateDoubleScalar(result);
 }
 
@@ -1101,7 +1097,6 @@ void nrnref_get_name(const mxArray* prhs[], mxArray* plhs[]) {
         // For Vectors, call label function to get the name
         nrn_method_call_(ref->obj, nrn_method_symbol_(ref->obj, "label"), 0);
         char** result = nrn_pop_str_();
-        mexPrintf("nrnref_get_name: result: %s\n", *result);
         plhs[0] = mxCreateString(*result);
     }
     else {
@@ -1237,13 +1232,6 @@ void nrn_get_plotshape_varname(const mxArray* prhs[], mxArray* plhs[]) {
         varname = "no variable specified";
     }
     plhs[0] = mxCreateString(varname);
-}
-
-void nrn_object_index(const mxArray* prhs[], mxArray* plhs[]) {
-    auto obj_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
-    Object* obj = reinterpret_cast<Object*>(obj_ptr);
-    int index = nrn_object_index_(obj);
-    plhs[0] = mxCreateDoubleScalar(static_cast<double>(index));
 }
 
 void nrn_symbol_array_length(const mxArray* prhs[], mxArray* plhs[]) {
@@ -1435,6 +1423,12 @@ void nrn_sectionlist_iterator_done(const mxArray* prhs[], mxArray* plhs[]) {
     plhs[0] = mxCreateLogicalScalar(done != 0);
 }
 
+void nrn_prop_exists(const mxArray* prhs[], mxArray* plhs[]) {
+    auto obj_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    const Object* obj = reinterpret_cast<const Object*>(obj_ptr);
+    bool result = nrn_prop_exists_(obj);
+    plhs[0] = mxCreateLogicalScalar(result);
+}
 
 
 
@@ -1610,8 +1604,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         function_map["nrn_symbol_type"] = nrn_symbol_type;
         function_map["nrn_symbol"] = nrn_symbol;
         function_map["nrn_get_plotshape_varname"] = nrn_get_plotshape_varname;
-        nrn_object_index_ = (int (*)(Object*)) DLL_GET_PROC(neuron_handle, "nrn_object_index");
-        function_map["nrn_object_index"] = nrn_object_index;
         nrn_symbol_array_length_ = (int (*)(Symbol*)) DLL_GET_PROC(neuron_handle, "nrn_symbol_array_length");
         function_map["nrn_symbol_array_length"] = nrn_symbol_array_length;
         nrn_section_Ra_get_ = (double (*)(Section*)) DLL_GET_PROC(neuron_handle, "nrn_section_Ra_get");
@@ -1662,7 +1654,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         function_map["nrn_sectionlist_iterator_new"] = nrn_sectionlist_iterator_new;
         function_map["nrn_sectionlist_iterator_next"] = nrn_sectionlist_iterator_next;
         function_map["nrn_sectionlist_iterator_done"] = nrn_sectionlist_iterator_done;
+        nrn_prop_exists_ = (bool (*)(const Object*)) DLL_GET_PROC(neuron_handle, "nrn_prop_exists");
+        function_map["nrn_prop_exists"] = nrn_prop_exists;
        
+
         // Clean up
         //DLL_FREE(wrapper_handle);
         //DLL_FREE(neuron_handle);
