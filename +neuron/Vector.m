@@ -56,7 +56,133 @@ classdef Vector < neuron.Object
                     error("Trying to access element of empty Vector.")
                 end
             else
+                % Adjust for 0-based indexing where applicable.
+                if (S(1).subs == "at" || ...
+                    S(1).subs == "remove" || ...
+                    S(1).subs == "min_ind" || ...
+                    S(1).subs == "max_ind" || ...
+                    S(1).subs == "sum" || ...
+                    S(1).subs == "sumsq" || ...
+                    S(1).subs == "mean" || ...
+                    S(1).subs == "var" || ...
+                    S(1).subs == "stdev" || ...
+                    S(1).subs == "c" || ...
+                    S(1).subs == "cl")
+                    % Subtract 1 from each index in S(1).subs
+                    for i = 1:numel(S(2).subs)
+                        S(2).subs{i} = S(2).subs{i} - 1;
+                    end
+                end
+                if (S(1).subs == "get" || ...
+                    S(1).subs == "set" || ...
+                    S(1).subs == "insrt")
+                    if ~isempty(S(2).subs)
+                        S(2).subs{1} = S(2).subs{1} - 1;
+                    end
+                end
+                if (S(1).subs == "fwrite" || ...
+                    S(1).subs == "apply" || ...
+                    S(1).subs == "addrand" || ...
+                    S(1).subs == "setrand")
+                    if numel(S(2).subs) > 1
+                        for i = 2:numel(S(2).subs)
+                            S(2).subs{i} = S(2).subs{i} - 1;
+                        end
+                    end
+                end
+                if (S(1).subs == "printf")
+                    for i = 1:numel(S(2).subs)
+                        if isnumeric(S(2).subs{i})
+                            S(2).subs{i} = S(2).subs{i} - 1;
+                        end
+                    end
+                end
+                if (S(1).subs == "indwhere" || ...
+                    S(1).subs == "indvwhere")
+                    [varargout{1:nargout}] = subsref@neuron.Object(self, S);
+                    if ~isempty(varargout) && isnumeric(varargout{1}) && varargout{1} ~= -1
+                        varargout{1} = varargout{1} + 1;
+                    end
+                    return
+                end
+                if (S(1).subs == "sortindex")
+                    [varargout{1:nargout}] = subsref@neuron.Object(self, S);
+                    call_method_hoc(varargout{1:nargout}, 'add', 'Object', 1);
+                    return
+                end
+                if (S(1).subs == "smhist")
+                    if numel(S(2).subs) >= 2
+                        S(2).subs{2} = S(2).subs{2} - 1;
+                    end
+                end
+                if (S(1).subs == "index")
+                    if numel(S(2).subs) == 2 && isa(S(2).subs{2}, "neuron.Vector")
+                        call_method_hoc(S(2).subs{2}, 'sub', 'Object', 1);
+                    end
+                end
+                if (S(1).subs == "copy")
+                    nsubs = numel(S(2).subs);
+                    undo_add = [];  % Keep track of which vectors we modified
+                    if nsubs == 2 && isa(S(2).subs{2}, "neuron.Vector")
+                        call_method_hoc(S(2).subs{2}, 'sub', 'Object', 1);
+                        undo_add = [undo_add, 2];
+                    elseif nsubs == 3 && isa(S(2).subs{2}, "neuron.Vector") && isa(S(2).subs{3}, "neuron.Vector")
+                        call_method_hoc(S(2).subs{2}, 'sub', 'Object', 1);
+                        call_method_hoc(S(2).subs{3}, 'sub', 'Object', 1);
+                        undo_add = [undo_add, 2, 3];
+                    else
+                        for i = 2:nsubs
+                            if isnumeric(S(2).subs{i})
+                                S(2).subs{i} = S(2).subs{i} - 1;
+                            end
+                        end
+                    end
+                    % Call the method
+                    [varargout{1:nargout}] = subsref@neuron.Object(self, S);
+                    % Restore vectors to 1-based indexing
+                    for idx = undo_add
+                        call_method_hoc(S(2).subs{idx}, 'add', 'Object', 1);
+                    end
+                    return
+                end
+                if (S(1).subs == "play")
+                    nsubs = numel(S(2).subs);
+                    undo_add = [];  % Track vectors to re-add if subtracted
+
+                    % Case: play(index)
+                    if nsubs == 1 && isnumeric(S(2).subs{1})
+                        S(2).subs{1} = S(2).subs{1} - 1;
+                        index_was_numeric = true;
+                    else
+                        index_was_numeric = false;
+                    end
+
+                    % Case: play(..., indices_of_discontinuities_vector)
+                    % or play(..., tvec, indices_vector)
+                    if nsubs >= 3 && isa(S(2).subs{3}, "neuron.Vector")
+                        call_method_hoc(S(2).subs{3}, 'sub', 'Object', 1);
+                        undo_add = [undo_add, 3];
+                    end
+
+                    % Call the actual play method
+                    [varargout{1:nargout}] = subsref@neuron.Object(self, S);
+
+                    % Restore anything modified
+                    for idx = undo_add
+                        call_method_hoc(S(2).subs{idx}, 'add', 'Object', 1);
+                    end
+                    if index_was_numeric
+                        varargout{1} = varargout{1};  % Optional: no return value typically, but restores clarity
+                    end
+                    return
+                end
                 [varargout{1:nargout}] = subsref@neuron.Object(self, S);
+                % Restore input vector values where applicable, i.e., readd subtracted 1
+                if (S(1).subs == "index")
+                    if numel(S(2).subs) == 2 && isa(S(2).subs{2}, "neuron.Vector")
+                        call_method_hoc(S(2).subs{2}, 'add', 'Object', 1);
+                    end
+                end
             end
         end
 

@@ -210,10 +210,7 @@ classdef Session < dynamicprops
         end
         function quit(self)
         % Quit NEURON and close matlab.
-            if ismac || isunix
-                warning("Calling NEURON's quit() can lead to errors on linux or mac.");
-            end
-            self.call_func_hoc('quit', "double");
+            exit;
         end
 
     end

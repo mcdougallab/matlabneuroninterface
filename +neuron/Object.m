@@ -2,7 +2,7 @@ classdef Object < dynamicprops
 % NEURON Object Class
 
     properties (SetAccess=protected, GetAccess=public)
-        index           % Unique index for this Object instance.
+        idx             % Unique index for this Object instance.
         obj             % C++ NEURON Object.
         objtype         % NEURON Object type
         attr_list       % List of attributes of the C++ object.
@@ -24,7 +24,7 @@ classdef Object < dynamicprops
             self.objtype = neuron_api('nrn_class_name', obj);
             self.obj = obj;
             index = neuron.Session.call_func_hoc('object_id', 'double', self, 1);
-            self.index = index;
+            self.idx = index;
 
             % Get method list.
             method_str = neuron_api('get_class_methods', self.objtype);
