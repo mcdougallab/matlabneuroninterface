@@ -16,6 +16,7 @@ classdef NrnRef < handle
         % Initialize NrnRef
         %   NrnRef(obj) constructs a Matlab wrapper for C++ NrnRef obj
             self.obj = obj;
+            disp(obj);
         end
         function value = get(self, ind)
         % Get value.

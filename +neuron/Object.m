@@ -86,11 +86,67 @@ classdef Object < dynamicprops
         % Call method by passing method name (method) to HOC lookup, along with its return type (returntype) and method arguments (varargin).
         %   value = call_method_double(method, varargin)
             try
+                if self.objtype == "Matrix"
+                    if method == "getval" || ...
+                       method == "setval"
+                        if nargin >= 2
+                            for i = 1:2
+                                if isnumeric(varargin{i}) 
+                                    varargin{i} = varargin{i} - 1;
+                                end
+                            end
+                        end
+                    end
+                    if method == "sprowlen" || ...
+                       method == "getrow" || ...
+                       method == "getcol" || ...
+                       method == "getdiag" || ...
+                       method == "setrow" || ...
+                       method == "setcol" || ...
+                       method == "setdiag"
+                        if nargin >= 1
+                            if isnumeric(varargin{1}) 
+                                varargin{1} = varargin{1} - 1;
+                            end
+                        end
+                    end
+                    if method == "spgetrowval"
+                        if nargin >= 2
+                            % Adjust i and jx to 0-based for NEURON
+                            for k = 1:2
+                                if isnumeric(varargin{k})
+                                    varargin{k} = varargin{k} - 1;
+                                end
+                            end
+                        end
+                    end
+                    if method == "bcopy"
+                        if nargin >= 2
+                            for i = 1:2
+                                if isnumeric(varargin{i}) 
+                                    varargin{i} = varargin{i} - 1;
+                                end
+                            end
+                        end
+                        if nargin >= 6
+                            for i = 5:6
+                                if isnumeric(varargin{i}) 
+                                    varargin{i} = varargin{i} - 1;
+                                end
+                            end
+                        end
+                    end
+                end
                 [nsecs, nargs] = neuron.stack.push_args(varargin{:});
                 sym = neuron_api('nrn_method_symbol', self.obj, method);
                 neuron_api('nrn_method_call', self.obj, sym, nargs);
                 value = neuron.stack.hoc_pop(returntype);
                 neuron.stack.pop_sections(nsecs);
+                if method == "spgetrowval"
+                    if (nargin >= 3 && isa(varargin{3}, 'neuron.NrnRef'))
+                        neuron_api('nrnref_vector_set', varargin{3}.obj, varargin{3}(1) + 1, 0);
+                    end
+                end
             catch e
                 warning(e.message);
                 warning("'"+string(method)+"': caught error during call to NEURON function.");

@@ -315,7 +315,13 @@ void nrn_symbol_nrnref(const mxArray* prhs[], mxArray* plhs[]) {
     // Get the symbol name from the first argument
     std::string sym_name = getStringFromMxArray(prhs[1]);
     Symbol* sym = nrn_symbol_(sym_name.c_str());
-   
+
+    // Error if symbol not found in symbol table
+    if (!sym) {
+        mexErrMsgIdAndTxt("nrn_symbol_nrnref:SymbolNotFound", "Symbol '%s' not found in symbol table.", sym_name.c_str());
+        return;
+    }
+
     // If not an array, return 1
     NrnRef* ref = new NrnRef(sym, sym_name);
     plhs[0] = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
@@ -440,7 +446,11 @@ void nrnref_symbol_push(const mxArray* prhs[], mxArray* plhs[]) {
 void nrnref_vector_push(const mxArray* prhs[], mxArray* plhs[]) {
     auto ref_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
     NrnRef* ref = reinterpret_cast<NrnRef*>(ref_ptr);
-    nrn_object_push_(ref->obj); 
+    double* data = nrn_vector_data_(ref->obj);
+    if (ref->index < 0 || ref->index >= static_cast<int>(ref->n_elements + ref->index)) {
+        mexErrMsgIdAndTxt("nrnref_vector_push:IndexOutOfBounds", "Index %d out of bounds for vector with %zu elements.", ref->index + 1, ref->n_elements);
+    }
+    nrn_double_ptr_push_(data + ref->index);
 }
 
 void nrnref_rangevar_push(const mxArray* prhs[], mxArray* plhs[]) {
