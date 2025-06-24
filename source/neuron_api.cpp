@@ -139,8 +139,19 @@ int mlprint(int stream, char* msg) {
 }
 
 std::string getStringFromMxArray(const mxArray* mxStr) {
-    if (mxGetClassID(mxStr) != mxCHAR_CLASS) {
+    if (mxGetClassID(mxStr) != mxCHAR_CLASS && !(mxIsClass(mxStr, "string"))) {
         mexErrMsgIdAndTxt("MyModule:invalidInput", "Input must be a string.");
+    }
+
+    if (mxIsClass(mxStr, "string")) {
+        // Convert MATLAB string object to char array using mexCallMATLAB
+        mxArray* pArrayChar = nullptr;
+        mxArray* pArrayString = const_cast<mxArray*>(mxStr);
+        int rc = mexCallMATLAB(1, &pArrayChar, 1, &pArrayString, "char");
+        if (rc != 0 || pArrayChar == nullptr) {
+            mexErrMsgIdAndTxt("MyModule:conversionError", "Failed to convert MATLAB string to char array.");
+        }
+        mxStr = pArrayChar;
     }
 
     // Get the number of characters in the string

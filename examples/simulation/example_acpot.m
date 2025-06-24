@@ -10,7 +10,7 @@ n.reset_sections();
 axon = n.Section('axon');
 axon.nseg = 3;
 axon.diam = 50;
-axon.insert_mechanism('hh');
+axon.insert_mechanism("hh");
 
 % Connect branch.
 branch = n.Section('branch1');
