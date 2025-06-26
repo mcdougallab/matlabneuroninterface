@@ -11,6 +11,9 @@ classdef Vector < neuron.Object
         % Initialize Vector
         %   Vector(obj) constructs a Matlab wrapper for a NEURON vector
         %   (obj).
+            if ~isa(obj, 'uint64') || ~isreal(obj) || numel(obj) ~= 1
+                error('Invalid input for Vector constructor.');
+            end
             self = self@neuron.Object(obj);
 
             self.apply_func_list = [];

@@ -11,6 +11,12 @@ classdef Segment < handle
         function self = Segment(sec, x)
         % Initialize a new Segment by providing a Section and location value.
         %   Segment(sec, x) 
+            if ~isa(sec, 'neuron.Section')
+                error("First argument must be a neuron.Section object.");
+            end
+            if ~isnumeric(x) || ~isscalar(x) || x < 0 || x > 1
+                error("Second argument must be a scalar number between 0 and 1.");
+            end
             self.parent_sec = sec;
             self.x = x;
         end

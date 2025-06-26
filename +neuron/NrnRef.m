@@ -15,6 +15,9 @@ classdef NrnRef < handle
         function self = NrnRef(obj)
         % Initialize NrnRef
         %   NrnRef(obj) constructs a Matlab wrapper for C++ NrnRef obj
+            if ~isa(obj, 'uint64') || ~isreal(obj) || numel(obj) ~= 1
+                error('Invalid input for NrnRef constructor.');
+            end
             self.obj = obj;
             disp(obj);
         end
