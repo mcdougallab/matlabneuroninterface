@@ -19,6 +19,10 @@ classdef Object < dynamicprops
         % Initialize Object
         %   Object(obj) constructs a Matlab wrapper for NEURON Object obj
 
+            if ~isa(obj, 'uint64') || ~isreal(obj) || numel(obj) ~= 1
+                error('Invalid input for Object constructor.');
+            end
+
             self = self@dynamicprops;
             self.attr_array_map = containers.Map;
             self.objtype = neuron_api('nrn_class_name', obj);

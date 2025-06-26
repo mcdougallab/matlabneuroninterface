@@ -62,7 +62,6 @@ Symbol* (*hoc_install_)(const char*, int, double, Symlist**) = nullptr;
 void (*nrn_register_function_)(void (*)(), const char*, int type) = nullptr;
 char* (*hoc_gargstr_)(int) = nullptr;
 void (*hoc_ret_)(void) = nullptr;
-void (*hoc_pushx_)(double) = nullptr;
 double (*hoc_xpop_)(void) = nullptr;
 void (*hoc_call_ob_proc_)(Object*, Symbol*, int) = nullptr;
 void (*nrn_symbol_push_)(Symbol*) = nullptr;
@@ -1523,7 +1522,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         nrn_register_function_ = (void (*)(void (*)(), const char*, int)) DLL_GET_PROC(neuron_handle, "nrn_register_function");
         hoc_gargstr_ = (char* (*)(int)) DLL_GET_PROC(neuron_handle, "_Z11hoc_gargstri");  // TODO get rid of name mangling
         hoc_ret_ = (void (*)(void)) DLL_GET_PROC(neuron_handle, "_Z7hoc_retv");  // TODO get rid of name mangling
-        hoc_pushx_ = (void (*)(double)) DLL_GET_PROC(neuron_handle, "hoc_pushx");
         nrn_function_call_ = (void(*)(Symbol*,int)) DLL_GET_PROC(neuron_handle, "nrn_function_call");
         function_map["nrn_function_call"] = nrn_function_call;
         nrn_double_pop_ = (double (*)(void)) DLL_GET_PROC(neuron_handle, "nrn_double_pop");

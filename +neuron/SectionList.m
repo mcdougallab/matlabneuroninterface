@@ -3,6 +3,9 @@ classdef SectionList < neuron.Object
     methods
         function self = SectionList(obj, varargin)
             % Constructor: accepts a cell array or vector of sections
+            if ~isa(obj, 'uint64') || ~isreal(obj) || numel(obj) ~= 1
+                error('Invalid input for SectionList constructor.');
+            end
             self = self@neuron.Object(obj);
             for i = 1:numel(varargin)
                 self.call_method_hoc('append', 'double', varargin{i});

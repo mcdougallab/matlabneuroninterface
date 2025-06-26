@@ -9,6 +9,9 @@ classdef PlotShape < neuron.Object
         %   PlotShape.
 
             % Call the superclass constructor
+            if ~isa(obj, 'uint64') || ~isreal(obj) || numel(obj) ~= 1
+                error('Invalid input for PlotShape constructor.');
+            end
             self = self@neuron.Object(obj);
         end
 
