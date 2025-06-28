@@ -1675,7 +1675,15 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         function_map["nrn_sectionlist_iterator_done"] = nrn_sectionlist_iterator_done;
         nrn_prop_exists_ = (bool (*)(const Object*)) DLL_GET_PROC(neuron_handle, "nrn_prop_exists");
         function_map["nrn_prop_exists"] = nrn_prop_exists;
-       
+
+        if (!nrn_cas_) {
+             mexErrMsgIdAndTxt("NEURON:OutdatedAPI",
+                               "nrn_cas not found; update NEURON");
+        }
+        if (!nrn_prop_exists_) {
+             mexErrMsgIdAndTxt("NEURON:OutdatedAPI",
+                               "nrn_prop_exists not found; update NEURON");
+        }
 
         // Clean up
         //DLL_FREE(wrapper_handle);
@@ -1689,7 +1697,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
             // call it
             item->second(prhs, plhs);
         } else {
-            mexErrMsgIdAndTxt("MyModule:unknownFunction", "Function name not recognized.");
+            mexErrMsgIdAndTxt("NEURON:UnknownFunction", "Function name not recognized.");
         }
     }
 }
