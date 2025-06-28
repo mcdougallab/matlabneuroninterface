@@ -238,7 +238,7 @@ classdef Object < dynamicprops
                         [varargout{1:nargout}] = call_method_hoc(self, method, "string", S(2).subs{:});
                     % If none of the above, throw error.
                     else
-                        error("'"+string(func)+"': not found; call Object.list_methods() " + ...
+                        error("'"+string(method)+"': not found; call Object.list_methods() " + ...
                               "to see all available methods and attributes.")
                     end
                 else
