@@ -987,6 +987,8 @@ std::vector<double> get_section_plot_data(Section* sec, ShapePlotInterface* spi)
         }
     }
 
+    nrn_section_pop_();
+
     return result;
 }
 
