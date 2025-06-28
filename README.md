@@ -115,7 +115,7 @@ Here the steps are given that need to be done only once to be able to use the to
   - for the definition of `neuron_handle`, that should use the path to `libnrniv.dylib` or system equivalent.
   - for the definition of `wrapper_handle` to this project folder and then `/libmodlreg.dylib` (mac) or system equivalent.
 4. Compile the package: from the project folder, run:
-  - `!gcc -shared -o libmodlreg.dylib source/modl_reg.c`
+  - `!gcc -shared -o libmodlreg.dylib source/modl_reg.c` (use the system appropriate extension and compiler; values shown are for macOS)
   - `mex CXXFLAGS="-std=c++17" source/neuron_api.cpp`
 5. Check it works:
    - With the previous steps completed, run the matlab scripts **example_run** and **example_acpot** to check that the matlabneuroninterface works.
