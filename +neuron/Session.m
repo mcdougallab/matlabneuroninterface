@@ -358,9 +358,9 @@ classdef Session < dynamicprops
 
             % Convert section pointers to Section objects
             section_ptrs = section_ptrs(:).';
-            all_sections = cell(size(section_ptrs));
+            all_sections = [];
             for i = 1:numel(section_ptrs)
-                all_sections{i} = neuron.Section(section_ptrs(i), owner);
+                all_sections = [all_sections neuron.Section(section_ptrs(i), owner)];
             end
         end
     end
