@@ -9,3 +9,7 @@ defineneuron.mlx
 # nrnmatlab generated files
 stderr.txt
 stdout.txt
+
+# compiled files
+*.mexmaca64
+*.dylib
