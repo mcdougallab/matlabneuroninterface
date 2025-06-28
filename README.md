@@ -104,7 +104,7 @@ A non-exhaustive list:
 
 Here the steps are given that need to be done only once to be able to use the toolbox.
 
-1. Make sure NEURON 9 is installed (see https://nrn.readthedocs.io).
+1. Make sure NEURON 9+ is installed (see https://nrn.readthedocs.io). (If you're viewing this before NEURON 9 has been officially released, on Linux and macOS, you can `pip install neuron-nightly` to get the development version, which should work.)
 2. Linux and Mac: start Matlab from a bash shell with the correct PATH, `HOC_LIBRARY_PATH`. Matlab always needs to be started from such a shell, not just the first time only.
    - Get the directory where libnrniv is installed, within the NEURON installation folder.
      - If you installed NEURON via `pip`, you can do `import neuron; print(neuron.__file__)`. On my system, this displays `/Users/ramcdougal/anaconda3/envs/py313/lib/python3.13/site-packages/neuron/__init__.py`, which means libnrniv is at `/Users/ramcdougal/anaconda3/envs/py313/lib/python3.13/site-packages/neuron/.data/lib/libnrniv.dylib`
