@@ -110,6 +110,11 @@ Here the steps are given that need to be done only once to be able to use the to
      - If you installed NEURON via `pip`, you can do `import neuron; print(neuron.__file__)`. On my system, this displays `/Users/ramcdougal/anaconda3/envs/py313/lib/python3.13/site-packages/neuron/__init__.py`, which means libnrniv is at `/Users/ramcdougal/anaconda3/envs/py313/lib/python3.13/site-packages/neuron/.data/lib/libnrniv.dylib`
    - The environment variable `HOC_LIBRARY_PATH` should be set to the folder containing, e.g., `atoltool.hoc`; on my system, with libnrniv as above, this is `/Users/ramcdougal/anaconda3/envs/py313/lib/python3.13/site-packages/neuron/.data/share/nrn/lib/hoc/`
    - Get the directory where this toolbox is installed and put that on your MATLAB path
+   - For example, my `startup.m` script (goes in the folder reported by `userpath`) reads:
+     ```matlab
+        setenv('HOC_LIBRARY_PATH', '/Users/ramcdougal/anaconda3/envs/py313/lib/python3.13/site-packages/neuron/.data/share/nrn/lib/hoc/');
+        addpath('/Users/ramcdougal/neurontoolbox');
+     ```
 3. Update the paths in `source/neuron_api.cpp`
   - for the `#include` of `neuronapi.h`: in my computer as above, this is `/Users/ramcdougal/anaconda3/envs/py313/lib/python3.13/site-packages/neuron/.data/include/neuronapi.h`
   - for the definition of `neuron_handle`, that should use the path to `libnrniv.dylib` or system equivalent.
