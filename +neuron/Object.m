@@ -248,7 +248,7 @@ classdef Object < dynamicprops
                         n_processed = 1;
                     % If none of the above, throw error.
                     else
-                        error("'"+string(func)+"': not found; call Object.list_methods() " + ...
+                        error("'"+string(method)+"': not found; call Object.list_methods() " + ...
                               "to see all available methods and attributes.")
                     end
                 end
