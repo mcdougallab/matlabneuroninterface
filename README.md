@@ -80,6 +80,8 @@ v.list_methods();
 
 ### Testing
 
+:warning: The tests require `examples` and its subdirectories to be on your MATLAB path.
+
 Run the tests with:
 
 ```matlab
