@@ -130,6 +130,13 @@ classdef Section < handle
             % S(2).subs is a cell array containing arguments.
 
             % Check if section has been deleted.
+            % without this block arrays of Sections don't work
+            if numel(self) > 1
+                % Let MATLAB handle indexing arrays of Sections
+                varargout = {builtin('subsref', self, S)};
+                return
+            end
+            
             try
                 if ~neuron_api('nrn_section_is_active', self.sec)
                     error();
