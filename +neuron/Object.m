@@ -8,9 +8,10 @@ classdef Object < dynamicprops
         attr_list       % List of attributes of the C++ object.
         attr_array_map  % Map of array attributes of the C++ object.
                         % Keys are property names, values are array lengths.
-        mt_double_list  % List of methods of the C++ object, returning a double.
-        mt_object_list  % List of methods of the C++ object, returning an object.
-        mt_string_list  % List of methods of the C++ object, returning a string.
+        mt_double_list  % List of methods of the NEURON object, returning a double.
+        mt_object_list  % List of methods of the NEURON object, returning an object.
+        mt_string_list  % List of methods of the NEURON object, returning a string.
+        mt_proc_list    % List of procs of the NEURON object, returning nothing.
     end
     
     methods
@@ -65,6 +66,8 @@ classdef Object < dynamicprops
                     end
                 elseif (method_type == "270")
                     self.mt_double_list = [self.mt_double_list method(1)];
+                elseif (method_type == "271")
+                    self.mt_proc_list = [self.mt_proc_list method(1)];
                 elseif (method_type == "329")
                     self.mt_object_list = [self.mt_object_list method(1)];
                 elseif (method_type == "330")
@@ -144,7 +147,11 @@ classdef Object < dynamicprops
                 [nsecs, nargs] = neuron.stack.push_args(varargin{:});
                 sym = neuron_api('nrn_method_symbol', self.obj, method);
                 neuron_api('nrn_method_call', self.obj, sym, nargs);
-                value = neuron.stack.hoc_pop(returntype);
+                if ~strcmp(returntype, 'none')
+                    value = neuron.stack.hoc_pop(returntype);
+                else
+                    value = [];  % TODO: eliminate the need for this with vargout
+                end
                 neuron.stack.pop_sections(nsecs);
                 if method == "spgetrowval"
                     if (nargin >= 3 && isa(varargin{3}, 'neuron.NrnRef'))
@@ -167,6 +174,12 @@ classdef Object < dynamicprops
                 disp("Available attributes:")
                 for i=1:length(self.attr_list)
                     disp("    "+self.attr_list(i));
+                end
+            end
+            if ~isempty(self.mt_proc_list)
+                disp("Available methods (returning nothing):")
+                for i=1:length(self.mt_proc_list)
+                    disp("    "+self.mt_proc_list(i));
                 end
             end
             if ~isempty(self.mt_double_list)
@@ -194,7 +207,7 @@ classdef Object < dynamicprops
             % Assign a (dynamic) property value.
             % Are we trying to directly assign a class property?
             if (isa(S(1).subs, "char") && length(S) == 1 && isprop(self, S(1).subs))
-                if any(strcmp(S(1).subs, {'obj', 'objtype', 'attr_list', 'attr_array_map', ...
+                if any(strcmp(S(1).subs, {'obj', 'objtype', 'attr_list', 'attr_array_map', 'mt_proc_list', ...
                                           'mt_double_list', 'mt_object_list', 'mt_string_list'}))
                     error("Property '%s' is read-only and cannot be set after construction.", S(1).subs);
                 end
@@ -228,6 +241,8 @@ classdef Object < dynamicprops
                         [varargout{1:nargout}] = self.(method);
                         n_processed = 1;  % Number of elements of S to process.
                     % Is this method present in the HOC lookup table, and does it return a double?
+                    elseif any(strcmp(self.mt_proc_list, method))
+                        call_method_hoc(self, method, "none", S(2).subs{:});
                     elseif any(strcmp(self.mt_double_list, method))
                         [varargout{1:nargout}] = call_method_hoc(self, method, "double", S(2).subs{:});
                     % Is this method present in the HOC lookup table, and does it return an object?
@@ -256,7 +271,9 @@ classdef Object < dynamicprops
             else
                 error("Indexing type "+S(1).type+" not supported.");
             end
-            [varargout{1:nargout}] = neuron.chained_method(varargout, S, n_processed);
+            if exist('varargout', 'var')
+                [varargout{1:nargout}] = neuron.chained_method(varargout, S, n_processed);
+            end
         end
 
         function set_pp_prop(self, propname, value)
