@@ -42,7 +42,7 @@ classdef test_Session < matlab.unittest.TestCase
         function testAllsecAndSection(testCase)
             n = neuron.launch();
             n.reset_sections();
-            n.hoc_oc('create soma');
+            n('create soma');
             s = n.Section('soma');
             testCase.verifyClass(s, 'neuron.Section');
             allsecs = n.allsec();
@@ -53,7 +53,7 @@ classdef test_Session < matlab.unittest.TestCase
         function testSectionList(testCase)
             n = neuron.launch();
             n.reset_sections();
-            n.hoc_oc('create soma, dend');
+            n('create soma, dend');
             soma = n.Section('soma');
             dend = n.Section('dend');
             sl = n.SectionList();
@@ -66,7 +66,7 @@ classdef test_Session < matlab.unittest.TestCase
 
         function testResetSections(testCase)
             n = neuron.launch();
-            n.hoc_oc('create soma');
+            n('create soma');
             n.reset_sections();
             allsecs = n.allsec();
             testCase.verifyEmpty(allsecs);

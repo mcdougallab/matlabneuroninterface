@@ -3,7 +3,7 @@ classdef test_PlotShape < matlab.unittest.TestCase
         function testConstructorAndIndex(testCase)
             n = neuron.launch();
             n.reset_sections();
-            n.hoc_oc('create soma');
+            n('create soma');
             s = n.Section('soma');
             % Insert a mechanism if needed for a variable (e.g., 'pas')
             if ~any(strcmp(s.mech_list, 'pas'))
@@ -17,7 +17,7 @@ classdef test_PlotShape < matlab.unittest.TestCase
         function testGetPlotData(testCase)
             n = neuron.launch();
             n.reset_sections();
-            n.hoc_oc('create soma');
+            n('create soma');
             s = n.Section('soma');
             if ~any(strcmp(s.mech_list, 'pas'))
                 s.insert_mechanism('pas');
@@ -32,7 +32,7 @@ classdef test_PlotShape < matlab.unittest.TestCase
         function testPlotNoError(testCase)
             n = neuron.launch();
             n.reset_sections();
-            n.hoc_oc('create soma');
+            n('create soma');
             s = n.Section('soma');
             if ~any(strcmp(s.mech_list, 'pas'))
                 s.insert_mechanism('pas');
@@ -46,7 +46,7 @@ classdef test_PlotShape < matlab.unittest.TestCase
         function testPlotWithCustomColormap(testCase)
             n = neuron.launch();
             n.reset_sections();
-            n.hoc_oc('create soma');
+            n('create soma');
             s = n.Section('soma');
             if ~any(strcmp(s.mech_list, 'pas'))
                 s.insert_mechanism('pas');

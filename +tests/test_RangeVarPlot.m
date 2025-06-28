@@ -3,7 +3,7 @@ classdef test_RangeVarPlot < matlab.unittest.TestCase
         function testConstructor(testCase)
             n = neuron.launch();
             n.reset_sections();
-            n.hoc_oc('create soma');
+            n('create soma');
             s = n.Section('soma');
             % Insert a mechanism if needed for a range variable (e.g., 'pas')
             if ~any(strcmp(s.mech_list, 'pas'))
@@ -17,7 +17,7 @@ classdef test_RangeVarPlot < matlab.unittest.TestCase
         function testGetXYData(testCase)
             n = neuron.launch();
             n.reset_sections();
-            n.hoc_oc('create soma');
+            n('create soma');
             s = n.Section('soma');
             if ~any(strcmp(s.mech_list, 'pas'))
                 s.insert_mechanism('pas');
@@ -33,7 +33,7 @@ classdef test_RangeVarPlot < matlab.unittest.TestCase
         function testPlotNoError(testCase)
             n = neuron.launch();
             n.reset_sections();
-            n.hoc_oc('create soma');
+            n('create soma');
             s = n.Section('soma');
             if ~any(strcmp(s.mech_list, 'pas'))
                 s.insert_mechanism('pas');
@@ -47,7 +47,7 @@ classdef test_RangeVarPlot < matlab.unittest.TestCase
         function testErrorOnInvalidRangeVar(testCase)
             n = neuron.launch();
             n.reset_sections();
-            n.hoc_oc('create soma');
+            n('create soma');
             s = n.Section('soma');
             testCase.verifyError(@() n.RangeVarPlot(s, 'notarangevar'), 'MATLAB:expectedError');
         end

@@ -3,7 +3,7 @@ classdef test_NrnRef < matlab.unittest.TestCase
         function testConstructorAndProperties(testCase)
             n = neuron.launch();
             n.reset_sections();
-            n.hoc_oc('create soma');
+            n('create soma');
             s = n.Section('soma');
             s.nseg = 3;
             % Reference a known range variable (e.g., 'v')
@@ -21,7 +21,7 @@ classdef test_NrnRef < matlab.unittest.TestCase
         function testGetSetSingleValue(testCase)
             n = neuron.launch();
             n.reset_sections();
-            n.hoc_oc('create soma');
+            n('create soma');
             s = n.Section('soma');
             s.nseg = 1;
             if any(strcmp(s.range_list, 'v'))
@@ -39,7 +39,7 @@ classdef test_NrnRef < matlab.unittest.TestCase
         function testGetSetIndexedValue(testCase)
             n = neuron.launch();
             n.reset_sections();
-            n.hoc_oc('create soma');
+            n('create soma');
             s = n.Section('soma');
             s.nseg = 3;
             if any(strcmp(s.range_list, 'v'))
@@ -57,7 +57,7 @@ classdef test_NrnRef < matlab.unittest.TestCase
         function testSubsrefSubsasgn(testCase)
             n = neuron.launch();
             n.reset_sections();
-            n.hoc_oc('create soma');
+            n('create soma');
             s = n.Section('soma');
             s.nseg = 2;
             if any(strcmp(s.range_list, 'v'))
@@ -75,7 +75,7 @@ classdef test_NrnRef < matlab.unittest.TestCase
         function testSizeAndNumel(testCase)
             n = neuron.launch();
             n.reset_sections();
-            n.hoc_oc('create soma');
+            n('create soma');
             s = n.Section('soma');
             s.nseg = 3;
             if any(strcmp(s.range_list, 'v'))
@@ -91,7 +91,7 @@ classdef test_NrnRef < matlab.unittest.TestCase
         function testErrorOnInvalidIndexing(testCase)
             n = neuron.launch();
             n.reset_sections();
-            n.hoc_oc('create soma');
+            n('create soma');
             s = n.Section('soma');
             s.nseg = 1;
             if any(strcmp(s.range_list, 'v'))
@@ -105,7 +105,7 @@ classdef test_NrnRef < matlab.unittest.TestCase
         function testErrorOnInvalidPropertyOrMethod(testCase)
             n = neuron.launch();
             n.reset_sections();
-            n.hoc_oc('create soma');
+            n('create soma');
             s = n.Section('soma');
             s.nseg = 1;
             if any(strcmp(s.range_list, 'v'))

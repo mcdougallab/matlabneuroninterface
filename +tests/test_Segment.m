@@ -3,7 +3,7 @@ classdef test_Segment < matlab.unittest.TestCase
         function testConstructorAndProperties(testCase)
             n = neuron.launch();
             n.reset_sections();
-            n.hoc_oc('create soma');
+            n('create soma');
             s = n.Section('soma');
             s.nseg = 3;
             segs = s.segments();
@@ -18,7 +18,7 @@ classdef test_Segment < matlab.unittest.TestCase
         function testDispAndErrorOnDeletedSection(testCase)
             n = neuron.launch();
             n.reset_sections();
-            n.hoc_oc('create soma');
+            n('create soma');
             s = n.Section('soma');
             s.nseg = 1;
             seg = s.segments{1};
@@ -32,7 +32,7 @@ classdef test_Segment < matlab.unittest.TestCase
         function testPushAndRef(testCase)
             n = neuron.launch();
             n.reset_sections();
-            n.hoc_oc('create soma');
+            n('create soma');
             s = n.Section('soma');
             s.nseg = 3;
             seg = s.segments{2};
@@ -49,7 +49,7 @@ classdef test_Segment < matlab.unittest.TestCase
         function testSubsrefDynamicRangeVar(testCase)
             n = neuron.launch();
             n.reset_sections();
-            n.hoc_oc('create soma');
+            n('create soma');
             s = n.Section('soma');
             s.nseg = 3;
             seg = s.segments{2};
@@ -65,7 +65,7 @@ classdef test_Segment < matlab.unittest.TestCase
         function testSubsasgnDynamicRangeVar(testCase)
             n = neuron.launch();
             n.reset_sections();
-            n.hoc_oc('create soma');
+            n('create soma');
             s = n.Section('soma');
             s.nseg = 3;
             seg = s.segments{2};
@@ -81,7 +81,7 @@ classdef test_Segment < matlab.unittest.TestCase
         function testGetBounds(testCase)
             n = neuron.launch();
             n.reset_sections();
-            n.hoc_oc('create soma');
+            n('create soma');
             s = n.Section('soma');
             s.nseg = 4;
             seg = s.segments{3};
@@ -95,7 +95,7 @@ classdef test_Segment < matlab.unittest.TestCase
         function testErrorOnInvalidSubsrefSubsasgn(testCase)
             n = neuron.launch();
             n.reset_sections();
-            n.hoc_oc('create soma');
+            n('create soma');
             s = n.Section('soma');
             s.nseg = 1;
             seg = s.segments{1};

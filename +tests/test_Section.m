@@ -3,7 +3,7 @@ classdef test_Section < matlab.unittest.TestCase
         function testConstructorAndName(testCase)
             n = neuron.launch();
             n.reset_sections();
-            n.hoc_oc('create soma');
+            n('create soma');
             s = n.Section('soma');
             testCase.verifyClass(s, 'neuron.Section');
             testCase.verifyEqual(s.name, 'soma');
@@ -12,7 +12,7 @@ classdef test_Section < matlab.unittest.TestCase
         function testSetGetProperties(testCase)
             n = neuron.launch();
             n.reset_sections();
-            n.hoc_oc('create dend');
+            n('create dend');
             s = n.Section('dend');
             s.L = 123;
             s.nseg = 5;
@@ -27,7 +27,7 @@ classdef test_Section < matlab.unittest.TestCase
         function testSegmentLocationsAndSegments(testCase)
             n = neuron.launch();
             n.reset_sections();
-            n.hoc_oc('create axon');
+            n('create axon');
             s = n.Section('axon');
             s.nseg = 3;
             locs = s.segment_locations();
@@ -40,7 +40,7 @@ classdef test_Section < matlab.unittest.TestCase
         function testSegmentsWithEndpoints(testCase)
             n = neuron.launch();
             n.reset_sections();
-            n.hoc_oc('create axon');
+            n('create axon');
             s = n.Section('axon');
             s.nseg = 2;
             segs = s.segments(true);
@@ -51,7 +51,7 @@ classdef test_Section < matlab.unittest.TestCase
         function testAllsegAlias(testCase)
             n = neuron.launch();
             n.reset_sections();
-            n.hoc_oc('create axon');
+            n('create axon');
             s = n.Section('axon');
             s.nseg = 2;
             segs1 = s.segments(true);
@@ -62,7 +62,7 @@ classdef test_Section < matlab.unittest.TestCase
         function testInsertMechanismError(testCase)
             n = neuron.launch();
             n.reset_sections();
-            n.hoc_oc('create soma');
+            n('create soma');
             s = n.Section('soma');
             testCase.verifyError(@() s.insert_mechanism('notamech'), 'MATLAB:expectedError');
         end
@@ -70,7 +70,7 @@ classdef test_Section < matlab.unittest.TestCase
         function testRefRangeVar(testCase)
             n = neuron.launch();
             n.reset_sections();
-            n.hoc_oc('create soma');
+            n('create soma');
             s = n.Section('soma');
             % Use a known range variable, e.g. 'v'
             if any(strcmp(s.range_list, 'v'))
@@ -84,7 +84,7 @@ classdef test_Section < matlab.unittest.TestCase
         function testDeleteSection(testCase)
             n = neuron.launch();
             n.reset_sections();
-            n.hoc_oc('create soma');
+            n('create soma');
             s = n.Section('soma');
             sec_ptr = s.get_sec();
             s.delete();
@@ -96,7 +96,7 @@ classdef test_Section < matlab.unittest.TestCase
         function testSubsrefAndSubsasgnError(testCase)
             n = neuron.launch();
             n.reset_sections();
-            n.hoc_oc('create soma');
+            n('create soma');
             s = n.Section('soma');
             s.delete();
             testCase.verifyError(@() s.L, 'MATLAB:expectedError');
@@ -106,7 +106,7 @@ classdef test_Section < matlab.unittest.TestCase
         function testConnectAndAddpoint(testCase)
             n = neuron.launch();
             n.reset_sections();
-            n.hoc_oc('create soma, dend');
+            n('create soma, dend');
             soma = n.Section('soma');
             dend = n.Section('dend');
             dend.connect(soma);
@@ -118,7 +118,7 @@ classdef test_Section < matlab.unittest.TestCase
         function testInfoAndPsection(testCase)
             n = neuron.launch();
             n.reset_sections();
-            n.hoc_oc('create soma');
+            n('create soma');
             s = n.Section('soma');
             testCase.verifyWarningFree(@() s.info());
             testCase.verifyWarningFree(@() s.psection());

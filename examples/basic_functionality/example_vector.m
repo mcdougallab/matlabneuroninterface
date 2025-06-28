@@ -5,7 +5,7 @@
 clearvars -except testCase;  % Make sure testing params are not cleared.
 n = neuron.launch();
 n.reset_sections();
-n.hoc_oc('create soma');
+n('create soma');
 n.topology();
 
 % Try vector.
