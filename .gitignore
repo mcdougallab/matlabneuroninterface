@@ -13,3 +13,6 @@ stdout.txt
 # compiled files
 *.mexmaca64
 *.dylib
+
+# VSCode
+.vscode/
