@@ -15,9 +15,9 @@ classdef test_morphology < matlab.unittest.TestCase
             testCase.verifyEqual(sl.objtype, "SectionList");
             testCase.verifyClass(axon2_new, "neuron.Section");
             testCase.verifyEqual(axon2_new.name, "axon2");
-            testCase.verifyEqual(axon2_new.length, 42);
+            testCase.verifyEqual(axon2_new.L, 42);
             testCase.verifyClass(soma_new, "neuron.Section");
-            testCase.verifyEqual(soma_new.length, 100);
+            testCase.verifyEqual(soma_new.L, 100);
             testCase.verifyEqual(double(soma_new.nseg), 5);
             testCase.verifyEqual(soma_new.name, "soma");
             testCase.verifyClass(soma_segs{1}, "neuron.Segment");
@@ -29,7 +29,7 @@ classdef test_morphology < matlab.unittest.TestCase
             % Call the function to test
             example_morph;
             % Check output.
-            testCase.verifyEqual(main.length, 200);
+            testCase.verifyEqual(main.L, 200);
             testCase.verifyEqual(double(main.nseg), 3);
             testCase.verifyEqual(iclamp.dur, 10000);
             testCase.verifyTrue(~exist('branch2', 'var'));
