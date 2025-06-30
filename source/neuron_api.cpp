@@ -1675,6 +1675,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         function_map["nrn_sectionlist_iterator_done"] = nrn_sectionlist_iterator_done;
         nrn_prop_exists_ = (bool (*)(const Object*)) DLL_GET_PROC(neuron_handle, "nrn_prop_exists");
         function_map["nrn_prop_exists"] = nrn_prop_exists;
+        
        
 
         // Clean up
