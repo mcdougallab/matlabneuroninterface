@@ -22,14 +22,18 @@ classdef Segment < handle
         end
 
         function disp(self)
-            try
-                if ~neuron_api('nrn_section_is_active', self.parent_sec.get_sec())
-                    error();
-                else
-                    builtin('disp', self);
+            if numel(self) == 1
+                try
+                    if ~neuron_api('nrn_section_is_active', self.parent_sec.get_sec())
+                        error();
+                    else
+                        builtin('disp', self);
+                    end
+                catch
+                    error("Parent section has been deleted.");
                 end
-            catch
-                error("Parent section has been deleted.");
+            else
+                builtin('disp', self);
             end
         end
 

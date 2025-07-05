@@ -130,13 +130,14 @@ classdef Section < handle
             % S(2).subs is a cell array containing arguments.
 
             % Check if section has been deleted.
-            % without this block arrays of Sections don't work
+
+            % without this block arrays of Sections do not work
             if numel(self) > 1
                 % Let MATLAB handle indexing arrays of Sections
                 varargout = {builtin('subsref', self, S)};
                 return
             end
-            
+
             try
                 if ~neuron_api('nrn_section_is_active', self.sec)
                     error();
@@ -201,9 +202,9 @@ classdef Section < handle
             else
                 x_arr = self.segment_locations();
             end
-            segs = cell(size(x_arr));
+            segs = [];
             for i=1:numel(x_arr)
-                segs{i} = neuron.Segment(self, x_arr(i));
+                segs = [segs neuron.Segment(self, x_arr(i))];
             end
         end
         function segs = allseg(self)
