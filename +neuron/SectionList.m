@@ -10,9 +10,8 @@ classdef SectionList < neuron.Object
             for i = 1:numel(varargin)
                 self.call_method_hoc('append', 'double', varargin{i});
             end
-            
         end
-        
+
         function n = numel(self, varargin)
             sections_arr = self.allsec();
             n = numel(sections_arr);
@@ -27,13 +26,13 @@ classdef SectionList < neuron.Object
                 varargout = num2cell(sz);
             end
         end
-        
+
         function varargout = subsref(self, S)
             if (length(S) == 1 && S(1).type == "()")
                 element_id = S(1).subs{:};
                 sections_arr = self.allsec();
                 if ~isempty(sections_arr)
-                    [varargout{1:nargout}] = sections_arr{element_id};
+                    [varargout{1:nargout}] = sections_arr(element_id);
                 else
                     error("Trying to access element of empty SectionList.")
                 end
@@ -42,12 +41,12 @@ classdef SectionList < neuron.Object
             end
         end
 
-        function sections = iter(self)
+        function sections = secs(self)
             sections = self.allsec();
         end
-        
+
         function all_sections = allsec(self, owner)
-        % Return cell array containing all sections in a NEURON
+        % Return array containing all sections in a NEURON
         % SectionList section_list.
         % Boolean owner (optional, default: false).
         %   allsec(self)
@@ -64,9 +63,15 @@ classdef SectionList < neuron.Object
 
             % Convert section pointers to Section objects
             section_ptrs = section_ptrs(:).';
-            all_sections = [];
-            for i = 1:numel(section_ptrs)
-                all_sections = [all_sections neuron.Section(section_ptrs(i), owner)];
+            n = numel(section_ptrs);
+            if n == 0
+                all_sections = [];
+            else
+                all_sections_cell = cell(1, n);
+                for i = 1:n
+                    all_sections_cell{i} = neuron.Section(section_ptrs(i), owner);
+                end
+                all_sections = [all_sections_cell{:}];
             end
         end
     end
