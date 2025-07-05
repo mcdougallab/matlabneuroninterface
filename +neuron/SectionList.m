@@ -11,7 +11,7 @@ classdef SectionList < neuron.Object
                 self.call_method_hoc('append', 'double', varargin{i});
             end
         end
-        
+
         function n = numel(self, varargin)
             sections_arr = self.allsec();
             n = numel(sections_arr);
@@ -26,7 +26,7 @@ classdef SectionList < neuron.Object
                 varargout = num2cell(sz);
             end
         end
-        
+
         function varargout = subsref(self, S)
             if (length(S) == 1 && S(1).type == "()")
                 element_id = S(1).subs{:};
