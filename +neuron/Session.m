@@ -285,6 +285,7 @@ classdef Session < dynamicprops
                         % No sections provided, just create empty SectionList
                         obj = neuron.SectionList(cppobj);
                     end
+                    neuron.stack.pop_sections(nsecs);
                 else
                     % Generic case: push arguments to stack and create Object.
                     [nsecs, nargs] = neuron.stack.push_args(varargin{:});
@@ -358,9 +359,15 @@ classdef Session < dynamicprops
 
             % Convert section pointers to Section objects
             section_ptrs = section_ptrs(:).';
-            all_sections = [];
-            for i = 1:numel(section_ptrs)
-                all_sections = [all_sections neuron.Section(section_ptrs(i), owner)];
+            n = numel(section_ptrs);
+            if n == 0
+                all_sections = [];
+            else
+                all_sections_cell = cell(1, n);
+                for i = 1:n
+                    all_sections_cell{i} = neuron.Section(section_ptrs(i), owner);
+                end
+                all_sections = [all_sections_cell{:}];
             end
         end
     end
