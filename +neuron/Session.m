@@ -242,7 +242,7 @@ classdef Session < dynamicprops
             catch e
                 value = NaN;
                 warning(e.message);
-                warning("'"+string(func)+"': caught error during call to NEURON function.");
+                error("'"+string(func)+"': caught error during call to NEURON function.");
                 % state.restore();
             end
 
