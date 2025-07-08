@@ -93,8 +93,12 @@ runtests +tests
 A non-exhaustive list:
 - `size(vector)` returns  an array `[1 N]` with `N == length(vector)`, 
   as is customary in MATLAB. In Python, `size(vector)` is a scalar.
+- When using NEURON via MATLAB, all arrays and matrices are 1-indexed;
+  i.e., the first position is 1; this differs from Python where the first
+  position is 0. This is true not only when indexing directly into a Vector
+  or Matrix, but also for methods that expect or return indices.
 - When iterating over segments we use `section.segments()`, which returns
-  a cell array with Segment objects. In Python, we can simply write 
+  an array with Segment objects. In Python, we can simply write 
   `for segment in section`.
 - Call chaining is not (yet) always available in MATLAB. As such, we cannot
   use `t = n.Vector().record(ref);`; instead we have to write
