@@ -99,12 +99,14 @@ classdef Segment < handle
         function self = subsasgn(self, S, varargin)
         % Assign a (dynamic) property value.
 
-            try
-                if ~neuron_api('nrn_section_is_active', self.parent_sec.get_sec())
-                    error();
+            if numel(self) == 1
+                try
+                    if ~neuron_api('nrn_section_is_active', self.parent_sec.get_sec())
+                        error();
+                    end
+                catch
+                    error("Parent section has been deleted.");
                 end
-            catch
-                error("Parent section has been deleted.");
             end
             
             % Are we trying to directly access a class property?

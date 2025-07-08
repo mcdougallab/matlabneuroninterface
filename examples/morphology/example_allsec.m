@@ -30,7 +30,7 @@ disp("axon2_new length: " + axon2_new.L);
 soma_new.nseg = 5;
 soma_segs = soma_new.segments();
 for i=1:numel(soma_segs)
-    disp("Segment location: " + soma_segs{i}.x);
+    disp("Segment location: " + soma_segs(i).x);
 end
 
 % Put the sections in a section_list.
