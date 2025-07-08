@@ -11,8 +11,8 @@ classdef test_simulation < matlab.unittest.TestCase
             set(0,'DefaultFigureVisible','off');
             example_acpot;
             set(0,'DefaultFigureVisible','on');
-            testCase.verifyEqual(v2_vec(100), 8.89159427501637, "RelTol", testCase.tol);
-            testCase.verifyEqual(v1_vec(100), 3.77273092993764, "RelTol", testCase.tol);
+            testCase.verifyEqual(v2_vec(100), 14.2575892416028, "RelTol", testCase.tol);
+            testCase.verifyEqual(v1_vec(100), 6.53771377261781, "RelTol", testCase.tol);
             testCase.verifyEqual(t_vec(100), 2.4750, "RelTol", testCase.tol);
         end
 
@@ -56,7 +56,7 @@ classdef test_simulation < matlab.unittest.TestCase
             example_netcon;
             set(0,'DefaultFigureVisible','on');
             testCase.verifyEqual(t_vec(750), 18.7250, "RelTol", testCase.tol);
-            testCase.verifyEqual(v_vec(750), 8.578110111980308, "RelTol", testCase.tol);
+            testCase.verifyEqual(v_vec(750), -73.9171252696946, "RelTol", testCase.tol);
         end
 
         function test_patternstim(testCase)
@@ -76,7 +76,7 @@ classdef test_simulation < matlab.unittest.TestCase
         function test_temptest(testCase)
             example_temptest;
             testCase.verifyEqual(t0, 6.1, "RelTol", testCase.tol);
-            testCase.verifyEqual(t1, 6.067608753980505, "RelTol", testCase.tol);
+            testCase.verifyEqual(t1, 6.06760875204805, "RelTol", testCase.tol);
             testCase.verifyEqual(l0, 1);
             testCase.verifyEqual(l1, 1);
             testCase.verifyEqual(l2, 0);

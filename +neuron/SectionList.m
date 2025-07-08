@@ -12,13 +12,9 @@ classdef SectionList < neuron.Object
             end
         end
 
-        function n = numel(self, varargin)
+        function varargout = size(self, varargin)
             sections_arr = self.allsec();
             n = numel(sections_arr);
-        end
-
-        function varargout = size(self, varargin)
-            n = numel(self);
             sz = [1 n];
             if nargout <= 1
                 varargout{1} = sz;
@@ -36,7 +32,7 @@ classdef SectionList < neuron.Object
                 else
                     error("Trying to access element of empty SectionList.")
                 end
-            elseif S(1).type == "." && strcmp(S(1).subs, 'objtype') %length(S) == 1 && isprop(self, S(1).subs)
+            elseif S(1).type == "." && (strcmp(S(1).subs, 'objtype') || strcmp(S(1).subs, 'obj')) %length(S) == 1 && isprop(self, S(1).subs)
                 % Handle access to own properties (like objtype)
                 [varargout{1:nargout}] = builtin('subsref', self, S);
             else

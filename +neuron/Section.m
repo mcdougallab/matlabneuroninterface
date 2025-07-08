@@ -426,7 +426,7 @@ classdef Section < handle
             end
             segments = self.segments();
             for i=1:self.nseg
-                seg = segments{i};
+                seg = segments(i);
                 disp(self.name + "(" + seg.x + ").v = " + seg.v);
                 disp(self.name + "(" + seg.x + ").diam = " + seg.diam);
             end
