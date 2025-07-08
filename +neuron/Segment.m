@@ -55,6 +55,13 @@ classdef Segment < handle
 
         function varargout = subsref(self, S)
         % Call a class method or dynamic property.
+            % If S(1).subs is 1, just return the object itself (for obj(1) syntax)
+            
+            if numel(self) > 1
+                % Let MATLAB handle indexing arrays of Sections
+                varargout = {builtin('subsref', self, S)};
+                return
+            end
 
             try
                 if ~neuron_api('nrn_section_is_active', self.parent_sec.get_sec())
@@ -80,6 +87,9 @@ classdef Segment < handle
                     error("Method/property "+S(1).subs+" not recognized.");
                 end
             % Other indexing types ({} or ()) not supported.
+            elseif isnumeric(S(1).subs{:}) && isequal(S(1).subs{:}, 1)
+                [varargout{1:nargout}] = self;
+                n_processed = 1;
             else
                 error("Indexing type "+S(1).type+" not supported.");
             end

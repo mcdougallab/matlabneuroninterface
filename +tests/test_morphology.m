@@ -20,8 +20,8 @@ classdef test_morphology < matlab.unittest.TestCase
             testCase.verifyEqual(soma_new.L, 100);
             testCase.verifyEqual(double(soma_new.nseg), 5);
             testCase.verifyEqual(soma_new.name, "soma");
-            testCase.verifyClass(soma_segs{1}, "neuron.Segment");
-            testCase.verifyEqual(soma_segs{1}.parent_name, "soma");
+            testCase.verifyClass(soma_segs(1), "neuron.Segment");
+            testCase.verifyEqual(soma_segs(1).parent_name, "soma");
             testCase.verifyEqual(numel(soma_segs), double(soma_new.nseg));
         end
 
