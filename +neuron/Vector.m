@@ -56,7 +56,7 @@ classdef Vector < neuron.Object
                 if self.length() > 0
                     [varargout{1:nargout}] = self.data(element_id);
                 else
-                    error("Trying to access element of empty Vector.")
+                    error("MATLAB:badsubscript", "Trying to access element of empty Vector.")
                 end
             else
                 % Adjust for 0-based indexing where applicable.
