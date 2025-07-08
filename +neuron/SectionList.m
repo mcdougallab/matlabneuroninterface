@@ -36,6 +36,9 @@ classdef SectionList < neuron.Object
                 else
                     error("Trying to access element of empty SectionList.")
                 end
+            elseif S(1).type == "." && strcmp(S(1).subs, 'objtype') %length(S) == 1 && isprop(self, S(1).subs)
+                % Handle access to own properties (like objtype)
+                [varargout{1:nargout}] = builtin('subsref', self, S);
             else
                 [varargout{1:nargout}] = subsref@neuron.Object(self, S);
             end

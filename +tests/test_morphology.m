@@ -11,7 +11,7 @@ classdef test_morphology < matlab.unittest.TestCase
             % Call the function to test
             example_allsec;
             % Check output.
-            testCase.verifyClass(sl, "neuron.Object");
+            testCase.verifyClass(sl, "neuron.SectionList");
             testCase.verifyEqual(sl.objtype, "SectionList");
             testCase.verifyClass(axon2_new, "neuron.Section");
             testCase.verifyEqual(axon2_new.name, "axon2");
