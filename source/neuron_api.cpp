@@ -798,6 +798,17 @@ void nrn_section_diam_set(const mxArray* prhs[], mxArray* plhs[]) {
     Section* sec = reinterpret_cast<Section*>(sec_ptr);
     double diam = mxGetScalar(prhs[2]);
 
+    // Check if the section has 3D points defined
+    nrn_section_push_(sec);
+    auto sym = nrn_symbol_("n3d");
+    nrn_function_call_(sym, 0);
+    double n3d = nrn_double_pop_();
+    nrn_section_pop_();
+    if (n3d > 0) {
+        mexErrMsgIdAndTxt("nrn_section_diam_set:Pt3dError",
+            "Use pt3dclear() to clear 3D points before changing the diameter of the Section.");
+    }
+
     int nseg = nrn_nseg_get_(sec);
     for (int i = 0; i < nseg; ++i) {
         double x = (i + 0.5) / nseg;  // center of each segment
@@ -1199,6 +1210,20 @@ void nrn_rangevar_set(const mxArray* prhs[], mxArray* plhs[]) {
     Symbol* sym = nrn_symbol_(sym_name.c_str());
     double x = mxGetScalar(prhs[3]);
     double value = mxGetScalar(prhs[4]);
+
+    if (sym_name == "diam") {
+        // Special case for diam, check if 3D points are defined
+        nrn_section_push_(sec);
+        auto sym_n3d = nrn_symbol_("n3d");
+        nrn_function_call_(sym_n3d, 0);
+        double n3d = nrn_double_pop_();
+        nrn_section_pop_();
+        if (n3d > 0) {
+            mexErrMsgIdAndTxt("nrn_rangevar_set:Pt3dError",
+                "Use pt3dclear() to clear 3D points before changing the diameter of the Segment.");
+        }
+    }
+
     nrn_rangevar_set_(sym, sec, x, value);
 }
 
