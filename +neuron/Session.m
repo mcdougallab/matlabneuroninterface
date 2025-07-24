@@ -336,17 +336,9 @@ classdef Session < dynamicprops
             end
         end
         function all_sections = allsec(section_list, owner)
-        % Return cell array containing all sections, or all sections in a NEURON
-        % SectionList section_list (optional).
-        % Boolean owner (optional, default: false).
-        %   allsec()
-        %   allsec(section_list)
-        %   allsec(section_list, true)
-
-            % Deal with input.
-            if ~exist('section_list', 'var') % No input: get SectionList of all Sections.
+            if ~exist('section_list', 'var')
                 section_list = neuron_api('nrn_section_list');
-            elseif isa(section_list, 'neuron.Object') % Input is a 'n.SectionList'
+            elseif isa(section_list, 'neuron.Object')
                 section_list.allsec();
             end
 
@@ -354,21 +346,17 @@ classdef Session < dynamicprops
                 owner = false;
             end
 
-            % Call the MEX function to get section pointers
             section_ptrs = neuron_api('nrn_loop_sections', 0);
-
-            % Convert section pointers to Section objects
-            section_ptrs = section_ptrs(:).';
+            section_ptrs = section_ptrs(:).';  % row vector
             n = numel(section_ptrs);
-            if n == 0
-                all_sections = [];
-            else
-                all_sections_cell = cell(1, n);
-                for i = 1:n
-                    all_sections_cell{i} = neuron.Section(section_ptrs(i), owner);
-                end
-                all_sections = [all_sections_cell{:}];
+
+            sections_cell = cell(1, n);
+            for i = 1:n
+                sections_cell{i} = neuron.Section(section_ptrs(i), owner);
             end
+
+            % Wrap in SectionArray for consistent behavior
+            all_sections = neuron.SectionArray(sections_cell);
         end
     end
 end

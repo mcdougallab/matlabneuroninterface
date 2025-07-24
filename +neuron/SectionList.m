@@ -63,15 +63,13 @@ classdef SectionList < neuron.Object
             % Convert section pointers to Section objects
             section_ptrs = section_ptrs(:).';
             n = numel(section_ptrs);
-            if n == 0
-                all_sections = [];
-            else
-                all_sections_cell = cell(1, n);
-                for i = 1:n
-                    all_sections_cell{i} = neuron.Section(section_ptrs(i), owner);
-                end
-                all_sections = [all_sections_cell{:}];
+            sections_cell = cell(1, n);
+            for i = 1:n
+                sections_cell{i} = neuron.Section(section_ptrs(i), owner);
             end
+
+            % Wrap in SectionArray for consistent behavior
+            all_sections = neuron.SectionArray(sections_cell);
         end
     end
 end
