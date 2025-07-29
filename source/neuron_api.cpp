@@ -79,8 +79,8 @@ void (*nrn_symbol_push_)(Symbol*) = nullptr;
 // --- HOC/Function registration and calling ---
 Symbol* (*hoc_install_)(const char*, int, double, Symlist**) = nullptr;
 void (*nrn_register_function_)(void (*)(), const char*, int type) = nullptr;
-char* (*hoc_gargstr_)(int) = nullptr;
-void (*hoc_ret_)(void) = nullptr;
+char* (*nrn_gargstr_)(int) = nullptr;
+void (*nrn_hoc_ret_)(void) = nullptr;
 double (*hoc_xpop_)(void) = nullptr;
 void (*hoc_call_ob_proc_)(Object*, Symbol*, int) = nullptr;
 void (*nrn_function_call_)(Symbol* sym, int narg) = nullptr;
@@ -476,12 +476,12 @@ void nrnref_property_push(const mxArray* prhs[], mxArray* plhs[]) {
 // Function to be called through hoc to run arbitrary matlab code
 // passed as string argument.
 void nrnmatlab() {
-    std::string command = hoc_gargstr_(1);
+    std::string command = nrn_gargstr_(1);
     char* command_c = const_cast<char*>(command.c_str());
 
     int status = mexEvalString(command_c);
 
-    hoc_ret_();
+    nrn_hoc_ret_();
     nrn_double_push_(status);
 }
 
@@ -493,13 +493,13 @@ void setup_nrnmatlab(const mxArray* prhs[], mxArray* plhs[]) {
 // Used as hoc function with void return type and instance_id: string.
 // Calls matlab function defined in static dictionary with key instance_id.
 void finitialize_callback() {
-    std::string instance_id = hoc_gargstr_(1);
+    std::string instance_id = nrn_gargstr_(1);
     std::string command = "neuron.FInitializeHandler.handlers(" + instance_id + ")";
     char* command_c = const_cast<char*>(command.c_str());
 
     mexEvalString(command_c);
 
-    hoc_ret_();
+    nrn_hoc_ret_();
     nrn_double_push_(0);
 }
 
@@ -1438,8 +1438,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         nrn_symbol_name_ = (char const* (*)(const Symbol*)) DLL_GET_PROC(neuron_handle, "nrn_symbol_name");
         hoc_install_ = (Symbol* (*)(const char*, int, double, Symlist**)) DLL_GET_PROC(neuron_handle, "hoc_install");
         nrn_register_function_ = (void (*)(void (*)(), const char*, int)) DLL_GET_PROC(neuron_handle, "nrn_register_function");
-        hoc_gargstr_ = (char* (*)(int)) DLL_GET_PROC(neuron_handle, "_Z11hoc_gargstri");  // TODO get rid of name mangling
-        hoc_ret_ = (void (*)(void)) DLL_GET_PROC(neuron_handle, "_Z7hoc_retv");  // TODO get rid of name mangling
+        nrn_gargstr_ = (char* (*)(int)) DLL_GET_PROC(neuron_handle, "nrn_gargstr");  // TODO get rid of name mangling
+        nrn_hoc_ret_ = (void (*)(void)) DLL_GET_PROC(neuron_handle, "nrn_hoc_ret");  // TODO get rid of name mangling
         nrn_function_call_ = (void(*)(Symbol*,int)) DLL_GET_PROC(neuron_handle, "nrn_function_call");
         function_map["nrn_function_call"] = nrn_function_call;
         nrn_double_pop_ = (double (*)(void)) DLL_GET_PROC(neuron_handle, "nrn_double_pop");
