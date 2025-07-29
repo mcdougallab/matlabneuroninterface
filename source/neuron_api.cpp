@@ -30,69 +30,10 @@
 
 typedef void (*MxFunctionPtr)(const mxArray*, mxArray*);
 
+// --- Section-related functions ---
 Section* (*nrn_section_new_)(char const* name) = nullptr;
-void (*nrn_hoc_call_)(char const* command) = nullptr;
-void (*nrn_double_push_)(double) = nullptr;
-double (*nrn_double_pop_)(void) = nullptr;
-void (*nrn_function_call_)(Symbol* sym, int narg) = nullptr;
-
-Symlist* (*nrn_global_symbol_table_)(void) = nullptr;
-Symlist* (*nrn_top_level_symbol_table_)(void) = nullptr;
-
-SymbolTableIterator* (*nrn_symbol_table_iterator_new_)(Symlist* my_symbol_table) = nullptr;
-void (*nrn_symbol_table_iterator_free_)(SymbolTableIterator* st) = nullptr;
-Symbol* (*nrn_symbol_table_iterator_next_)(SymbolTableIterator* st) = nullptr;
-int (*nrn_symbol_table_iterator_done_)(SymbolTableIterator* st) = nullptr;
-Symlist* (*nrn_symbol_table_)(Symbol* sym) = nullptr;
-
-SectionListIterator* (*nrn_sectionlist_iterator_new_)(nrn_Item*) = nullptr;
-void (*nrn_sectionlist_iterator_free_)(SectionListIterator*) = nullptr;
-Section* (*nrn_sectionlist_iterator_next_)(SectionListIterator*) = nullptr;
-int (*nrn_sectionlist_iterator_done_)(SectionListIterator*) = nullptr;
-
-Symbol* (*nrn_symbol_)(char const* const name) = nullptr;
-int (*nrn_symbol_type_)(const Symbol* sym) = nullptr;
-int (*nrn_symbol_subtype_)(const Symbol* sym) = nullptr;
-char const* (*nrn_symbol_name_)(const Symbol* sym) = nullptr;
-double* (*nrn_symbol_dataptr_)(Symbol* sym) = nullptr;
-bool (*nrn_symbol_is_array_)(Symbol*) = nullptr;
-int (*nrn_symbol_array_length_)(Symbol*) = nullptr;
-
-Symbol* (*hoc_install_)(const char*, int, double, Symlist**) = nullptr;
-void (*nrn_register_function_)(void (*)(), const char*, int type) = nullptr;
-char* (*hoc_gargstr_)(int) = nullptr;
-void (*hoc_ret_)(void) = nullptr;
-double (*hoc_xpop_)(void) = nullptr;
-void (*hoc_call_ob_proc_)(Object*, Symbol*, int) = nullptr;
-void (*nrn_symbol_push_)(Symbol*) = nullptr;
-
-Object* (*nrn_object_new_)(Symbol* sym, int narg) = nullptr;
-void (*nrn_object_unref_)(Object*) = nullptr;
-char const* (*nrn_class_name_)(const Object*) = nullptr;
-Symbol* (*nrn_method_symbol_)(Object*, char const* const) = nullptr;
-void (*nrn_method_call_)(Object*, Symbol*, int) = nullptr;
-bool (*nrn_prop_exists_)(const Object*) = nullptr;
-
-double* (*nrn_vector_data_)(Object*) = nullptr;
-
-void (*nrn_section_pop_)(void) = nullptr;
-char** (*nrn_pop_str_)(void) = nullptr;
-Object* (*nrn_object_pop_)(void) = nullptr;
-double* (*nrn_double_ptr_pop_)(void) = nullptr;
-
-void (*nrn_str_push_)(char**) = nullptr;
-void (*nrn_object_push_)(Object*) = nullptr;
-void (*nrn_double_ptr_push_)(double*) = nullptr;
 void (*nrn_section_push_)(Section*) = nullptr;
-void (*nrn_rangevar_push_)(Symbol*, Section*, double) = nullptr;
-void (*nrn_property_push_)(Object*, const char*) = nullptr;
-void (*nrn_property_array_push_)(Object*, const char*, int) = nullptr;
-
-nrn_Item* (*nrn_allsec_)(void) = nullptr;
-nrn_Item* (*nrn_sectionlist_data_)(Object*) = nullptr;
-void (*nrn_mechanism_insert_)(Section*, const Symbol*) = nullptr;
-double (*nrn_rangevar_get_)(Symbol*, Section*, double) = nullptr;
-void (*nrn_rangevar_set_)(Symbol*, Section*, double, double) = nullptr;
+void (*nrn_section_pop_)(void) = nullptr;
 void (*nrn_section_connect_)(Section*, double, Section*, double) = nullptr;
 void (*nrn_section_length_set_)(Section*, double) = nullptr;
 double (*nrn_section_length_get_)(Section*) = nullptr;
@@ -110,11 +51,75 @@ void (*nrn_section_ref_)(Section*) = nullptr;
 void (*nrn_section_unref_)(Section*) = nullptr;
 Section* (*nrn_cas_)(void) = nullptr;
 
+// --- SectionList/Iterator functions ---
+nrn_Item* (*nrn_allsec_)(void) = nullptr;
+nrn_Item* (*nrn_sectionlist_data_)(Object*) = nullptr;
+SectionListIterator* (*nrn_sectionlist_iterator_new_)(nrn_Item*) = nullptr;
+void (*nrn_sectionlist_iterator_free_)(SectionListIterator*) = nullptr;
+Section* (*nrn_sectionlist_iterator_next_)(SectionListIterator*) = nullptr;
+int (*nrn_sectionlist_iterator_done_)(SectionListIterator*) = nullptr;
+
+// --- Symbol table and symbol functions ---
+Symlist* (*nrn_global_symbol_table_)(void) = nullptr;
+Symlist* (*nrn_top_level_symbol_table_)(void) = nullptr;
+SymbolTableIterator* (*nrn_symbol_table_iterator_new_)(Symlist* my_symbol_table) = nullptr;
+void (*nrn_symbol_table_iterator_free_)(SymbolTableIterator* st) = nullptr;
+Symbol* (*nrn_symbol_table_iterator_next_)(SymbolTableIterator* st) = nullptr;
+int (*nrn_symbol_table_iterator_done_)(SymbolTableIterator* st) = nullptr;
+Symlist* (*nrn_symbol_table_)(Symbol* sym) = nullptr;
+Symbol* (*nrn_symbol_)(char const* const name) = nullptr;
+int (*nrn_symbol_type_)(const Symbol* sym) = nullptr;
+int (*nrn_symbol_subtype_)(const Symbol* sym) = nullptr;
+char const* (*nrn_symbol_name_)(const Symbol* sym) = nullptr;
+double* (*nrn_symbol_dataptr_)(Symbol* sym) = nullptr;
+bool (*nrn_symbol_is_array_)(Symbol*) = nullptr;
+int (*nrn_symbol_array_length_)(Symbol*) = nullptr;
+void (*nrn_symbol_push_)(Symbol*) = nullptr;
+
+// --- HOC/Function registration and calling ---
+Symbol* (*hoc_install_)(const char*, int, double, Symlist**) = nullptr;
+void (*nrn_register_function_)(void (*)(), const char*, int type) = nullptr;
+char* (*hoc_gargstr_)(int) = nullptr;
+void (*hoc_ret_)(void) = nullptr;
+double (*hoc_xpop_)(void) = nullptr;
+void (*hoc_call_ob_proc_)(Object*, Symbol*, int) = nullptr;
+void (*nrn_function_call_)(Symbol* sym, int narg) = nullptr;
+void (*nrn_hoc_call_)(char const* command) = nullptr;
+
+// --- Object-related functions ---
+Object* (*nrn_object_new_)(Symbol* sym, int narg) = nullptr;
+void (*nrn_object_unref_)(Object*) = nullptr;
+char const* (*nrn_class_name_)(const Object*) = nullptr;
+Symbol* (*nrn_method_symbol_)(Object*, char const* const) = nullptr;
+void (*nrn_method_call_)(Object*, Symbol*, int) = nullptr;
+bool (*nrn_prop_exists_)(const Object*) = nullptr;
+
+// --- Vector-related functions ---
+double* (*nrn_vector_data_)(Object*) = nullptr;
+
+// --- Stack and pointer functions ---
+char** (*nrn_pop_str_)(void) = nullptr;
+Object* (*nrn_object_pop_)(void) = nullptr;
+double* (*nrn_double_ptr_pop_)(void) = nullptr;
+void (*nrn_str_push_)(char**) = nullptr;
+void (*nrn_object_push_)(Object*) = nullptr;
+void (*nrn_double_push_)(double) = nullptr;
+double (*nrn_double_pop_)(void) = nullptr;
+void (*nrn_double_ptr_push_)(double*) = nullptr;
+
+// --- Range variable and property functions ---
+void (*nrn_rangevar_push_)(Symbol*, Section*, double) = nullptr;
+void (*nrn_property_push_)(Object*, const char*) = nullptr;
+void (*nrn_property_array_push_)(Object*, const char*, int) = nullptr;
+void (*nrn_mechanism_insert_)(Section*, const Symbol*) = nullptr;
+double (*nrn_rangevar_get_)(Symbol*, Section*, double) = nullptr;
+void (*nrn_rangevar_set_)(Symbol*, Section*, double, double) = nullptr;
 double (*nrn_property_get_)(Object const*, const char*) = nullptr;
 double (*nrn_property_array_get_)(Object const*, const char*, int) = nullptr;
 void (*nrn_property_set_)(Object*, const char*, double) = nullptr;
 void (*nrn_property_array_set_)(Object*, const char*, int, double) = nullptr;
 
+// --- PlotShape/ShapePlotInterface functions ---
 ShapePlotInterface* (*nrn_get_plotshape_interface_)(Object*) = nullptr;
 Object* (*nrn_get_plotshape_section_list_)(ShapePlotInterface*) = nullptr;
 const char* (*nrn_get_plotshape_varname_)(ShapePlotInterface*) = nullptr;
