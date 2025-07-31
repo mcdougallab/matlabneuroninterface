@@ -121,6 +121,8 @@ const char* (*nrn_get_plotshape_varname_)(ShapePlotInterface*) = nullptr;
 float (*nrn_get_plotshape_low_)(ShapePlotInterface*) = nullptr;
 float (*nrn_get_plotshape_high_)(ShapePlotInterface*) = nullptr;
 
+double (*nrn_distance_)(Section*, double, Section*, double) = nullptr;
+
 bool has_inited = false;
 DLL_HANDLE neuron_handle = nullptr;
 std::unordered_map<std::string, void(*)(const mxArray**, mxArray**)> function_map;
@@ -1477,6 +1479,17 @@ void nrn_prop_exists(const mxArray* prhs[], mxArray* plhs[]) {
     plhs[0] = mxCreateLogicalScalar(result);
 }
 
+void nrn_distance(const mxArray* prhs[], mxArray* plhs[]) {
+    auto sec0_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    Section* sec0 = reinterpret_cast<Section*>(sec0_ptr);
+    double x0 = mxGetScalar(prhs[2]);
+    auto sec1_ptr = static_cast<uint64_t>(mxGetScalar(prhs[3]));
+    Section* sec1 = reinterpret_cast<Section*>(sec1_ptr);
+    double x1 = mxGetScalar(prhs[4]);    
+    double dist = nrn_distance_(sec0, x0, sec1, x1);
+    plhs[0] = mxCreateDoubleScalar(dist);
+}
+
 
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
@@ -1702,6 +1715,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         function_map["nrn_sectionlist_iterator_done"] = nrn_sectionlist_iterator_done;
         nrn_prop_exists_ = (bool (*)(const Object*)) DLL_GET_PROC(neuron_handle, "nrn_prop_exists");
         function_map["nrn_prop_exists"] = nrn_prop_exists;
+        nrn_distance_ = (double (*)(Section*, double, Section*, double)) DLL_GET_PROC(neuron_handle, "nrn_distance");
+        function_map["nrn_distance"] = nrn_distance;
 
         if (!nrn_cas_) {
              mexErrMsgIdAndTxt("NEURON:OutdatedAPI",

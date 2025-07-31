@@ -358,5 +358,29 @@ classdef Session < dynamicprops
             % Wrap in SectionArray for consistent behavior
             all_sections = neuron.SectionArray(sections_cell);
         end
+        function dist = distance(sec1, x1, sec2, x2)
+        % Calculate distance between two points in space, given by sections sec1 and sec2 and
+        % positions x1 and x2 (in [0, 1] range).
+        %   dist = distance(sec1, x1, sec2, x2)
+            if nargin < 4
+                if nargin == 2
+                    % If only two arguments, assume both are segments and extract section and position
+                    if isa(sec1, 'neuron.Segment') && isa(x1, 'neuron.Segment')
+                        sec2 = x1.parent_sec;
+                        x2 = x1.x;
+                        x1 = sec1.x;
+                        sec1 = sec1.parent_sec;
+                    else
+                        error("If only two arguments are provided, both must be neuron.Segment objects.");
+                    end
+                else
+                    error("Incorrect number of arguments. Provide two sections and their positions.");
+                end
+            end
+            if ~isa(sec1, 'neuron.Section') || ~isa(sec2, 'neuron.Section')
+                error("Both sec1 and sec2 must be neuron.Section objects.");
+            end
+            dist = neuron_api('nrn_distance', sec1.sec, x1, sec2.sec, x2);
+        end
     end
 end
