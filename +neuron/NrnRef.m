@@ -107,6 +107,8 @@ classdef NrnRef < handle
                     [varargout{1:nargout}] = builtin('subsref', self, S(1:2));
                     n_processed = 2;
                 % Are we trying to directly access a class property?
+                elseif strcmp(S(1).subs, "ref") || strcmp(S(1).subs, "ref_class") || strcmp(S(1).subs, "length")
+                    error("Property '%s' is for display only and cannot be accessed directly.", S(1).subs);
                 elseif isprop(self, S(1).subs)
                     [varargout{1:nargout}] = self.(S(1).subs);
                     n_processed = 1;
