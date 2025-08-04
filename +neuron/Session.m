@@ -258,8 +258,7 @@ classdef Session < dynamicprops
                     obj = neuron.Vector(cppobj);
                     vector_data = varargin{:};
                     for i=1:numel(vector_data)
-                        temp = obj.append(vector_data(i));
-                        clear temp;
+                        obj.append(vector_data(i));
                     end
                 elseif (objtype == "SectionList")
                     % Accept cell array or list of neuron.Section objects
