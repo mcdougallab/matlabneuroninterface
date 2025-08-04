@@ -96,7 +96,7 @@ bool (*nrn_prop_exists_)(const Object*) = nullptr;
 double* (*nrn_vector_data_)(Object*) = nullptr;
 
 // --- Stack and pointer functions ---
-char** (*nrn_pop_str_)(void) = nullptr;
+char** (*nrn_str_pop_)(void) = nullptr;
 Object* (*nrn_object_pop_)(void) = nullptr;
 double* (*nrn_double_ptr_pop_)(void) = nullptr;
 void (*nrn_str_push_)(char**) = nullptr;
@@ -651,8 +651,8 @@ void nrn_section_pop(const mxArray* prhs[], mxArray* plhs[]) {
     nrn_section_pop_();
 }
 
-void nrn_pop_str(const mxArray* prhs[], mxArray* plhs[]) {
-    char** result = nrn_pop_str_();
+void nrn_str_pop(const mxArray* prhs[], mxArray* plhs[]) {
+    char** result = nrn_str_pop_();
     plhs[0] = mxCreateString(*result);
 }
 
@@ -1023,7 +1023,7 @@ void nrnref_get_name(const mxArray* prhs[], mxArray* plhs[]) {
     if (ref->ref_class == NrnRef::RefClass::Vector) {
         // For Vectors, call label function to get the name
         nrn_method_call_(ref->obj, nrn_method_symbol_(ref->obj, "label"), 0);
-        char** result = nrn_pop_str_();
+        char** result = nrn_str_pop_();
         plhs[0] = mxCreateString(*result);
     }
     else {
@@ -1466,8 +1466,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         function_map["nrn_vector_data"] = nrn_vector_data;
         nrn_section_pop_ = (void (*)(void)) DLL_GET_PROC(neuron_handle, "nrn_section_pop");
         function_map["nrn_section_pop"] = nrn_section_pop;
-        nrn_pop_str_ = (char** (*)(void)) DLL_GET_PROC(neuron_handle, "nrn_pop_str");
-        function_map["nrn_pop_str"] = nrn_pop_str;
+        nrn_str_pop_ = (char** (*)(void)) DLL_GET_PROC(neuron_handle, "nrn_str_pop");
+        function_map["nrn_str_pop"] = nrn_str_pop;
         nrn_object_pop_ = (Object* (*)(void)) DLL_GET_PROC(neuron_handle, "nrn_object_pop");
         function_map["nrn_object_pop"] = nrn_object_pop;
         nrn_str_push_ = (void (*)(char**)) DLL_GET_PROC(neuron_handle, "nrn_str_push");

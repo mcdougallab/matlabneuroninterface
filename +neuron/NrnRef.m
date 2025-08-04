@@ -19,7 +19,7 @@ classdef NrnRef < handle
                 error('Invalid input for NrnRef constructor.');
             end
             self.obj = obj;
-            disp(obj);
+            % disp(obj);
         end
         function value = get(self, ind)
         % Get value.
