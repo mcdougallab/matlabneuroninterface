@@ -77,12 +77,10 @@ int (*nrn_symbol_array_length_)(Symbol*) = nullptr;
 void (*nrn_symbol_push_)(Symbol*) = nullptr;
 
 // --- HOC/Function registration and calling ---
-Symbol* (*hoc_install_)(const char*, int, double, Symlist**) = nullptr;
 void (*nrn_register_function_)(void (*)(), const char*, int type) = nullptr;
 char* (*nrn_gargstr_)(int) = nullptr;
 void (*nrn_hoc_ret_)(void) = nullptr;
 double (*hoc_xpop_)(void) = nullptr;
-void (*hoc_call_ob_proc_)(Object*, Symbol*, int) = nullptr;
 void (*nrn_function_call_)(Symbol* sym, int narg) = nullptr;
 void (*nrn_hoc_call_)(char const* command) = nullptr;
 
@@ -98,7 +96,7 @@ bool (*nrn_prop_exists_)(const Object*) = nullptr;
 double* (*nrn_vector_data_)(Object*) = nullptr;
 
 // --- Stack and pointer functions ---
-char** (*nrn_pop_str_)(void) = nullptr;
+char** (*nrn_str_pop_)(void) = nullptr;
 Object* (*nrn_object_pop_)(void) = nullptr;
 double* (*nrn_double_ptr_pop_)(void) = nullptr;
 void (*nrn_str_push_)(char**) = nullptr;
@@ -586,15 +584,6 @@ void nrn_method_symbol(const mxArray* prhs[], mxArray* plhs[]) {
     *(uint64_t*)mxGetData(plhs[0]) = reinterpret_cast<uint64_t>(method_sym);
 }
 
-void nrn_hoc_call_ob_proc(const mxArray* prhs[], mxArray* plhs[]) {
-    auto obj_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
-    Object* obj = reinterpret_cast<Object*>(obj_ptr);
-    auto sym_ptr = static_cast<uint64_t>(mxGetScalar(prhs[2]));
-    Symbol* sym = reinterpret_cast<Symbol*>(sym_ptr);
-    auto [narg] = extractParams<int>(prhs, 3);
-    hoc_call_ob_proc_(obj, sym, narg);
-}
-
 void nrn_get_value(const mxArray* prhs[], mxArray* plhs[]) {
     // Get string name
     std::string propname = getStringFromMxArray(prhs[1]);
@@ -662,8 +651,8 @@ void nrn_section_pop(const mxArray* prhs[], mxArray* plhs[]) {
     nrn_section_pop_();
 }
 
-void nrn_pop_str(const mxArray* prhs[], mxArray* plhs[]) {
-    char** result = nrn_pop_str_();
+void nrn_str_pop(const mxArray* prhs[], mxArray* plhs[]) {
+    char** result = nrn_str_pop_();
     plhs[0] = mxCreateString(*result);
 }
 
@@ -1034,7 +1023,7 @@ void nrnref_get_name(const mxArray* prhs[], mxArray* plhs[]) {
     if (ref->ref_class == NrnRef::RefClass::Vector) {
         // For Vectors, call label function to get the name
         nrn_method_call_(ref->obj, nrn_method_symbol_(ref->obj, "label"), 0);
-        char** result = nrn_pop_str_();
+        char** result = nrn_str_pop_();
         plhs[0] = mxCreateString(*result);
     }
     else {
@@ -1451,7 +1440,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         nrn_symbol_type_ = (int (*)(const Symbol*)) DLL_GET_PROC(neuron_handle, "nrn_symbol_type");
         nrn_symbol_subtype_ = (int (*)(const Symbol*)) DLL_GET_PROC(neuron_handle, "nrn_symbol_subtype");
         nrn_symbol_name_ = (char const* (*)(const Symbol*)) DLL_GET_PROC(neuron_handle, "nrn_symbol_name");
-        hoc_install_ = (Symbol* (*)(const char*, int, double, Symlist**)) DLL_GET_PROC(neuron_handle, "hoc_install");
         nrn_register_function_ = (void (*)(void (*)(), const char*, int)) DLL_GET_PROC(neuron_handle, "nrn_register_function");
         nrn_gargstr_ = (char* (*)(int)) DLL_GET_PROC(neuron_handle, "nrn_gargstr");  // TODO get rid of name mangling
         nrn_hoc_ret_ = (void (*)(void)) DLL_GET_PROC(neuron_handle, "nrn_hoc_ret");  // TODO get rid of name mangling
@@ -1469,8 +1457,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         function_map["get_class_methods"] = get_class_methods;
         nrn_method_symbol_ = (Symbol* (*)(Object*, char const* const)) DLL_GET_PROC(neuron_handle, "nrn_method_symbol");
         function_map["nrn_method_symbol"] = nrn_method_symbol;
-        hoc_call_ob_proc_ = (void (*)(Object*, Symbol*, int)) DLL_GET_PROC(neuron_handle, "hoc_call_ob_proc");
-        function_map["nrn_hoc_call_ob_proc"] = nrn_hoc_call_ob_proc;
         function_map["nrn_get_value"] = nrn_get_value;
         nrn_symbol_dataptr_ = (double* (*)(Symbol*)) DLL_GET_PROC(neuron_handle, "nrn_symbol_dataptr");
         function_map["nrn_set_value"] = nrn_set_value;
@@ -1480,8 +1466,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         function_map["nrn_vector_data"] = nrn_vector_data;
         nrn_section_pop_ = (void (*)(void)) DLL_GET_PROC(neuron_handle, "nrn_section_pop");
         function_map["nrn_section_pop"] = nrn_section_pop;
-        nrn_pop_str_ = (char** (*)(void)) DLL_GET_PROC(neuron_handle, "nrn_pop_str");
-        function_map["nrn_pop_str"] = nrn_pop_str;
+        nrn_str_pop_ = (char** (*)(void)) DLL_GET_PROC(neuron_handle, "nrn_str_pop");
+        function_map["nrn_str_pop"] = nrn_str_pop;
         nrn_object_pop_ = (Object* (*)(void)) DLL_GET_PROC(neuron_handle, "nrn_object_pop");
         function_map["nrn_object_pop"] = nrn_object_pop;
         nrn_str_push_ = (void (*)(char**)) DLL_GET_PROC(neuron_handle, "nrn_str_push");
@@ -1623,7 +1609,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
             // call it
             item->second(prhs, plhs);
         } else {
-            mexErrMsgIdAndTxt("NEURON:UnknownFunction", "Function name not recognized.");
+            mexErrMsgIdAndTxt("NEURON:UnknownFunction", "Function name not recognized: %s", name.c_str());
         }
     }
 }

@@ -4,7 +4,7 @@ function value = hoc_pop(returntype)
     if (returntype=="double")
         value = neuron_api('nrn_double_pop');
     elseif (returntype=="string" || returntype=="char")
-        value = neuron_api('nrn_pop_str');
+        value = neuron_api('nrn_str_pop');
     elseif (returntype=="ref")
         % For NrnRef objects.
         value = neuron_api('nrn_double_ptr_pop');
