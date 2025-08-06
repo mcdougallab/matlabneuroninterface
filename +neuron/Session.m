@@ -234,12 +234,15 @@ classdef Session < dynamicprops
         % Call function by passing function name (func) to HOC lookup, along with its return type (returntype) and arguments (varargin).
         %   value = call_func_hoc(func, returntype, varargin)
 
-            % h = neuron_api('nrn_create_string_stack');  % Create new string stack
+            persistent string_stack
+            if isempty(string_stack)
+                string_stack = neuron_api('nrn_create_string_stack');
+            end
             try
-                [nsecs, nargs] = neuron.stack.push_args(varargin{:});
+                [nsecs, nargs] = neuron.stack.push_args(varargin{:}, string_stack);
                 neuron_api('nrn_function_call', func, nargs);
                 value = neuron.stack.hoc_pop(returntype);
-                neuron.stack.pop_sections(nsecs);
+                % neuron.stack.pop_sections(nsecs);
                 
             catch e
                 % neuron_api('nrn_clear_string_stack', h);

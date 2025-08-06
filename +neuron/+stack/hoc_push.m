@@ -1,12 +1,22 @@
-function hoc_push(value)
+function hoc_push(value, varargin)
 % Push a double, string, Vector, Object or NrnRef to the NEURON stack.
 %   hoc_push(value)
+%   hoc_push(value, string_stack)
+    string_stack = [];
+    if nargin >= 2
+        string_stack = varargin{1};
+    end
+    
     if isa(value, "logical")
         neuron_api('nrn_double_push', double(value));
     elseif isa(value, "double")
         neuron_api('nrn_double_push', value);
     elseif isa(value, "string") || isa(value, "char")
-        neuron_api('nrn_str_push', value);
+        if isempty(string_stack)
+            neuron_api('nrn_str_push', value);
+        else
+            neuron_api('nrn_str_push', string_stack, value);
+        end
     elseif isa(value, "neuron.Object")
         neuron_api('nrn_object_push', value.obj);
     elseif isa(value, "neuron.NrnRef")
