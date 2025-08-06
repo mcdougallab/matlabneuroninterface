@@ -1609,7 +1609,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
             // call it
             item->second(prhs, plhs);
         } else {
-            mexErrMsgIdAndTxt("NEURON:UnknownFunction", "Function name not recognized.");
+            mexErrMsgIdAndTxt("NEURON:UnknownFunction", "Function name not recognized: %s", name.c_str());
         }
     }
 }
