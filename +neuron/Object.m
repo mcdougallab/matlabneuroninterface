@@ -92,6 +92,10 @@ classdef Object < dynamicprops
         function value = call_method_hoc(self, method, returntype, varargin)
         % Call method by passing method name (method) to HOC lookup, along with its return type (returntype) and method arguments (varargin).
         %   value = call_method_double(method, varargin)
+            persistent string_stack
+            if isempty(string_stack)
+                string_stack = neuron_api('nrn_create_string_stack');
+            end
             try
                 if self.objtype == "Matrix"
                     if method == "getval" || ...
@@ -144,13 +148,13 @@ classdef Object < dynamicprops
                         end
                     end
                 end
-                [nsecs, nargs] = neuron.stack.push_args(varargin{:});
+                [nsecs, nargs] = neuron.stack.push_args(varargin{:}, string_stack);
                 sym = neuron_api('nrn_method_symbol', self.obj, method);
                 neuron_api('nrn_method_call', self.obj, sym, nargs);
                 if ~strcmp(returntype, 'none')
                     value = neuron.stack.hoc_pop(returntype);
                 else
-                    value = [];  % TODO: eliminate the need for this with vargout
+                    value = [];
                 end
                 neuron.stack.pop_sections(nsecs);
                 if method == "spgetrowval"
@@ -159,11 +163,13 @@ classdef Object < dynamicprops
                     end
                 end
             catch e
+                neuron_api('nrn_reset_string_stack', string_stack);  % Cleanup on error
                 warning(e.message);
                 warning("'"+string(method)+"': caught error during call to NEURON function.");
                 value = NaN;
                 % state.restore();
             end
+            neuron_api('nrn_reset_string_stack', string_stack);  % Final cleanup
 
         end
 
