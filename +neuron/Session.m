@@ -242,7 +242,7 @@ classdef Session < dynamicprops
                 [nsecs, nargs] = neuron.stack.push_args(varargin{:}, string_stack);
                 neuron_api('nrn_function_call', func, nargs);
                 value = neuron.stack.hoc_pop(returntype);
-                % neuron.stack.pop_sections(nsecs);
+                neuron.stack.pop_sections(nsecs);
                 
             catch e
                 % neuron_api('nrn_clear_string_stack', h);

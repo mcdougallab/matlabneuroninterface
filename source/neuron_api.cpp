@@ -664,25 +664,50 @@ void nrn_object_pop(const mxArray* prhs[], mxArray* plhs[]) {
 
 void nrn_create_string_stack(const mxArray*[], mxArray* plhs[]) {
     auto* stack = new std::vector<char*>();
-    mexPrintf("Creating stack: %p\n", stack);  // debug
     plhs[0] = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
     *((uint64_t*)mxGetData(plhs[0])) = reinterpret_cast<uint64_t>(stack);
 }
 
 void nrn_str_push(const mxArray* prhs[], mxArray* plhs[]) {
+    // Handle two cases:
+    // Case 1: nrn_str_push(value) - no string stack, use the old static method
+    // Case 2: nrn_str_push(string_stack, value) - use string stack
+    
+    if (prhs[1] == nullptr || mxGetNumberOfElements(prhs[1]) != 1 || !mxIsUint64(prhs[1])) {
+        // Case 1: No string_stack provided, use simple static approach
+        
+        static char* str = nullptr;
+        static std::string temp_str;
+        temp_str = getStringFromMxArray(prhs[1]);
+        str = const_cast<char*>(temp_str.c_str());
+        nrn_str_push_(&str);
+        return;
+    }
+    
+    // Case 2: string_stack provided
     auto* stack = reinterpret_cast<std::vector<char*>*>(
         *((uint64_t*)mxGetData(prhs[1])));
-    mexPrintf("Using stack: %p\n", stack);
 
-    static char* str = nullptr;
-    static std::string temp_str;
-    temp_str = getStringFromMxArray(prhs[2]);
-    str = const_cast<char*>(temp_str.c_str());
-
-    mexPrintf("Pushing string: %s\n", str);
-
-    nrn_str_push_(&str);     // push pointer to NEURON
-    stack->push_back(str);   // keep it alive until cleared
+    // Create a new string for each push (no static variables!)
+    std::string temp_str = getStringFromMxArray(prhs[2]);
+    
+    // Allocate new memory for this specific string
+    char* str = new char[temp_str.length() + 1];
+    std::strcpy(str, temp_str.c_str());
+    
+    // Reserve enough space upfront to prevent reallocation during push operations
+    if (stack->capacity() < stack->size() + 1) {
+        stack->reserve(stack->size() + 20);
+    }
+    
+    // Add to our stack to keep it alive
+    stack->push_back(str);
+    
+    // Get the index of the element we just added
+    size_t index = stack->size() - 1;
+    
+    // Pass pointer to the element at this specific index
+    nrn_str_push_(&((*stack)[index]));
 }
 
 /* void nrn_str_push(const mxArray* prhs[], mxArray* plhs[]) {
