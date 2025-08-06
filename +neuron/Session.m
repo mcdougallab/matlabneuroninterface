@@ -234,17 +234,21 @@ classdef Session < dynamicprops
         % Call function by passing function name (func) to HOC lookup, along with its return type (returntype) and arguments (varargin).
         %   value = call_func_hoc(func, returntype, varargin)
 
+            % h = neuron_api('nrn_create_string_stack');  % Create new string stack
             try
                 [nsecs, nargs] = neuron.stack.push_args(varargin{:});
                 neuron_api('nrn_function_call', func, nargs);
                 value = neuron.stack.hoc_pop(returntype);
                 neuron.stack.pop_sections(nsecs);
+                
             catch e
+                % neuron_api('nrn_clear_string_stack', h);
                 value = NaN;
                 warning(e.message);
                 error("'"+string(func)+"': caught error during call to NEURON function.");
                 % state.restore();
             end
+            %neuron_api('nrn_clear_string_stack', h);  % Final cleanup
 
         end
         function obj = hoc_new_obj(objtype, varargin)
