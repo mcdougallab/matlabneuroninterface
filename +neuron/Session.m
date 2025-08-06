@@ -245,13 +245,13 @@ classdef Session < dynamicprops
                 neuron.stack.pop_sections(nsecs);
                 
             catch e
-                % neuron_api('nrn_clear_string_stack', h);
+                neuron_api('nrn_reset_string_stack', string_stack);  % Cleanup on error
                 value = NaN;
                 warning(e.message);
                 error("'"+string(func)+"': caught error during call to NEURON function.");
                 % state.restore();
             end
-            %neuron_api('nrn_clear_string_stack', h);  % Final cleanup
+            neuron_api('nrn_reset_string_stack', string_stack);  % Final cleanup
 
         end
         function obj = hoc_new_obj(objtype, varargin)
