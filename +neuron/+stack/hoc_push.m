@@ -1,10 +1,9 @@
-function hoc_push(value, varargin)
+function hoc_push(value, string_stack)
 % Push a double, string, Vector, Object or NrnRef to the NEURON stack.
 %   hoc_push(value)
 %   hoc_push(value, string_stack)
-    string_stack = [];
-    if nargin >= 2
-        string_stack = varargin{1};
+    if nargin < 2
+        string_stack = [];
     end
     
     if isa(value, "logical")
