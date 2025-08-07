@@ -662,15 +662,65 @@ void nrn_object_pop(const mxArray* prhs[], mxArray* plhs[]) {
     *(uint64_t*)mxGetData(plhs[0]) = reinterpret_cast<uint64_t>(obj);
 }
 
+void nrn_create_string_stack(const mxArray*[], mxArray* plhs[]) {
+    auto* stack = new std::vector<char*>();
+    plhs[0] = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
+    *((uint64_t*)mxGetData(plhs[0])) = reinterpret_cast<uint64_t>(stack);
+}
+
 void nrn_str_push(const mxArray* prhs[], mxArray* plhs[]) {
-    // This is a memory leak and we can only have one string at a time on the stack
-    // Allocate a static buffer to hold the string pointer
-    static char* str = nullptr;
-    static std::string temp_str;
-    temp_str = getStringFromMxArray(prhs[1]);
-    str = const_cast<char*>(temp_str.c_str());
-    nrn_str_push_(&str);
-    // Do not call mxFree(str); here!
+    // Two cases:
+    // Case 1: nrn_str_push(value) - no string stack, use old static method
+    // Case 2: nrn_str_push(string_stack, value) - use string stack
+    
+    if (prhs[1] == nullptr || mxGetNumberOfElements(prhs[1]) != 1 || !mxIsUint64(prhs[1])) {
+        // Case 1: use simple static approach
+        static char* str = nullptr;
+        static std::string temp_str;
+        temp_str = getStringFromMxArray(prhs[1]);
+        str = const_cast<char*>(temp_str.c_str());
+        nrn_str_push_(&str);
+        return;
+    }
+    
+    // Case 2: use string stack
+    auto* stack = reinterpret_cast<std::vector<char*>*>(
+        *((uint64_t*)mxGetData(prhs[1])));
+
+    // Create new string for each push
+    std::string temp_str = getStringFromMxArray(prhs[2]);
+    
+    // Allocate memory
+    char* str = new char[temp_str.length() + 1];
+    std::strcpy(str, temp_str.c_str());
+    
+    // Reserve enough space
+    if (stack->capacity() < stack->size() + 1) {
+        stack->reserve(stack->size() + 20);
+    }
+    
+    // Add to stack to keep alive
+    stack->push_back(str);
+    
+    // Get index of element
+    size_t index = stack->size() - 1;
+    
+    // Pass pointer to element at this index
+    nrn_str_push_(&((*stack)[index]));
+}
+
+void nrn_reset_string_stack(const mxArray* prhs[], mxArray* plhs[]) {
+    if (prhs[1] == nullptr || !mxIsUint64(prhs[1]) || mxGetNumberOfElements(prhs[1]) != 1) {
+        mexErrMsgIdAndTxt("nrn_reset_string_stack:InvalidInput", "Input must be a uint64 pointer to string stack.");
+        return;
+    }
+    auto* stack = reinterpret_cast<std::vector<char*>*>(
+        *((uint64_t*)mxGetData(prhs[1])));
+    // Free all allocated strings
+    for (char* str : *stack) {
+        delete[] str;
+    }
+    stack->clear();
 }
 
 void nrn_object_push(const mxArray* prhs[], mxArray* plhs[]) {
@@ -1587,6 +1637,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         function_map["nrn_prop_exists"] = nrn_prop_exists;
         nrn_distance_ = (double (*)(Section*, double, Section*, double)) DLL_GET_PROC(neuron_handle, "nrn_distance");
         function_map["nrn_distance"] = nrn_distance;
+        function_map["nrn_create_string_stack"] = nrn_create_string_stack;
+        function_map["nrn_reset_string_stack"] = nrn_reset_string_stack;
 
         if (!nrn_cas_) {
              mexErrMsgIdAndTxt("NEURON:OutdatedAPI",
