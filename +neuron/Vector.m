@@ -39,8 +39,8 @@ classdef Vector < neuron.Object
                 self.call_method_hoc('set', 'Object', element_id-1, varargin{:});
             % Are we trying to directly access a class property?
             elseif (isa(S(1).subs, "char") && length(S) == 1 && isprop(self, S(1).subs))
-                if any(strcmp(S(1).subs, {'obj', 'objtype', 'attr_list', 'attr_array_map', ...
-                                          'mt_double_list', 'mt_object_list', 'mt_string_list'}))
+                if ismember(S(1).subs, {'obj', 'objtype', 'attr_list', 'attr_array_map', ...
+                                        'mt_double_list', 'mt_object_list', 'mt_string_list'})
                     error("Property '%s' is read-only and cannot be set after construction.", S(1).subs);
                 end
                 self.(S(1).subs) = varargin{:};
@@ -60,74 +60,56 @@ classdef Vector < neuron.Object
                 end
             else
                 % Adjust for 0-based indexing where applicable.
-                if (S(1).subs == "at" || ...
-                    S(1).subs == "remove" || ...
-                    S(1).subs == "min_ind" || ...
-                    S(1).subs == "max_ind" || ...
-                    S(1).subs == "sum" || ...
-                    S(1).subs == "sumsq" || ...
-                    S(1).subs == "mean" || ...
-                    S(1).subs == "var" || ...
-                    S(1).subs == "stdev" || ...
-                    S(1).subs == "c" || ...
-                    S(1).subs == "cl" || ...
-                    S(1).subs == "min" || ...
-                    S(1).subs == "max" || ...
-                    S(1).subs == "stderr")
-                    % Subtract 1 from each index in S(1).subs
+                if ismember(S(1).subs, ["at", "remove", "min_ind", "max_ind", ...
+                                        "sum", "sumsq", "mean", "var", ...
+                                        "stdev", "c", "cl", "min", "max", "stderr"])
+                    % Subtract 1 from each index in S(2).subs
                     for i = 1:numel(S(2).subs)
                         S(2).subs{i} = S(2).subs{i} - 1;
                     end
                 end
-                if (S(1).subs == "get" || ...
-                    S(1).subs == "set" || ...
-                    S(1).subs == "insrt")
+                if ismember(S(1).subs, ["get", "set", "insrt"])
                     if ~isempty(S(2).subs)
                         S(2).subs{1} = S(2).subs{1} - 1;
                     end
                 end
-                if (S(1).subs == "fwrite" || ...
-                    S(1).subs == "apply" || ...
-                    S(1).subs == "addrand" || ...
-                    S(1).subs == "setrand" || ...
-                    S(1).subs == "fill")
+                if ismember(S(1).subs, ["fwrite", "apply", "addrand", "setrand", "fill"])
                     if numel(S(2).subs) > 1
                         for i = 2:numel(S(2).subs)
                             S(2).subs{i} = S(2).subs{i} - 1;
                         end
                     end
                 end
-                if (S(1).subs == "printf")
+                if S(1).subs == "printf"
                     for i = 1:numel(S(2).subs)
                         if isnumeric(S(2).subs{i})
                             S(2).subs{i} = S(2).subs{i} - 1;
                         end
                     end
                 end
-                if (S(1).subs == "indwhere" || ...
-                    S(1).subs == "indvwhere")
+                if ismember(S(1).subs, ["indwhere", "indvwhere"])
                     [varargout{1:nargout}] = subsref@neuron.Object(self, S);
                     if ~isempty(varargout) && isnumeric(varargout{1}) && varargout{1} ~= -1
                         varargout{1} = varargout{1} + 1;
                     end
                     return
                 end
-                if (S(1).subs == "sortindex")
+                if S(1).subs == "sortindex"
                     [varargout{1:nargout}] = subsref@neuron.Object(self, S);
                     call_method_hoc(varargout{1:nargout}, 'add', 'Object', 1);
                     return
                 end
-                if (S(1).subs == "smhist")
+                if S(1).subs == "smhist"
                     if numel(S(2).subs) >= 2
                         S(2).subs{2} = S(2).subs{2} - 1;
                     end
                 end
-                if (S(1).subs == "index")
+                if S(1).subs == "index"
                     if numel(S(2).subs) == 2 && isa(S(2).subs{2}, "neuron.Vector")
                         call_method_hoc(S(2).subs{2}, 'sub', 'Object', 1);
                     end
                 end
-                if (S(1).subs == "copy")
+                if S(1).subs == "copy"
                     nsubs = numel(S(2).subs);
                     undo_add = [];  % Keep track of which vectors we modified
                     if nsubs == 2 && isa(S(2).subs{2}, "neuron.Vector")
@@ -152,7 +134,7 @@ classdef Vector < neuron.Object
                     end
                     return
                 end
-                if (S(1).subs == "play")
+                if S(1).subs == "play"
                     nsubs = numel(S(2).subs);
                     undo_add = [];  % Track vectors to re-add if subtracted
 
@@ -185,7 +167,7 @@ classdef Vector < neuron.Object
                 end
                 [varargout{1:nargout}] = subsref@neuron.Object(self, S);
                 % Restore input vector values where applicable, i.e., readd subtracted 1
-                if (S(1).subs == "index")
+                if S(1).subs == "index"
                     if numel(S(2).subs) == 2 && isa(S(2).subs{2}, "neuron.Vector")
                         call_method_hoc(S(2).subs{2}, 'add', 'Object', 1);
                     end
