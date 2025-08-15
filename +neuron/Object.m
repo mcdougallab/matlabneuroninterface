@@ -92,6 +92,13 @@ classdef Object < dynamicprops
         function value = call_method_hoc(self, method, returntype, varargin)
         % Call method by passing method name (method) to HOC lookup, along with its return type (returntype) and method arguments (varargin).
         %   value = call_method_double(method, varargin)
+            % Create cell array of string stacks to account for nested calls
+            persistent string_stacks
+            if isempty(string_stacks)
+                string_stacks = {};
+            end
+            stack = neuron_api('nrn_create_string_stack');
+            string_stacks{end + 1} = stack;
             try
                 if self.objtype == "Matrix"
                     if method == "getval" || ...
@@ -144,13 +151,13 @@ classdef Object < dynamicprops
                         end
                     end
                 end
-                [nsecs, nargs] = neuron.stack.push_args(varargin{:});
+                [nsecs, nargs] = neuron.stack.push_args(varargin{:}, stack);
                 sym = neuron_api('nrn_method_symbol', self.obj, method);
                 neuron_api('nrn_method_call', self.obj, sym, nargs);
                 if ~strcmp(returntype, 'none')
                     value = neuron.stack.hoc_pop(returntype);
                 else
-                    value = [];  % TODO: eliminate the need for this with vargout
+                    value = [];
                 end
                 neuron.stack.pop_sections(nsecs);
                 if method == "spgetrowval"
@@ -159,11 +166,16 @@ classdef Object < dynamicprops
                     end
                 end
             catch e
+                neuron_api('nrn_reset_string_stack', stack);  % Cleanup on error
+                string_stacks(end) = [];  % pop
                 warning(e.message);
                 warning("'"+string(method)+"': caught error during call to NEURON function.");
                 value = NaN;
                 % state.restore();
             end
+            % End function by popping last frame in cell array
+            neuron_api('nrn_reset_string_stack', stack);
+            string_stacks(end) = [];
 
         end
 
