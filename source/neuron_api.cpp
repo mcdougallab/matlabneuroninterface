@@ -1,6 +1,16 @@
-// compile via: mex CXXFLAGS="-std=c++17" neuron_api.cpp
+// compile from the parent folder via: mex CXXFLAGS="-std=c++17" source/neuron_api.cpp
+
+#ifdef _WIN32
+    #define WIN32_LEAN_AND_MEAN
+    #define NOMINMAX
+#endif
+
 #include "mex.h"
+#ifdef _WIN32
+#include "C:\nrn\include\neuronapi.h"
+#else
 #include "/usr/local/include/neuronapi.h"
+#endif
 #include <stdio.h>
 #include <array>
 #include <tuple>
@@ -1436,7 +1446,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         #endif
     
         // Load the NEURON library next
+        #ifndef _WIN32
         neuron_handle = DLL_LOAD("/usr/local/lib/libnrniv.dylib");
+        #else
+        neuron_handle = DLL_LOAD("c:\\nrn\\bin\\libnrniv.dll");
+        #endif
         if (!neuron_handle) {
             mexErrMsgIdAndTxt("load_neuron:loadFailure", "Failed to load libnrniv.dylib: %s", DLL_ERROR());
             //DLL_FREE(wrapper_handle);  // Clean up before returning
@@ -1665,3 +1679,4 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         }
     }
 }
+
