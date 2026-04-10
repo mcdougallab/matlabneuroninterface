@@ -1,7 +1,7 @@
 # NEURON Toolbox for MATLAB
 [![View NEURON toolbox for MATLAB on File Exchange](https://www.mathworks.com/matlabcentral/images/matlab-file-exchange.svg)](https://www.mathworks.com/matlabcentral/fileexchange/135842-neuron-toolbox-for-matlab)
 
-The NEURON Toolbox provides a MATLAB API to NEURON, via MEX and the NEURON C API, introduced in NEURON 9.
+The NEURON Toolbox provides MATLAB language bindings for NEURON, via MEX and the NEURON C API, introduced in NEURON 9.
 
 The [NEURON simulation environment](https://nrn.readthedocs.io/) is used
 in laboratories and classrooms around the world for building and using
