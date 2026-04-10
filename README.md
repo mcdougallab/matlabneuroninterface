@@ -9,7 +9,7 @@ computational models of neurons and networks of neurons.
 
 About this toolbox:
 
-- The +neuron package defines the MATLAB API to NEURON. All calls to
+- The +neuron package defines the MATLAB language bindings for NEURON. All calls to
   NEURON from MATLAB should only use methods and properties exposed by
   the classes in this package.
   This is because the +neuron package takes care of proper initialization
@@ -46,7 +46,7 @@ Smaller example scripts are available at:
 
 ![Action potential](doc/acpot.jpg)
 
-### Basic API usage
+### Basic usage
 
 The main NEURON class can be found at `neuron.Session`. A (singleton) 
 `neuron.Session` is returned upon calling the `neuron.launch()` function.
