@@ -539,7 +539,13 @@ void create_FInitializeHandler(const mxArray* prhs[], mxArray* plhs[]) {
 void nrn_function_call(const mxArray* prhs[], mxArray* plhs[]) {
     auto [name, narg] = extractParams<std::string, int>(prhs, 1);
     auto sym = nrn_symbol_(name.c_str());
-    nrn_function_call_(sym, narg);
+    try {
+        nrn_function_call_(sym, narg);// this can cause unhandled exceptions crashing mex/MATLAB
+    }
+    catch (...) {
+         mexErrMsgIdAndTxt("neuron_api:unknown_exception", "Unknown exception caught in nrn_function_call");
+    }
+    
 }
 
 void nrn_object_new(const mxArray* prhs[], mxArray* plhs[]) {
@@ -637,7 +643,12 @@ void nrn_method_call(const mxArray* prhs[], mxArray* plhs[]) {
     auto sym_ptr = static_cast<uint64_t>(mxGetScalar(prhs[2]));
     Symbol* method_sym = reinterpret_cast<Symbol*>(sym_ptr);
     int narg = (int) mxGetScalar(prhs[3]);
-    nrn_method_call_(obj, method_sym, narg);
+    try {
+    nrn_method_call_(obj, method_sym, narg); // this can cause unhandled exceptions crashing mex/MATLAB
+    }
+    catch (...) {
+        mexErrMsgIdAndTxt("neuron_api:unknown_exception", "Unknown exception caught in nrn_method_call");
+    }
 }
 
 void nrn_vector_data(const mxArray* prhs[], mxArray* plhs[]) {
