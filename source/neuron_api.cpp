@@ -19,7 +19,7 @@
 #include <vector>
 #include <cstdint>
 #include <cstring>
-
+#include <limits>
 
 #ifdef _WIN32
     #include <windows.h>
