@@ -644,7 +644,7 @@ void nrn_method_call(const mxArray* prhs[], mxArray* plhs[]) {
     Symbol* method_sym = reinterpret_cast<Symbol*>(sym_ptr);
     int narg = (int) mxGetScalar(prhs[3]);
     try {
-    nrn_method_call_(obj, method_sym, narg); // this can cause unhandled exceptions crashing mex/MATLAB
+        nrn_method_call_(obj, method_sym, narg); // this can cause unhandled exceptions crashing mex/MATLAB
     }
     catch (...) {
         mexErrMsgIdAndTxt("neuron_api:unknown_exception", "Unknown exception caught in nrn_method_call");
