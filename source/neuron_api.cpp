@@ -543,10 +543,8 @@ void nrn_function_call(const mxArray* prhs[], mxArray* plhs[]) {
     char error_buffer[256];
     auto [name, narg] = extractParams<std::string, int>(prhs, 1);
     auto sym = nrn_symbol_(name.c_str());
-    try {
-        int returnval = nrn_function_call_nothrow_(sym, narg, error_buffer, sizeof(error_buffer));
-    }
-    catch (...) {
+    int returnval = nrn_function_call_nothrow_(sym, narg, error_buffer, sizeof(error_buffer));
+    if (returnval) {
         mexErrMsgIdAndTxt("neuron_api:exception", "nrn_function_call failed: %s\n", error_buffer);
     }
 }
@@ -647,10 +645,8 @@ void nrn_method_call(const mxArray* prhs[], mxArray* plhs[]) {
     auto sym_ptr = static_cast<uint64_t>(mxGetScalar(prhs[2]));
     Symbol* method_sym = reinterpret_cast<Symbol*>(sym_ptr);
     int narg = (int) mxGetScalar(prhs[3]);
-    try {
-        int returnval = nrn_method_call_nothrow_(obj, method_sym, narg, error_buffer, sizeof(error_buffer));
-    }
-    catch (...) {
+    int returnval = nrn_method_call_nothrow_(obj, method_sym, narg, error_buffer, sizeof(error_buffer));
+    if (returnval) {
         mexErrMsgIdAndTxt("neuron_api:exception", "nrn_method_call failed: %s\n", error_buffer);
     }
 }
@@ -1098,10 +1094,8 @@ void nrnref_get_name(const mxArray* prhs[], mxArray* plhs[]) {
 
     if (ref->ref_class == NrnRef::RefClass::Vector) {
             // For Vectors, call label function to get the name
-        try {
-            int returnval = nrn_method_call_nothrow_(ref->obj, nrn_method_symbol_(ref->obj, "label"), 0, error_buffer, sizeof(error_buffer));
-        }
-        catch (...) {
+        int returnval = nrn_method_call_nothrow_(ref->obj, nrn_method_symbol_(ref->obj, "label"), 0, error_buffer, sizeof(error_buffer));
+        if (returnval) {
             mexErrMsgIdAndTxt("neuron_api:exception", "nrnref_get_name failed: %s\n", error_buffer);
         }
         char** result = nrn_str_pop_();
