@@ -17,6 +17,7 @@ classdef Vector < neuron.Object
             self = self@neuron.Object(obj);
 
             self.apply_func_list = [];
+            type_codes = neuron.TypeCodes.instance();
             arr = split(neuron_api('get_nrn_functions'), ";");
             arr = arr(1:end-1);
 
@@ -24,7 +25,9 @@ classdef Vector < neuron.Object
             % See: doc/DEV_README.md#neuron-types
             for i=1:length(arr)
                 var = split(arr(i), ":");
-                if (var(2) == "264")
+                var_types = split(var(2), "-");
+                var_type = str2double(var_types(1));
+                if (var_type == type_codes.BLTIN)
                     self.apply_func_list = [self.apply_func_list var(1)];
                 end
             end

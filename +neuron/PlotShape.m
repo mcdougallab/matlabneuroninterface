@@ -108,9 +108,10 @@ classdef PlotShape < neuron.Object
 
             var_symbol = neuron_api('nrn_symbol', var_name);
             var_type = neuron_api('nrn_symbol_type', var_symbol);
+            type_codes = neuron.TypeCodes.instance();
             
-            if var_type ~= 310
-            error('The variable "%s" is not valid. Expected var_type 310, but got %d.', var_name, var_type);
+            if var_type ~= type_codes.RANGEVAR
+            error('The variable "%s" is not valid. Expected RANGEVAR type (%d), but got %d.', var_name, type_codes.RANGEVAR, var_type);
             end
 
             neuron_api('nrn_hoc_call', sprintf('PlotShape[%d].variable("%s")', self.index, var_name));

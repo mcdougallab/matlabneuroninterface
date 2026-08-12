@@ -32,7 +32,11 @@ classdef FInitializeHandler < handle
             % Random UUID used as we are polluting the hoc name space.
             uuid = replace(char(matlab.lang.internal.uuid()), "-", "_");
             func_name = "matlab_NEURON_" + uuid;
-            self.hoc_object = neuron_api('create_FInitializeHandler', type, char(func_name), char(string(instance_id)));
+            type_codes = neuron.TypeCodes.instance();
+            if isnan(type_codes.FUN_BLTIN)
+                error('Could not discover FUN_BLTIN type code needed for callback registration.');
+            end
+            self.hoc_object = neuron_api('create_FInitializeHandler', type, char(func_name), char(string(instance_id)), type_codes.FUN_BLTIN);
         end
         function delete(self)
             neuron_api('nrn_object_unref', self.hoc_object);

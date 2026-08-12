@@ -17,7 +17,11 @@ classdef Session < dynamicprops
         % Initialize the NEURON session, if it has not been initialized before.
         %   Session()
             self = self@dynamicprops;
-            neuron_api('setup_nrnmatlab');
+            type_codes = neuron.TypeCodes.instance();
+            if isnan(type_codes.FUN_BLTIN)
+                error('Could not discover FUN_BLTIN type code needed for setup_nrnmatlab registration.');
+            end
+            neuron_api('setup_nrnmatlab', type_codes.FUN_BLTIN);
             self.fill_dynamic_props();
             self.null = clib.type.nullptr;
             self.nrnmatlab_ready = true;
@@ -27,6 +31,7 @@ classdef Session < dynamicprops
         function fill_dynamic_props(self)
         % Fill var_list, fn_double_list, fn_string_list, object_list with dynamic variables, functions and objects.
         %   fill_dynamic_props()
+            type_codes = neuron.TypeCodes.instance();
             arr = split(neuron_api('get_nrn_functions'), ";");
             call_list = arr(1:end-1);
             % disp(call_list);
@@ -43,43 +48,29 @@ classdef Session < dynamicprops
             for i=1:length(call_list)
                 f = split(call_list(i), ":");
                 f_types = split(f(2), "-");
-                f_type = f_types{1};
-                f_subtype = f_types{2};
+                f_type = str2double(f_types{1});
+                f_subtype = str2double(f_types{2});
                 % Depending on the NEURON type (f_type, f_subtype), we add
                 % the variable/function as a property (by adding it with 
                 % self.addprop) or as a method (by adding it to one of the 
                 % various self.*_list arrays).
-                switch f_type
-                    case "263"  % Properties with get/set functionality.
-                        if f_subtype == "1" % int variable
-                            if ~isprop(self, f{1})
-                                self.var_list = [self.var_list f{1}];
-                                p = self.addprop(f{1});
-                                p.GetMethod = @(self)get_prop(self, f{1});
-                                p.SetMethod = @(self, value)set_prop(self, f{1}, value);
-                            end
-                        elseif f_subtype == "2" % double variable
-                            if ~isprop(self, f{1})
-                                self.var_list = [self.var_list f{1}];
-                                p = self.addprop(f{1});
-                                p.GetMethod = @(self)get_prop(self, f{1});
-                                p.SetMethod = @(self, value)set_prop(self, f{1}, value);
-                            end
+                if f_type == type_codes.VAR
+                    if f_subtype == type_codes.USERINT || f_subtype == type_codes.USERDOUBLE
+                        if ~isprop(self, f{1})
+                            self.var_list = [self.var_list f{1}];
+                            p = self.addprop(f{1});
+                            p.GetMethod = @(self)get_prop(self, f{1});
+                            p.SetMethod = @(self, value)set_prop(self, f{1}, value);
                         end
-                    case "264" % HOC function returning a double (e.g., abs)
-                        self.fn_double_list = [self.fn_double_list f{1}];
-                    case "271" % HOC procedures (returning nothing)
-                        self.fn_void_list = [self.fn_void_list f{1}];
-                    case "280" % function returning a double,  e.g. n3d
-                        self.fn_double_list = [self.fn_double_list f{1}];
-                    case "295" % function returning a string, e.g., secname
-                        self.fn_string_list = [self.fn_string_list f{1}];
-                    case "325" % object (e.g., Vector, PlotShape, RangeVarPlot)
-                        self.object_list = [self.object_list f{1}];
-                    otherwise
-                        % We ignore all other types; they will either be
-                        % implemented at a later point, or they are internal 
-                        % NEURON types that we do not need to interface with.
+                    end
+                elseif f_type == type_codes.BLTIN || f_type == type_codes.FUN_BLTIN || f_type == type_codes.FUNCTION
+                    self.fn_double_list = [self.fn_double_list f{1}];
+                elseif f_type == type_codes.PROCEDURE
+                    self.fn_void_list = [self.fn_void_list f{1}];
+                elseif f_type == type_codes.STRINGFUNC
+                    self.fn_string_list = [self.fn_string_list f{1}];
+                elseif f_type == type_codes.TEMPLATE
+                    self.object_list = [self.object_list f{1}];
                 end
             end
         end

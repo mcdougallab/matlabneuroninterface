@@ -32,6 +32,7 @@ classdef Object < dynamicprops
             self.idx = index;
 
             % Get method list.
+            type_codes = neuron.TypeCodes.instance();
             method_str = neuron_api('get_class_methods', self.objtype);
             method_list = split(method_str, ";");
             method_list = method_list(1:end-1);
@@ -42,14 +43,14 @@ classdef Object < dynamicprops
             for i=1:length(method_list)
                 method = split(method_list(i), ":");
                 method_types = split(method(2), "-");
-                method_type = method_types(1);
+                method_type = str2double(method_types(1));
                 % method_subtype = method_types(2);
-                if (method_type == "263" && method{1}(1) ~= 'x')  % steered property; we need to exclude Vector.x and Matrix.x to prevent errors.
+                if (method_type == type_codes.VAR && method{1}(1) ~= 'x')  % steered property; we need to exclude Vector.x and Matrix.x to prevent errors.
                     self.attr_list = [self.attr_list method(1)];
                     p = self.addprop(method{1});
                     p.GetMethod = @(self)get_steered_prop(self, method{1});
                     p.SetMethod = @(self, value)set_steered_prop(self, method{1}, value);
-                elseif (method_type == "310")  % point process property
+                elseif (method_type == type_codes.POINT_PROCESS_PROPERTY)  % point process property
                     sym = neuron_api('nrn_method_symbol', self.obj, method{1});
                     if ~neuron_api('nrn_symbol_is_array', sym) % scalar property
                         self.attr_list = [self.attr_list method(1)];
@@ -64,13 +65,13 @@ classdef Object < dynamicprops
                         p.GetMethod = @(self)get_pp_arr(self, method{1});
                         p.SetMethod = @(self, value)set_pp_arr(self, method{1}, value);
                     end
-                elseif (method_type == "270")
+                elseif (method_type == type_codes.FUNCTION)
                     self.mt_double_list = [self.mt_double_list method(1)];
-                elseif (method_type == "271")
+                elseif (method_type == type_codes.PROCEDURE)
                     self.mt_proc_list = [self.mt_proc_list method(1)];
-                elseif (method_type == "329")
+                elseif (method_type == type_codes.METHOD_OBFUNC)
                     self.mt_object_list = [self.mt_object_list method(1)];
-                elseif (method_type == "330")
+                elseif (method_type == type_codes.METHOD_STRFUNC)
                     self.mt_string_list = [self.mt_string_list method(1)];
                 end
             end

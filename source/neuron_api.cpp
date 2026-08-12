@@ -501,7 +501,8 @@ void nrnmatlab() {
 
 // Register nrnmatlab function in hoc.
 void setup_nrnmatlab(const mxArray* prhs[], mxArray* plhs[]) {
-    nrn_register_function_(nrnmatlab, "nrnmatlab", 280);
+    int registration_type = static_cast<int>(mxGetScalar(prhs[1]));
+    nrn_register_function_(nrnmatlab, "nrnmatlab", registration_type);
 }
 
 // Used as hoc function with void return type and instance_id: string.
@@ -521,9 +522,10 @@ void create_FInitializeHandler(const mxArray* prhs[], mxArray* plhs[]) {
     int type = static_cast<int>(mxGetScalar(prhs[1]));
     std::string func_name = getStringFromMxArray(prhs[2]);
     std::string instance_id = getStringFromMxArray(prhs[3]);
+    int registration_type = static_cast<int>(mxGetScalar(prhs[4]));
 
     // Register the callback in hoc
-    nrn_register_function_(finitialize_callback, func_name.c_str(), 280);
+    nrn_register_function_(finitialize_callback, func_name.c_str(), registration_type);
 
     // Create hoc command for calling the callback with instance_id
     std::string command = func_name + "(\"" + instance_id + "\")";
@@ -1233,6 +1235,13 @@ void nrn_symbol_type(const mxArray* prhs[], mxArray* plhs[]) {
     plhs[0] = mxCreateDoubleScalar(static_cast<double>(type));
 }
 
+void nrn_symbol_subtype(const mxArray* prhs[], mxArray* plhs[]) {
+    auto sym_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
+    Symbol* sym = reinterpret_cast<Symbol*>(sym_ptr);
+    int subtype = nrn_symbol_subtype_(sym);
+    plhs[0] = mxCreateDoubleScalar(static_cast<double>(subtype));
+}
+
 void nrn_symbol(const mxArray* prhs[], mxArray* plhs[]) {
     auto [name] = extractParams<std::string>(prhs, 1);
     Symbol* sym = nrn_symbol_(name.c_str());
@@ -1615,6 +1624,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         nrn_get_plotshape_high_ = (float (*)(ShapePlotInterface*)) DLL_GET_PROC(neuron_handle, "nrn_get_plotshape_high");
         function_map["nrn_get_plotshape_high"] = nrn_get_plotshape_high;
         function_map["nrn_symbol_type"] = nrn_symbol_type;
+        function_map["nrn_symbol_subtype"] = nrn_symbol_subtype;
         function_map["nrn_symbol"] = nrn_symbol;
         function_map["nrn_get_plotshape_varname"] = nrn_get_plotshape_varname;
         nrn_symbol_array_length_ = (int (*)(Symbol*)) DLL_GET_PROC(neuron_handle, "nrn_symbol_array_length");

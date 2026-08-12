@@ -45,6 +45,7 @@ classdef Section < handle
             end
             self.mech_list = [];
             self.range_list = [];
+            type_codes = neuron.TypeCodes.instance();
             arr = split(neuron_api('get_nrn_functions'), ";");
             arr = arr(1:end-1);
 
@@ -53,11 +54,11 @@ classdef Section < handle
             for i=1:length(arr)
                 var = split(arr(i), ":");
                 var_types = split(var(2), "-");
-                var_type = var_types(1);
+                var_type = str2double(var_types(1));
                 % var_subtype = var_types(2);
-                if (var_type == "310") % range variable
+                if (var_type == type_codes.RANGEVAR) % range variable
                     self.range_list = [self.range_list var(1)];
-                elseif (var_type == "311") % insertable mechanism
+                elseif (var_type == type_codes.MECHANISM) % insertable mechanism
                     self.mech_list = [self.mech_list var(1)];
                 end
             end
