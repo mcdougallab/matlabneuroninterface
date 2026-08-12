@@ -1,5 +1,5 @@
 % Minimal IClamp/SEClamp/VClamp/secondorder example.
-% adapted from https://nrn.readthedocs.io/en/8.2.2/python/modelspec/programmatic/mechanisms/mech.html#SEClamp
+% adapted from https://www.neuronsimulator.org/en/8.2.2/python/modelspec/programmatic/mechanisms/mech.html#SEClamp
 % conceptually: this simulates an action potential, records it,
 % then feeds that in to various types of voltage clamps and sees
 % how much extra current they need to stabilize and how close the

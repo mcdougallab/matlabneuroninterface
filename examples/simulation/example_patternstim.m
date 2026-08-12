@@ -1,5 +1,5 @@
 % Minimal ParallelContext/IntFire1 example.
-% From from https://nrn.readthedocs.io/en/8.2.2/python/modelspec/programmatic/mechanisms/mech.html#PatternStim
+% From from https://www.neuronsimulator.org/en/8.2.2/python/modelspec/programmatic/mechanisms/mech.html#PatternStim
 clearvars -except testCase;  % Make sure testing params are not cleared.
 n = neuron.launch();
 n.reset_sections();
