@@ -112,6 +112,8 @@ A non-exhaustive list:
 
 Run the installer from the project root. It will locate NEURON and MATLAB automatically, compile the MEX file, and update your shell environment and MATLAB `startup.m`.
 
+The installer also writes `setenv('HOC_LIBRARY_PATH', ...)` into `startup.m`, which is important when MATLAB is launched from the GUI (where shell rc files are not sourced).
+
 **macOS / Linux:**
 ```bash
 ./install.sh
