@@ -129,7 +129,7 @@ Here the steps are given that need to be done only once to be able to use the to
   - `!gcc -shared -o libmodlreg.dylib source/modl_reg.c` (use the system appropriate extension and compiler; values shown are for macOS)
   - `mex CXXFLAGS="-std=c++17" source/neuron_api.cpp`
 5. Check it works:
-   - With the previous steps completed, run the matlab scripts **example_run** and **example_acpot** to check that the matlabneuroninterface works.
+   - With the previous steps completed, run the matlab scripts **example_run** and **example_acpot** to check that the neurontoolbox works.
    - Linux and Mac, additionally: 
       - Run **example_loadfile** to check that the HOC_LIBRARY_PATH has been set correctly.
       - Run **example_mod** to check that the PATH is correct. If this example fails, update the PATH per the instructions in the example startup script.

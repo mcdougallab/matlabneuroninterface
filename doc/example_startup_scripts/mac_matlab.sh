@@ -7,7 +7,7 @@
 # 1. The main directory where MATLAB is installed, probably /Applications/MATLAB_R2023a.app/
 NRNML_MLROOT = "<..matlabroot..>/"
 # 2. The 'neuron' directory within the directory where this toolbox is installed
-NRNML_INTERFACEPATH="<..matlabneuroninterface..>/neuron/"
+NRNML_INTERFACEPATH="<..neurontoolbox..>/neuron/"
 # 3. The directory where NEURON is installed, see also the next three variables
 NRNML_NRNPATH="<..neuron-directory..>/"
 

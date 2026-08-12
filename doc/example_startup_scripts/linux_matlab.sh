@@ -8,7 +8,7 @@
 # The directory where libmex is installed
 NRNML_LIBMEXPATH="<..matlabroot..>/bin/glnxa64/"
 # The 'neuron' directory within the directory where this toolbox is installed
-NRNML_INTERFACEPATH="<..matlabneuroninterface..>/neuron/"
+NRNML_INTERFACEPATH="<..neurontoolbox..>/neuron/"
 # The directory where NEURON is installed, see also the next three variables
 NRNML_NRNPATH="<..neuron-directory..>/"
 
