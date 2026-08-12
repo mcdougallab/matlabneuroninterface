@@ -105,7 +105,7 @@ classdef Session < dynamicprops
                         [varargout{1:nargout}] = neuron.Section(name);
                     elseif (func == "FInitializeHandler")
                         [varargout{1:nargout}] = neuron.FInitializeHandler(S(2).subs{:});
-                    % Is the provided function listed as a Neuron class method?
+                    % Is the provided function listed as a NEURON class method?
                     elseif ismethod(self, func)
                         [varargout{1:nargout}] = builtin('subsref', self, S(1:2));
                     % Is this method present in the HOC lookup table, and does it return nothing?
@@ -122,12 +122,12 @@ classdef Session < dynamicprops
                         [varargout{1:nargout}] = self.call_func_hoc(func, "string", S(2).subs{:});
                     else
                         % If none of the above, throw error.
-                        error("'"+string(func)+"': not found; call Neuron.list_functions() " + ...
+                        error("'"+string(func)+"': not found; call neuron.list_functions() " + ...
                               "to see all available methods and attributes.")
                     end
                 else
                     % If none of the above, throw error.
-                    error("'"+string(func)+"': not found; call Neuron.list_functions() " + ...
+                    error("'"+string(func)+"': not found; call neuron.list_functions() " + ...
                           "to see all available methods and attributes.")
                 end
             else
@@ -140,7 +140,7 @@ classdef Session < dynamicprops
 
         function varargout = subsref(self, S)
         % Call a top-level variable or function.
-        %   Available functions are displayed using Neuron.list_function().
+        %   Available functions are displayed using NEURON.list_function().
         %
         %   Getting/setting direct top-level variables is possible using:
         %   n = neuron.launch();

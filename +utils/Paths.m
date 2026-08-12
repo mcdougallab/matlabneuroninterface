@@ -7,7 +7,7 @@ classdef Paths
     %   The returned values are character arrays.
     %
     %   Example:
-    %     pathvalue = utils.Paths.NeuronLibDirectory;
+    %     pathvalue = utils.Paths.neuron_lib_directory();
 
 
     methods (Static)

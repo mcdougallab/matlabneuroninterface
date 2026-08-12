@@ -4,9 +4,9 @@ classdef test_init < matlab.unittest.TestCase
         % Test methods
         
         function test_neuron_initialization(testCase)
-            % Initialize Neuron.
+            % Initialize NEURON.
             n = neuron.launch();
-            % Check Neuron interface object.
+            % Check NEURON interface object.
             testCase.verifyClass(n, "neuron.Session");
             testCase.verifyTrue(isprop(n, 't'));
         end

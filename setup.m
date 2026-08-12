@@ -1,5 +1,5 @@
-% Setup Neuron paths.
-% Run this function once to set up your Matlab session for Neuron interaction.
+% Setup NEURON paths.
+% Run this function once to set up your Matlab session for NEURON interaction.
 function setup()
 
     % Path to the current directory.
@@ -39,7 +39,7 @@ function setup()
         % can't be set on runtime in matlab on unix and mac.
         hasMex = contains(getenv(env_var), mex_dir);
         hasNrn = contains(getenv(env_var), utils.Paths.neuron_lib_directory());
-        assert(hasMex && hasNrn, "The mex library directory and neuron installation library directory are not on the %s. Mex library directory: %s Neuron installation library directory: %s", env_var, mex_dir, utils.Paths.neuron_lib_directory())
+        assert(hasMex && hasNrn, "The mex library directory and neuron installation library directory are not on the %s. Mex library directory: %s NEURON installation library directory: %s", env_var, mex_dir, utils.Paths.neuron_lib_directory())
 
         % Use outofprocess execution, to avoid segmentation faults due to
         % conflicts between the neuron shared libraries and matlabs shared

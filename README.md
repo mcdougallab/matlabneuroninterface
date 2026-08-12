@@ -32,7 +32,7 @@ A comprehensive example live script, encompassing the smaller examples and provi
 
 Smaller example scripts are available at:
 - **examples/example_run.m**
-    - to initialize a Neuron session and call some top-level functions from the library
+    - to initialize a NEURON session and call some top-level functions from the library
 - **examples/example_vector.m**
     - to create a Vector object and calculate some properties
 - **examples/example_morph.m**
@@ -57,7 +57,7 @@ n = neuron.launch();
 
 Now all top-level variables, functions and classes can be accessed
 using this object. The available variables, functions and classes, as
-well as their Neuron types can be displayed with:
+well as their NEURON types can be displayed with:
 
 ```matlab
 n.list_functions();

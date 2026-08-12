@@ -5,7 +5,7 @@ classdef RangeVarPlot < neuron.Object
 
         function self = RangeVarPlot(obj)
         % Initialize RangeVarPlot
-        %   RangeVarPlot(obj) constructs a Matlab wrapper for a Neuron
+        %   RangeVarPlot(obj) constructs a Matlab wrapper for a NEURON
         %   RangeVarPlot.
             if ~isa(obj, 'uint64') || ~isreal(obj) || numel(obj) ~= 1
                 error('Invalid input for RangeVarPlot constructor.');

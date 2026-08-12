@@ -1,7 +1,7 @@
-% Define and build Neuron interface.
+% Define and build NEURON interface.
 % Run this function to generate the MATLAB-NEURON interface DLL.
 % Before running it, make sure that:
-% - The Neuron path is set (by running setup.m)
+% - The NEURON path is set (by running setup.m)
 % - For Windows, your compiler is set to MinGW64 (using mex -setup)
 % - For Windows+MingGW64, the static library file is present at
 %   source/libnrniv.a (to generate it yourself, see doc/DEV_README.md)

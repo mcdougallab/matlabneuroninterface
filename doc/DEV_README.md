@@ -4,7 +4,7 @@
 
 ## Code structure
 
-### Dynamic Neuron variables, functions an objects
+### Dynamic NEURON variables, functions an objects
 
 NEURON variables, functions and objects are created dynamically. This works 
 by making the NEURON class a subclass of `dynamicprops`, allowing us to
@@ -45,7 +45,7 @@ hope to fix this behavior in NEURON 9, in which error handling will be updated.
 
 Some NEURON Objects are defined __on__ a Section (e.g. `IClamp` objects); for these Objects, 
 the constructor takes that Section as a first argument. These arguments are handled in
-`Neuron.hoc_new_obj()`, which takes care of pushing and popping the Section.
+`neuron.hoc_new_obj()`, which takes care of pushing and popping the Section.
 
 ### Sections
 
@@ -72,10 +72,10 @@ as input.
 
 ### NrnRef
 
-The class `clib.neuron.NrnRef` contains a pointer to a Neuron variable, 
+The class `clib.neuron.NrnRef` contains a pointer to a NEURON variable, 
 and was added to make sure MATLAB handles pointers correctly. 
 The NrnRef can be given to `neuron.hoc_push` to put the pointer
-on the Neuron stack.
+on the NEURON stack.
 
 The variable itself can be set or read with:
 
