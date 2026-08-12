@@ -9,6 +9,13 @@ function build_interface()
 
     our_clib_package_name = "neuron"; % Do not change, will need much more changes than just this variable.
 
+    % On macOS, clang++ defaults to the current SDK deployment target, but MATLAB's
+    % pre-compiled MEX objects target an older version. Aligning them prevents
+    % link-time version-mismatch warnings and unresolved MEX API symbols.
+    if ismac
+        setenv('MACOSX_DEPLOYMENT_TARGET', '12.0');
+    end
+
     % Check if there is a C++ compiler.
     if ~check_compiler('C++')
         error("No C++ compiler found, run 'mex -setup cpp'");

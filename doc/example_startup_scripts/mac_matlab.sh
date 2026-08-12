@@ -11,11 +11,17 @@ NRNML_INTERFACEPATH="<..matlabneuroninterface..>/neuron/"
 # 3. The directory where NEURON is installed, see also the next three variables
 NRNML_NRNPATH="<..neuron-directory..>/"
 
+# Detect whether this MATLAB installation is arm64 (maca64) or x86_64 (maci64).
+# This reflects the MATLAB binary's architecture, not necessarily the Mac's.
+if [ -d "${NRNML_MLROOT}bin/maca64" ]; then
+    _NRNML_MLARCH="maca64"
+else
+    _NRNML_MLARCH="maci64"
+fi
+
 # Exact location of the following subdirectories might depend on how MATLAB was installed
-# The directory within the MATLAB installation where libmex is installed
-NRNML_MLLIBMEXPATH="${NRNML_MLROOT}bin/maci64/"
-# The directory within the MATLAB installation where other dylibs are installed
-NRNML_MLLIBSPATH="${NRNML_MLROOT}sys/os/maci64/"
+NRNML_MLLIBMEXPATH="${NRNML_MLROOT}bin/${_NRNML_MLARCH}/"
+NRNML_MLLIBSPATH="${NRNML_MLROOT}sys/os/${_NRNML_MLARCH}/"
 # The directory within the MATLAB installation where the MATLAB executable is installed
 NRNML_MLEXEPATH="${NRNML_MLROOT}Contents/MacOS/"
 # Exact location of the following subdirectories might depend on how NEURON was installed, do check!

@@ -28,7 +28,7 @@ function setup()
     if ismac || isunix
         if ismac
             env_var = 'DYLD_LIBRARY_PATH';
-            mex_dir = fullfile(matlabroot, "bin", "maci64");
+            mex_dir = fullfile(matlabroot, "bin", computer('arch'));
         else
             env_var = 'LD_LIBRARY_PATH';
             mex_dir = fullfile(matlabroot, "bin", "glnxa64");

@@ -1,4 +1,5 @@
-// compile from the parent folder via: mex CXXFLAGS="-std=c++17" source/neuron_api.cpp
+// compile from the parent folder via (run setenv('MACOSX_DEPLOYMENT_TARGET','12.0') first on macOS):
+// mex CXXFLAGS="-std=c++17" source/neuron_api.cpp
 
 #ifdef _WIN32
     #define WIN32_LEAN_AND_MEAN

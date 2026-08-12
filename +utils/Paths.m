@@ -62,7 +62,7 @@ classdef Paths
         function value = matlab_lib_directory()
             % The directory containing the matlab shared library files.
             if ismac
-                value = fullfile(matlabroot, "bin", "maci64");
+                value = fullfile(matlabroot, "bin", computer('arch'));
             elseif isunix
                 value = fullfile(matlabroot, "bin", "glnxa64");
             elseif ispc
