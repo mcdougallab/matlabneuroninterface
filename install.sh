@@ -362,6 +362,7 @@ MATLAB_USERPATH="$("$MATLAB_BIN" -batch "fprintf('%s\\n', userpath)" 2>/dev/null
 mkdir -p "$MATLAB_USERPATH"
 STARTUP_M="$MATLAB_USERPATH/startup.m"
 append_if_absent "$STARTUP_M" "addpath('$TOOLBOX_DIR');"
+append_if_absent "$STARTUP_M" "setenv('HOC_LIBRARY_PATH', '$HOC_DIR');"
 info "startup.m: $STARTUP_M"
 
 # ── Done ──────────────────────────────────────────────────────────────────────
