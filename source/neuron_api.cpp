@@ -1,6 +1,16 @@
-// compile via: mex CXXFLAGS="-std=c++17" neuron_api.cpp
+// compile from the parent folder via: mex CXXFLAGS="-std=c++17" source/neuron_api.cpp
+
+#ifdef _WIN32
+    #define WIN32_LEAN_AND_MEAN
+    #define NOMINMAX
+#endif
+
 #include "mex.h"
+#ifdef _WIN32
+#include "C:\nrn\include\neuronapi.h"
+#else
 #include "/usr/local/include/neuronapi.h"
+#endif
 #include <stdio.h>
 #include <array>
 #include <tuple>
@@ -9,6 +19,7 @@
 #include <vector>
 #include <cstdint>
 #include <cstring>
+#include <limits>
 
 
 #ifdef _WIN32
@@ -82,6 +93,7 @@ char* (*nrn_gargstr_)(int) = nullptr;
 void (*nrn_hoc_ret_)(void) = nullptr;
 double (*hoc_xpop_)(void) = nullptr;
 void (*nrn_function_call_)(Symbol* sym, int narg) = nullptr;
+int (*nrn_function_call_nothrow_)(Symbol* sym, int narg, char*, size_t) = nullptr;
 void (*nrn_hoc_call_)(char const* command) = nullptr;
 
 // --- Object-related functions ---
@@ -90,6 +102,7 @@ void (*nrn_object_unref_)(Object*) = nullptr;
 char const* (*nrn_class_name_)(const Object*) = nullptr;
 Symbol* (*nrn_method_symbol_)(Object*, char const* const) = nullptr;
 void (*nrn_method_call_)(Object*, Symbol*, int) = nullptr;
+int (*nrn_method_call_nothrow_)(Object*, Symbol*, int, char*, size_t) = nullptr;
 bool (*nrn_prop_exists_)(const Object*) = nullptr;
 
 // --- Vector-related functions ---
@@ -527,9 +540,13 @@ void create_FInitializeHandler(const mxArray* prhs[], mxArray* plhs[]) {
 
 
 void nrn_function_call(const mxArray* prhs[], mxArray* plhs[]) {
+    char error_buffer[256];
     auto [name, narg] = extractParams<std::string, int>(prhs, 1);
     auto sym = nrn_symbol_(name.c_str());
-    nrn_function_call_(sym, narg);
+    int returnval = nrn_function_call_nothrow_(sym, narg, error_buffer, sizeof(error_buffer));
+    if (returnval) {
+        mexErrMsgIdAndTxt("neuron_api:exception", "nrn_function_call failed: %s\n", error_buffer);
+    }
 }
 
 void nrn_object_new(const mxArray* prhs[], mxArray* plhs[]) {
@@ -622,12 +639,16 @@ void nrn_set_value(const mxArray* prhs[], mxArray* plhs[]) {
 }
 
 void nrn_method_call(const mxArray* prhs[], mxArray* plhs[]) {
+    char error_buffer[256];
     auto obj_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
     Object* obj = reinterpret_cast<Object*>(obj_ptr);
     auto sym_ptr = static_cast<uint64_t>(mxGetScalar(prhs[2]));
     Symbol* method_sym = reinterpret_cast<Symbol*>(sym_ptr);
     int narg = (int) mxGetScalar(prhs[3]);
-    nrn_method_call_(obj, method_sym, narg);
+    int returnval = nrn_method_call_nothrow_(obj, method_sym, narg, error_buffer, sizeof(error_buffer));
+    if (returnval) {
+        mexErrMsgIdAndTxt("neuron_api:exception", "nrn_method_call failed: %s\n", error_buffer);
+    }
 }
 
 void nrn_vector_data(const mxArray* prhs[], mxArray* plhs[]) {
@@ -1067,12 +1088,16 @@ void nrnref_get_n_elements(const mxArray* prhs[], mxArray* plhs[]) {
 }
 
 void nrnref_get_name(const mxArray* prhs[], mxArray* plhs[]) {
+    char error_buffer[256];
     auto ref_ptr = static_cast<uint64_t>(mxGetScalar(prhs[1]));
     NrnRef* ref = reinterpret_cast<NrnRef*>(ref_ptr);
 
     if (ref->ref_class == NrnRef::RefClass::Vector) {
-        // For Vectors, call label function to get the name
-        nrn_method_call_(ref->obj, nrn_method_symbol_(ref->obj, "label"), 0);
+            // For Vectors, call label function to get the name
+        int returnval = nrn_method_call_nothrow_(ref->obj, nrn_method_symbol_(ref->obj, "label"), 0, error_buffer, sizeof(error_buffer));
+        if (returnval) {
+            mexErrMsgIdAndTxt("neuron_api:exception", "nrnref_get_name failed: %s\n", error_buffer);
+        }
         char** result = nrn_str_pop_();
         plhs[0] = mxCreateString(*result);
     }
@@ -1436,7 +1461,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         #endif
     
         // Load the NEURON library next
+        #ifndef _WIN32
         neuron_handle = DLL_LOAD("/usr/local/lib/libnrniv.dylib");
+        #else
+        neuron_handle = DLL_LOAD("c:\\nrn\\bin\\libnrniv.dll");
+        #endif
         if (!neuron_handle) {
             mexErrMsgIdAndTxt("load_neuron:loadFailure", "Failed to load libnrniv.dylib: %s", DLL_ERROR());
             //DLL_FREE(wrapper_handle);  // Clean up before returning
@@ -1493,7 +1522,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         nrn_register_function_ = (void (*)(void (*)(), const char*, int)) DLL_GET_PROC(neuron_handle, "nrn_register_function");
         nrn_gargstr_ = (char* (*)(int)) DLL_GET_PROC(neuron_handle, "nrn_gargstr");  // TODO get rid of name mangling
         nrn_hoc_ret_ = (void (*)(void)) DLL_GET_PROC(neuron_handle, "nrn_hoc_ret");  // TODO get rid of name mangling
-        nrn_function_call_ = (void(*)(Symbol*,int)) DLL_GET_PROC(neuron_handle, "nrn_function_call");
+        nrn_function_call_ = (void (*)(Symbol *, int))DLL_GET_PROC(neuron_handle, "nrn_function_call");
+        nrn_function_call_nothrow_ = (int (*)(Symbol *, int, char *, size_t))DLL_GET_PROC(neuron_handle, "nrn_function_call_nothrow"); // HERE
         function_map["nrn_function_call"] = nrn_function_call;
         nrn_double_pop_ = (double (*)(void)) DLL_GET_PROC(neuron_handle, "nrn_double_pop");
         function_map["nrn_double_pop"] = nrn_double_pop;
@@ -1510,7 +1540,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         function_map["nrn_get_value"] = nrn_get_value;
         nrn_symbol_dataptr_ = (double* (*)(Symbol*)) DLL_GET_PROC(neuron_handle, "nrn_symbol_dataptr");
         function_map["nrn_set_value"] = nrn_set_value;
-        nrn_method_call_ = (void (*)(Object*, Symbol*, int)) DLL_GET_PROC(neuron_handle, "nrn_method_call");
+        nrn_method_call_ = (void (*)(Object *, Symbol *, int))DLL_GET_PROC(neuron_handle, "nrn_method_call");
+        nrn_method_call_nothrow_ = (int (*)(Object *, Symbol *, int, char *, size_t))DLL_GET_PROC(neuron_handle, "nrn_method_call_nothrow");
         function_map["nrn_method_call"] = nrn_method_call;
         nrn_vector_data_ = (double* (*)(Object*)) DLL_GET_PROC(neuron_handle, "nrn_vector_data");
         function_map["nrn_vector_data"] = nrn_vector_data;
