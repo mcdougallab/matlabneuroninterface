@@ -122,12 +122,12 @@ classdef Session < dynamicprops
                         [varargout{1:nargout}] = self.call_func_hoc(func, "string", S(2).subs{:});
                     else
                         % If none of the above, throw error.
-                        error("'"+string(func)+"': not found; call neuron.list_functions() " + ...
+                        error("'"+string(func)+"': not found; call n.list_functions() " + ...
                               "to see all available methods and attributes.")
                     end
                 else
                     % If none of the above, throw error.
-                    error("'"+string(func)+"': not found; call neuron.list_functions() " + ...
+                    error("'"+string(func)+"': not found; call n.list_functions() " + ...
                           "to see all available methods and attributes.")
                 end
             else
