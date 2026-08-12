@@ -108,7 +108,25 @@ A non-exhaustive list:
 <a id="first-time"></a>
 ## First time only
 
-Here the steps are given that need to be done only once to be able to use the toolbox.
+### Automated install (recommended)
+
+Run the installer from the project root. It will locate NEURON and MATLAB automatically, compile the MEX file, and update your shell environment and MATLAB `startup.m`.
+
+**macOS / Linux:**
+```bash
+./install.sh
+```
+
+**Windows:**
+```bat
+install.bat
+```
+
+Open a new terminal (or restart MATLAB) after running the installer so the updated environment takes effect.
+
+### Manual install
+
+If you prefer to install manually, follow the steps below.
 
 1. Make sure NEURON 9+ is installed (see https://www.neuronsimulator.org).
 2. Linux and Mac: start Matlab from a bash shell with the correct PATH, `HOC_LIBRARY_PATH`. Matlab always needs to be started from such a shell, not just the first time only.
@@ -124,10 +142,21 @@ Here the steps are given that need to be done only once to be able to use the to
 3. Update the paths in `source/neuron_api.cpp`
   - for the `#include` of `neuronapi.h`: in my computer as above, this is `/Users/ramcdougal/anaconda3/envs/py313/lib/python3.13/site-packages/neuron/.data/include/neuronapi.h`
   - for the definition of `neuron_handle`, that should use the path to `libnrniv.dylib` or system equivalent.
-  - for the definition of `wrapper_handle` to this project folder and then `/libmodlreg.dylib` (mac) or system equivalent.
+  - on macOS/Linux, for the definition of `wrapper_handle`, use the absolute path to `libmodlreg.dylib` (or `.so`) that you will compile in the next step — e.g. `/path/to/neurontoolbox/libmodlreg.dylib`. (Windows skips this; `wrapper_handle` is guarded by `#ifndef _WIN32`.)
 4. Compile the package: from the project folder, run:
-  - `!gcc -shared -o libmodlreg.dylib source/modl_reg.c` (use the system appropriate extension and compiler; values shown are for macOS)
-  - `mex CXXFLAGS="-std=c++17" source/neuron_api.cpp`
+  - macOS: `cc -dynamiclib -undefined dynamic_lookup -o libmodlreg.dylib source/modl_reg.c`
+  - Linux: `cc -shared -fPIC -o libmodlreg.so source/modl_reg.c`
+  - then, from within MATLAB: `setenv('MACOSX_DEPLOYMENT_TARGET', '<ver>'); mex CXXFLAGS="-std=c++17" source/neuron_api.cpp` where `<ver>` matches the deployment target of your MATLAB installation (check with `vtool -show-build $(matlabroot)/bin/maca64/libmex.dylib | grep minos` on macOS).
+  - **Troubleshooting — undefined MEX symbols on macOS 14+:** If `mex` fails with `_mexFunctionAdapter`, `_mexCreateMexFunction`, or `_mexDestroyMexFunction` undefined, this is a known incompatibility between MATLAB's `mex` linker flags and newer Apple `ld`. Compile directly with `clang++` instead (omitting `cpp_mexapi_version.o` causes MATLAB to fall back to the C API and call `mexFunction` directly):
+    ```bash
+    VER=$(vtool -show-build $(matlabroot)/bin/maca64/libmex.dylib | awk '/minos/{print $2}')
+    clang++ -std=c++17 -arch arm64 -mmacosx-version-min=$VER -fPIC -DMATLAB_MEX_FILE \
+        -I$(matlabroot)/extern/include -I/path/to/neuron/.data/include \
+        -c source/neuron_api.cpp -o /tmp/neuron_api.o
+    clang++ -arch arm64 -mmacosx-version-min=$VER -bundle \
+        -L$(matlabroot)/bin/maca64 -lmex -lmx -Wl,-rpath,$(matlabroot)/bin/maca64 \
+        /tmp/neuron_api.o -o neuron_api.mexmaca64
+    ```
 5. Check it works:
    - With the previous steps completed, run the matlab scripts **example_run** and **example_acpot** to check that the neurontoolbox works.
    - Linux and Mac, additionally: 
