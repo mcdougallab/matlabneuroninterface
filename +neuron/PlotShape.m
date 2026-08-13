@@ -47,15 +47,24 @@ classdef PlotShape < neuron.Object
             y = [section_plot_data(:, 3) section_plot_data(:, 4)];
             z = [section_plot_data(:, 5) section_plot_data(:, 6)];
             d = (section_plot_data(:, 7) + section_plot_data(:, 8)) / 2;
+            % In NEURON, negative diameter can encode spine presence;
+            % use absolute value for display width.
+            d = abs(d);
+            d(~isfinite(d) | d == 0) = 0.1;
             v = section_plot_data(:, 9);
             data = table(x, y, z, d, v, 'VariableNames', {'x', 'y', 'z', 'line_width', 'color'}); 
 
             % Normalize color value
             spi_low = neuron_api('nrn_get_plotshape_low', spi);
             spi_high = neuron_api('nrn_get_plotshape_high', spi);
-            data.color = data.color - spi_low;
-            data.color = data.color / (spi_high - spi_low);
-            data.color = min(max(data.color, 0), 1);
+            denom = spi_high - spi_low;
+            if ~isfinite(denom) || abs(denom) < eps
+                data.color = zeros(size(data.color));
+            else
+                data.color = (data.color - spi_low) / denom;
+                data.color(~isfinite(data.color)) = 0;
+                data.color = min(max(data.color, 0), 1);
+            end
         end
 
         function plot(self, cmap)
@@ -86,7 +95,12 @@ classdef PlotShape < neuron.Object
                 else
                     l(i).Color = cmap(indices(i), :);
                 end
-                l(i).LineWidth = seg.line_width;
+                % Preserve spine-flag semantics: sign is metadata, width is abs value.
+                w = abs(seg.line_width);
+                if ~isfinite(w) || w == 0
+                    w = 0.1;
+                end
+                l(i).LineWidth = w;
             end
 
             % Equal aspect ratio for x,y,z.
