@@ -34,6 +34,9 @@
     #include <dlfcn.h>
     #define DLL_HANDLE void*
     #define DLL_LOAD(name) dlopen(name, RTLD_NOW)
+    // RTLD_GLOBAL promotes the library's symbols into the global namespace so
+    // that subsequently dlopen'd libraries (e.g. libnrniv) can resolve them.
+    #define DLL_LOAD_GLOBAL(name) dlopen(name, RTLD_NOW | RTLD_GLOBAL)
     #define DLL_GET_PROC(handle, name) dlsym(handle, name)
     #define DLL_FREE(handle) dlclose(handle)
     #define DLL_ERROR() dlerror()
@@ -1462,8 +1465,9 @@ void nrn_distance(const mxArray* prhs[], mxArray* plhs[]) {
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     if (!neuron_handle) {
         #ifndef _WIN32
-        // Load the wrapper library first
-        DLL_HANDLE wrapper_handle = DLL_LOAD("libmodlreg.dylib");
+        // Load the wrapper library first, with RTLD_GLOBAL so modl_reg and any
+        // other symbols it defines are visible when libnrniv is loaded next.
+        DLL_HANDLE wrapper_handle = DLL_LOAD_GLOBAL("libmodlreg.dylib");
         if (!wrapper_handle) {
             mexErrMsgIdAndTxt("load_neuron:loadFailure", "Failed to load libmodlreg.dylib: %s", DLL_ERROR());
             return;

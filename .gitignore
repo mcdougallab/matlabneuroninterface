@@ -12,7 +12,10 @@ stdout.txt
 
 # compiled files
 *.mexmaca64
+*.mexa64
+*.mexw64
 *.dylib
+*.so
 
 # VSCode
 .vscode/

@@ -213,8 +213,8 @@ content = require_replace(content,
     'libnrniv path')
 
 content = require_replace(content,
-    'DLL_LOAD("libmodlreg.dylib")',
-    f'DLL_LOAD("{libmodlreg}")',
+    'DLL_LOAD_GLOBAL("libmodlreg.dylib")',
+    f'DLL_LOAD_GLOBAL("{libmodlreg}")',
     'libmodlreg path')
 
 with open(dst, 'w') as f:
@@ -249,24 +249,32 @@ echo "=== Step 5: Compiling neuron_api MEX ==="
 
 _mex_ok=0
 
-# First attempt: use MATLAB's mex command (works on older macOS / Linux)
-MEX_CMDS="cd('$TOOLBOX_DIR')"
+# First attempt: use MATLAB's mex command (macOS only).
+# On Linux, MATLAB's mex does not reliably pass -static-libstdc++ through the
+# compiler driver, so the resulting MEX ends up with a dynamic libstdc++
+# dependency that conflicts with MATLAB's own older bundled libstdc++.
+# We skip directly to the direct-compiler fallback on Linux.
 if [[ "$OS" == "Darwin" ]]; then
+    MEX_CMDS="cd('$TOOLBOX_DIR')"
     MEX_CMDS+="; setenv('MACOSX_DEPLOYMENT_TARGET','$MACOS_DEPLOY_TARGET')"
-fi
-MEX_CMDS+="; mex('CXXFLAGS=-std=c++17', '-output', fullfile('$TOOLBOX_DIR','neuron_api'), '$_PATCHED_CPP')"
+    MEX_CMDS+="; mex('CXXFLAGS=-std=c++17', '-output', fullfile('$TOOLBOX_DIR','neuron_api'), '$_PATCHED_CPP')"
 
-echo "  Trying mex ..."
-if "$MATLAB_BIN" -batch "$MEX_CMDS" >/dev/null 2>&1; then
-    info "MEX compilation succeeded (via mex)"
-    _mex_ok=1
+    echo "  Trying mex ..."
+    if "$MATLAB_BIN" -batch "$MEX_CMDS" >/dev/null 2>&1; then
+        info "MEX compilation succeeded (via mex)"
+        _mex_ok=1
+    fi
+else
+    echo "  Skipping mex on Linux (using direct compiler to ensure -static-libstdc++) ..."
 fi
 
 if [[ "$_mex_ok" -eq 0 ]]; then
-    # Fallback: compile with clang++ directly, bypassing mex's -u linker flags.
-    # Without cpp_mexapi_version.o, MATLAB falls back to the C API and calls
-    # mexFunction directly — which is what neuron_api.cpp provides.
-    echo "  mex compilation failed (likely a linker incompatibility with this OS); using direct compiler fallback ..."
+    # Direct-compiler path: bypasses mex's linker flags, giving full control.
+    # On Linux this is always taken (see above). On macOS it is a fallback when
+    # mex fails (e.g. linker incompatibility). Without cpp_mexapi_version.o,
+    # MATLAB falls back to the C API and calls mexFunction directly — which is
+    # what neuron_api.cpp provides.
+    [[ "$OS" == "Linux" ]] || echo "  mex compilation failed; using direct compiler fallback ..."
 
     case "$MATLAB_ARCH" in
         maca64)  _arch="-arch arm64";   _mex_ext="mexmaca64" ;;
@@ -291,7 +299,9 @@ if [[ "$_mex_ok" -eq 0 ]]; then
         _link="-bundle -L$MATLAB_LIB_DIR -lmex -lmx -Wl,-rpath,$MATLAB_LIB_DIR"
     else
         _deploy=""
-        _link="-shared -L$MATLAB_LIB_DIR -lmex -lmx -Wl,-rpath,$MATLAB_LIB_DIR"
+        # -static-libstdc++ embeds libstdc++ into the MEX so it is insulated from
+        # whichever libstdc++ MATLAB loads at runtime (MATLAB ships an older copy).
+        _link="-shared -static-libstdc++ -L$MATLAB_LIB_DIR -lmex -lmx -Wl,-rpath,$MATLAB_LIB_DIR"
     fi
 
     _tmpobj="$(mktemp /tmp/neuron_api_XXXXXX.o)"
