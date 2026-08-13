@@ -1,120 +1,198 @@
-# NEURON Toolbox for MATLAB: developer's readme
+# NEURON Toolbox for MATLAB: developer readme
 
-:warning: We no longer use `clib`, so any references to such in the below are out of date.
+This document describes the current implementation motifs in the MATLAB
+bindings.
 
-## Code structure
+## Core architecture
 
-### Dynamic NEURON variables, functions an objects
+### 1. Session bootstrap and singleton usage
 
-NEURON variables, functions and objects are created dynamically. This works 
-by making the NEURON class a subclass of `dynamicprops`, allowing us to
-pass the name of whichever variable, function or object the user is calling to 
-`hoc_lookup` as a string. `hoc_lookup` returns a 
-`Symbol` pointing to the correct variable, function or object. 
-Depending on the NEURON type, this `Symbol` can be passed to:
+Use `neuron.launch()` as the normal entry point.
 
-```matlab
-clib.neuron.ref             % Variables
-clib.neuron.hoc_call_func   % Functions
-clib.neuron.hoc_newobj1     % Objects
-```
+- `launch()` initializes the MEX boundary (`neuron_api()`) and returns the
+  singleton `neuron.Session.instance()`.
+- `Session` constructor calls `setup_nrnmatlab(...)` and then builds dynamic
+  symbol/method lists immediately.
 
-Moreover, a NEURON function can expect some number of arguments,
-which it will take from the NEURON stack machine. These arguments
-need to be placed on the stack before calling the function, using
-`neuron.push_hoc`. Output can be read by popping items off the stack
-with `neuron.pop_hoc`. If the user provides
-the incorrect number or types of input arguments, or tries to pop
-output off the stack if there is none, the code might crash.
+### 2. Dynamic dispatch is `subsref`-first
 
-### NEURON Objects
+Most external behavior is implemented by `subsref` on wrapper classes.
 
-A NEURON `neuron.Object` is wrapped by MATLAB in the class 
-`neuron.Object`. It has variables and methods, which are also 
-generated dynamically using a `dynamicprops` subclassing construction.
-Object variables and methods can be displayed using `list_methods`:
+- `neuron.Session` and `neuron.Object` inherit from `dynamicprops`.
+- Runtime symbol tables are split by return behavior (double, string, object,
+  procedure/no-return, variable).
+- Chained expressions are delegated through `neuron.chained_method(...)`.
 
-```matlab
-v = n.Vector();
-v.list_methods();
-```
+Typical top-level flow for `n.somecall(...)`:
 
-Watch out: if the user provides
-the incorrect number or types of input arguments, the code might crash! We
-hope to fix this behavior in NEURON 9, in which error handling will be updated.
+1. `Session.subsref` receives the expression.
+2. `dynamic_call` classifies `somecall` using runtime lists.
+3. Dispatch goes to:
+   - `call_func_hoc(...)` for scalar/string/procedure functions
+   - `hoc_new_obj(...)` for templates/objects
+   - dynamic property get/set for top-level variables
+4. Remaining chained indexing is handled by `chained_method`.
 
-Some NEURON Objects are defined __on__ a Section (e.g. `IClamp` objects); for these Objects, 
-the constructor takes that Section as a first argument. These arguments are handled in
-`neuron.hoc_new_obj()`, which takes care of pushing and popping the Section.
+There is also a convenience path for raw HOC strings:
 
-### Sections
+- `n('create soma')` is interpreted as `n.hoc('create soma')`.
 
-The `neuron.Section` class is the most straightforward MATLAB class in 
-terms of implementation. Its methods and attributes are not generated 
-dynamically.
+### 3. Runtime type discovery (no hard-coded type numbers)
 
-```matlab
-main = n.Section("main");       % Make main Section
-branch = n.Section("branch");   % Make branch
-branch.connect(0, main, 1);     % Connect start of branch to end of main
-n.topology();                   % Display resulting topology
-```
+`neuron.TypeCodes` probes NEURON at runtime and stores discovered codes in
+named fields such as `VAR`, `FUNCTION`, `PROCEDURE`, `TEMPLATE`, `RANGEVAR`,
+`METHOD_OBFUNC`, `METHOD_STRFUNC`, and subtype fields like `USERDOUBLE`.
 
-For calls to some top-level variables, functions or objects, it is
-necessary to put a Section on the stack first. For example,
-before attaching an `IClamp` to a Section, we need to first push the 
-Section onto the stack with `nrn_pushsec`. 
-After creating the `IClamp`, we must not forget to run 
-`nrn_sec_pop` to take the Section off the stack again.
-The `neuron.Session` class takes care of this automatically
-(see `neuron.Session.hoc_new_obj`) if the user provides a Section
-as input.
+This avoids hard-coding parser enum integers and keeps dispatch resilient
+across NEURON versions.
 
-### NrnRef
+If discovery cannot resolve required fields, `TypeCodes.validate()` emits a
+warning and affected dispatch branches may fail.
 
-The class `clib.neuron.NrnRef` contains a pointer to a NEURON variable, 
-and was added to make sure MATLAB handles pointers correctly. 
-The NrnRef can be given to `neuron.hoc_push` to put the pointer
-on the NEURON stack.
+## Stack, argument, and context motifs
 
-The variable itself can be set or read with:
+### 1. Sections are tracked separately from ordinary arguments
 
-```matlab
-t = n.ref("t");     % n.ref returns an NrnRef to a top-level variable
-t.set(3.14);        % Sets the variable; equivalent to n.t = 3.14;
-disp(t.get());      % Display the variable
-```
+`neuron.stack.push_args(...)` returns `[nsecs, nargs]`:
 
-## NEURON types
+- `nsecs`: how many sections were pushed to section context
+- `nargs`: how many actual call arguments were pushed to the NEURON stack
 
-These types are version-dependent and may not match your version of NEURON. 
+`neuron.stack.pop_sections(nsecs)` is required to unwind section context after
+the call.
 
-Top-level:
-- 263: double variables (e.g. t, dt) — some that are global and some that are dependent on 
-  the currently accessed section (e.g. L)
-- 280: functions that return a double (e.g. finitialize and fadvance return 1.0 on success)
-- 296: functions that return a char**
-- 325: classes (e.g. IClamp and Vector)
+This pattern is used by:
 
-Section related:
-- 311: range variables (e.g. v)
-- 312: insertable biophysical mechanisms (e.g. hh, pas)
+- `Session.call_func_hoc`
+- `Session.hoc_new_obj`
+- `Object.call_method_hoc`
 
-Object related:
-- 311: object attribute
-- 270: a method that returns a double
-- 271: a procedure (no return value)
-- 329: a method that returns an object
-- 330: a method that returns a string
+### 2. Segment arguments push both section and position
 
-Vector related:
-- 264: math functions that return a double (these are all functions of 1 variable), that can
-  be applied on the vector data
+`neuron.Segment` arguments are treated specially:
 
-## Useful links
+- push section context (parent section)
+- push segment location `x` as a regular argument
 
-- [Lifetime management](https://nl.mathworks.com/help/matlab/matlab_external/memory-management-for-c-objects-in-matlab.html)
-- [Releasing C++ memory](https://nl.mathworks.com/help/matlab/ref/clibrelease.html?s_tid=doc_ta)
-- [Dynamic methods with subsref](https://nl.mathworks.com/matlabcentral/answers/59026-is-it-possible-to-dynamically-add-methods-to-an-object-or-to-build-a-generic-method-that-catches-a)
-- [dynamicprops](https://nl.mathworks.com/help/matlab/ref/dynamicprops-class.html)
-- [Set/get methods for dynamicprops](https://nl.mathworks.com/matlabcentral/answers/48831-set-methods-for-dynamic-properties-with-unknown-names?s_tid=answers_rc1-2_p2_MLT)
+This allows calls that conceptually target a segment while preserving proper
+section state.
+
+### 3. Nested call string-stack lifecycle
+
+Function/method calls create a per-call string stack and always reset it in
+both success and error paths.
+
+Pattern:
+
+- create with `nrn_create_string_stack`
+- pass stack into argument-push helpers
+- reset with `nrn_reset_string_stack`
+
+### 4. Value-category push/pop helpers
+
+`neuron.stack.hoc_push` handles category-based pushing:
+
+- numeric/logical scalars
+- strings/chars
+- `neuron.Object`
+- `neuron.NrnRef`
+- null object sentinel
+
+`neuron.stack.hoc_pop` pops by expected return kind (`double`, `string`,
+`Object`, `void`) and wraps object returns into the appropriate MATLAB class
+(`Vector`, `PlotShape`, `RangeVarPlot`, or generic `Object`).
+
+## Wrapper class motifs
+
+### 1. `neuron.Object`: runtime method/property classification
+
+`neuron.Object` inspects class methods from NEURON and builds dynamic maps:
+
+- steered/dynamic attributes
+- point-process scalar properties
+- point-process array properties (via `attr_array_map`)
+- methods grouped by return kind (double/procedure/object/string)
+
+All unknown dot calls that match discovered methods are routed through
+`call_method_hoc(...)`.
+
+### 2. `neuron.Section`: ownership-aware lifetime
+
+`Section` tracks an `owner` flag:
+
+- `owner = true` means MATLAB object destruction also deletes NEURON section
+- `owner = false` means wrapper does not own the NEURON section lifetime
+
+The constructor also discovers valid mechanism names and range variables from
+runtime symbol tables.
+
+### 3. `neuron.Segment`: lightweight section-local proxy
+
+`Segment` stores `(parent_sec, x)` and provides:
+
+- dynamic access to range variables at that location
+- push semantics that combine section context + position
+
+### 4. `neuron.NrnRef`: reference wrapper by referent class
+
+References are wrapped as `neuron.NrnRef` and dispatched by `ref_class`
+(`Vector`, `Symbol`, `ObjectProp`, `RangeVar`).
+
+The important motif is semantic reference handling, not raw pointer arithmetic:
+the wrapper routes get/set/push operations based on what is referenced.
+
+### 5. `neuron.Vector`: MATLAB-friendly indexing shim
+
+`Vector` is an `Object` subclass with heavy index-translation logic:
+
+- MATLAB user-facing indexing is 1-based
+- many NEURON vector internals are 0-based
+- `subsref`/`subsasgn` adapt arguments and, where needed, temporarily adjust
+  vector-valued index arguments before and after method calls
+
+This is a unique and intentional compatibility layer.
+
+### 6. Section collections
+
+- `neuron.SectionList` wraps NEURON section lists and exposes `allsec()`.
+- `allsec()` returns a `neuron.SectionArray` wrapper for consistent indexing.
+- `SectionArray` is a light indexing container around section vectors.
+
+## Resilience and refresh motifs
+
+### 1. Dynamic symbol refresh on failed top-level dispatch
+
+`Session.subsref` retries failed calls by rebuilding dynamic properties via
+`fill_dynamic_props()`. This supports workflows where available symbols change
+at runtime (for example after loading HOC).
+
+### 2. Read-only internals guarded in `subsasgn`
+
+Core wrapper internals are protected from reassignment and emit explicit errors
+if modified from MATLAB.
+
+## Callback motif
+
+`neuron.FInitializeHandler` keeps a MATLAB-side persistent registry of handler
+objects and registers callback hooks with unique function names in HOC space.
+
+This bridges NEURON initialization callbacks back into MATLAB function handles.
+
+## Quick code map
+
+- Session dispatch: `+neuron/Session.m`
+- Object dispatch and method calls: `+neuron/Object.m`
+- Runtime type discovery: `+neuron/TypeCodes.m`
+- Stack helpers: `+neuron/+stack/*.m`
+- Section/segment wrappers: `+neuron/Section.m`, `+neuron/Segment.m`
+- Reference wrapper: `+neuron/NrnRef.m`
+- Vector index adaptation: `+neuron/Vector.m`
+- Callback bridge: `+neuron/FInitializeHandler.m`
+
+## Notes for future changes
+
+- Preserve the `subsref` + dynamic-list dispatch model unless replacing it
+  everywhere consistently.
+- Avoid introducing hard-coded NEURON type integers.
+- When adding new wrappers, define indexing semantics explicitly (MATLAB
+  1-based vs NEURON 0-based) and test both scalar and chained calls.
