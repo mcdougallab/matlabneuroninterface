@@ -311,10 +311,39 @@ classdef Session < dynamicprops
             end
 
         end
-        function value = hoc(str)
-        % Pass string to hoc.
-        %   hoc()
-            neuron_api('nrn_hoc_call', str);
+        function value = hoc(str, varargin)
+        % Pass string to hoc, optionally in a section context.
+        %   hoc(str)
+        %   hoc(str, sec)
+
+            if ~(ischar(str) || (isstring(str) && isscalar(str)))
+                error('hoc expects the first argument to be a char or string scalar.');
+            end
+            str = char(str);
+
+            if nargin == 1
+                neuron_api('nrn_hoc_call', str);
+                value = true;
+                return;
+            end
+
+            if nargin ~= 2
+                error('hoc accepts either 1 argument (str) or 2 arguments (str, sec).');
+            end
+
+            sec = varargin{1};
+            if ~isa(sec, 'neuron.Section')
+                error('hoc optional second argument must be a neuron.Section.');
+            end
+
+            neuron_api('nrn_section_push', sec.get_sec());
+            try
+                neuron_api('nrn_hoc_call', str);
+            catch me
+                neuron_api('nrn_section_pop');
+                rethrow(me);
+            end
+            neuron_api('nrn_section_pop');
             value = true;
         end
         function nrnref = ref(sym)
