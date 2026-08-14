@@ -86,14 +86,31 @@ classdef Segment < handle
                 else
                     error("Method/property "+S(1).subs+" not recognized.");
                 end
-            % Other indexing types ({} or ()) not supported.
-            elseif isnumeric(S(1).subs{:}) && isequal(S(1).subs{:}, 1)
+            % Allow scalar identity indexing like obj(1), obj(1,1), or obj(:)
+            % for chained usage and MATLAB's internal iteration/indexing paths.
+            elseif strcmp(S(1).type, "()") && self.is_scalar_identity_index(S(1).subs)
                 [varargout{1:nargout}] = self;
                 n_processed = 1;
             else
                 error("Indexing type "+S(1).type+" not supported.");
             end
             [varargout{1:nargout}] = neuron.chained_method(varargout, S, n_processed);
+        end
+
+        function tf = is_scalar_identity_index(~, subs)
+            tf = true;
+            for k = 1:numel(subs)
+                sk = subs{k};
+                if ischar(sk) || (isstring(sk) && isscalar(sk))
+                    if ~(strcmp(char(sk), ':'))
+                        tf = false;
+                        return;
+                    end
+                elseif ~(isnumeric(sk) && isscalar(sk) && isequal(sk, 1))
+                    tf = false;
+                    return;
+                end
+            end
         end
 
         function self = subsasgn(self, S, varargin)
