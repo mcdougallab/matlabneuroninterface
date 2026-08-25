@@ -26,7 +26,7 @@
 #ifdef _WIN32
     #include <windows.h>
     #define DLL_HANDLE HMODULE
-    #define DLL_LOAD(name) LoadLibrary(name)
+    #define DLL_LOAD(name) LoadLibraryExA(name, nullptr, LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LOAD_LIBRARY_SEARCH_DEFAULT_DIRS)
     #define DLL_GET_PROC(handle, name) GetProcAddress(handle, name)
     #define DLL_FREE(handle) FreeLibrary(handle)
     #define DLL_ERROR() "Error loading library"
@@ -1481,7 +1481,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         neuron_handle = DLL_LOAD("c:\\nrn\\bin\\libnrniv.dll");
         #endif
         if (!neuron_handle) {
+            #ifdef _WIN32
+            mexErrMsgIdAndTxt("load_neuron:loadFailure", "Failed to load libnrniv.dll: %s", DLL_ERROR());
+            #else
             mexErrMsgIdAndTxt("load_neuron:loadFailure", "Failed to load libnrniv.dylib: %s", DLL_ERROR());
+            #endif
             //DLL_FREE(wrapper_handle);  // Clean up before returning
             //DLL_FREE(neuron_handle);
             return;
